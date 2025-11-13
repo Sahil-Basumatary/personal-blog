@@ -1,21 +1,38 @@
+import "./HeroSection.css";
+
 function HeroSection() {
   return (
     <header className="hero">
-      <div className="hero-left">
-        <h1 className="hero-title">Namaste</h1>
-        <p className="hero-subtitle">
-          Welcome to my blog! Here you'll find a journey full of fun experiences,
-          unique catches and just learn what I have learned!
-        </p>
-        <button className="hero-btn">Sign up</button>
-      </div>
+      <nav className="navbar">
+        <h1 className="logo">Sahil's Blog</h1>
 
-      <div className="hero-right">
-        <img
-          src="/images/profile.png"
-          alt="Sahil Basumatary"
-          className="hero-img"
-        />
+        <div className="nav-links">
+          <a href="#">About</a>
+          <a
+            href="https://www.linkedin.com/in/sahil-basumatary/"
+            target="_blank"
+          >
+            LinkedIn
+          </a>
+        </div>
+      </nav>
+
+      <div className="hero-content">
+        <div className="text-section">
+          <h2>Namaste</h2>
+          <p>
+            Welcome to my blog! Here you will find a journey full of fun
+            experiences, unique catches and just learn what I have learned!
+          </p>
+          <button className="signup-btn">Sign up</button>
+        </div>
+
+        <div className="image-section">
+          <img
+            src="/images/sahil.jpg"
+            alt="Sahil"
+          />
+        </div>
       </div>
     </header>
   );
