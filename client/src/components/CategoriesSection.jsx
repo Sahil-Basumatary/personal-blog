@@ -25,7 +25,7 @@ function CategoriesSection() {
           <Link to="/motivation" className="category-card">
             <img src="/icons/personallife.svg" alt="Motivation" />
           </Link>
-          <p className="card-text">A personal touch — inspiration and motivation</p>
+          <p className="card-text">A personal touch, inspiration and motivation</p>
         </div>
 
         <div className="card">
