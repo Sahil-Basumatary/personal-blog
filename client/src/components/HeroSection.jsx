@@ -2,8 +2,8 @@ import "./HeroSection.css";
 
 function HeroSection() {
   return (
-    <header className="hero">
-      <nav className="navbar">
+    <header className="hero hero-hybrid">
+      <nav className="navbar hero-nav">
         <h1 className="logo">Sahil's Blog</h1>
 
         <div className="nav-links">
@@ -18,20 +18,18 @@ function HeroSection() {
       </nav>
 
       <div className="hero-content">
-        <div className="text-section">
-          <h2>Namaste</h2>
-          <p>
-            Welcome to my blog! Here you will find a journey full of fun
-            experiences, unique catches and just learn what I have learned!
+        <div className="hero-text">
+          <h2 className="hero-title">Namaste </h2>
+
+          <p className="hero-desc">
+            Welcome to my blog! Here you will find a journey full of fun experiences, unique catches and just learn what I have learned!
           </p>
-          <button className="signup-btn">Sign up</button>
+
+          <button className="hero-btn">Start Reading</button>
         </div>
 
-        <div className="image-section">
-          <img
-            src="/images/sahil.jpg"
-            alt="Sahil"
-          />
+        <div className="hero-image">
+          <img src="/images/New-profile-picture.jpeg" alt="Sahil" />
         </div>
       </div>
     </header>
