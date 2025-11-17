@@ -1,9 +1,8 @@
 .home-container {
   font-family: system-ui, sans-serif;
-  padding-bottom: 3rem;
+  padding-bottom: 0;
 }
 
-/* Hero */
 .hero {
   background: #1f2937;
   color: white;
@@ -38,7 +37,6 @@
   border-radius: 16px;
 }
 
-/* Categories */
 .categories {
   text-align: center;
   padding: 3rem 1rem;
@@ -76,7 +74,6 @@
   margin-bottom: 1rem;
 }
 
-/* Quote */
 .quote-section {
   background: #f3f4f6;
   padding: 4rem 2rem;
@@ -91,12 +88,21 @@
   line-height: 1.6;
 }
 
-/* Subscribe */
 .subscribe {
   background: #fff;
   padding: 3rem 1rem;
   text-align: center;
 }
+
+.subscribe-wrapper {
+  width: 100%;
+  background: #1a1d24; /* clean dark background like before */
+  padding: 14px 0; 
+}
+.subscribe {
+  margin: 0 auto; /* REMOVE big margin */
+}
+
 
 .subscribe-btns {
   margin-top: 1rem;
@@ -122,7 +128,6 @@
   color: #3b82f6;
 }
 
-/* Footer */
 .footer {
   background: #1f2937;
   color: white;

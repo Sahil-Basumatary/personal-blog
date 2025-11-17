@@ -12,7 +12,9 @@ function HomePage() {
       <HeroSection />
       <CategoriesSection />
       <QuoteSection />
+      <div className="subscribe-wrapper">
       <SubscribeSection />
+      </div>
       <Footer />
     </div>
   );
