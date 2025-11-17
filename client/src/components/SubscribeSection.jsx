@@ -1,3 +1,4 @@
+import "./SubscribeSection.css";
 function SubscribeSection() {
   return (
     <section className="subscribe">
@@ -12,7 +13,7 @@ function SubscribeSection() {
         <button
           className="linkedin-btn"
           onClick={() =>
-            window.open("https://www.linkedin.com/in/sahilbasumatary", "_blank")
+            window.open("https://www.linkedin.com/in/sahil-basumatary/", "_blank")
           }
         >
           Connect with me on LinkedIn

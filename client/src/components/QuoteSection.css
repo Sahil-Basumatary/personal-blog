@@ -1,0 +1,19 @@
+.quote-section {
+  padding: 120px 10%;
+  background: #f8fafc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.quote {
+  max-width: 900px;
+  font-size: 32px;
+  font-weight: 300;
+  font-style: italic;
+  color: #1e293b;
+  text-align: center;
+  line-height: 1.45;
+  letter-spacing: -0.3px;
+  opacity: 0.95;
+}

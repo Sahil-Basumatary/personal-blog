@@ -1,0 +1,70 @@
+.subscribe {
+  background: radial-gradient(circle at top left, #2b2f38, #1f2430);
+  padding: 90px 14%;
+  border-radius: 16px;
+  margin: 120px auto;
+  text-align: center;
+  color: white;
+
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12);
+}
+  
+.subscribe h3 {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+  
+.subscribe p {
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 1.6;
+  opacity: 0.92;
+  margin: 0 auto;
+  max-width: 750px;
+}
+  
+.subscribe-btns {
+  margin-top: 28px;
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+  
+.sub-btn,
+.linkedin-btn {
+  padding: 14px 28px;
+  font-size: 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: none;
+  transition: 0.25s ease;
+  font-weight: 500;
+}
+  
+.sub-btn {
+  background: white;
+  color: #1f2937;
+}
+  
+.sub-btn:hover {
+  background: #e5e7eb;
+  transform: translateY(-3px);
+}
+  
+.linkedin-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: white;
+  backdrop-filter: blur(6px);
+}
+  
+.linkedin-btn:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.18);
+}
