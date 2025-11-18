@@ -4,6 +4,7 @@ import MyCSJourney from "./pages/MyCSJourney";
 import LifeInLondon from "./pages/LifeInLondon";
 import Motivation from "./pages/Motivation";
 import ToolsResources from "./pages/ToolsResources";
+import BlogPage from "./pages/BlogPage";
 
 
 function App() {
@@ -11,8 +12,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
-
-        {/* Category Pages */}
+        <Route path="/blog" element={<BlogPage />} />
         <Route path="/cs-journey" element={<MyCSJourney />} />
         <Route path="/life-in-london" element={<LifeInLondon />} />
         <Route path="/motivation" element={<Motivation />} />

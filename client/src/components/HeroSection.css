@@ -170,3 +170,112 @@ header.hero {
   box-shadow: 0 12px 40px rgba(0,0,0,0.5);
   object-fit: cover;
 }
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 32px;
+}
+
+.logo {
+  font-size: 26px;
+  font-weight: 700;
+  color: white;
+}
+
+.desktop-nav {
+  display: flex;
+  gap: 28px;
+}
+
+.nav-item {
+  font-size: 18px;
+  color: #d7d7d7;
+  position: relative;
+  transition: 0.25s ease;
+}
+
+.nav-item::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: white;
+  transition: width 0.25s ease;
+}
+
+.nav-item:hover {
+  color: white;
+}
+
+.nav-item:hover::after {
+  width: 100%;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.hamburger span {
+  width: 26px;
+  height: 3px;
+  background: white;
+  transition: 0.3s ease;
+}
+
+.hamburger.open span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+}
+.hamburger.open span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+.mobile-menu {
+  display: none;
+  flex-direction: column;
+  background: rgba(20, 20, 20, 0.85);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  gap: 18px;
+  text-align: right;
+  animation: fadeSlide 0.3s ease;
+}
+
+.mobile-menu a {
+  color: white;
+  font-size: 18px;
+}
+
+.mobile-menu.show {
+  display: flex;
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 780px) {
+  .desktop-nav {
+    display: none;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+}
