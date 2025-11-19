@@ -1,31 +1,48 @@
 import "./BlogPage.css";
 import posts from "../data/posts";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 
 function BlogPage() {
-  const featuredPost = posts.find((post) => post.featured);
-  const otherPosts = posts.filter((post) => !post.featured);
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const categoryFilter = searchParams.get("category");
+
+  const featuredPost = posts.find((post) => post.featured);
+
+  const filteredPosts = categoryFilter
+    ? posts.filter((p) => p.category === categoryFilter)
+    : posts;
 
   return (
     <div className="blog-page">
+      {/* HEADER */}
       <section className="blog-header">
-        <h1>All Posts</h1>
-        <p>
-          A collection of thoughts, stories and notes from my journey as a CS
-          student in London.
+        <h1 className="blog-title">
+          {categoryFilter
+            ? `Posts in "${categoryFilter.replace("-", " ")}"`
+            : "All Posts"}
+        </h1>
+
+        <p className="blog-subtitle">
+          {categoryFilter
+            ? "Filtered results based on your selection"
+            : "A collection of thoughts, stories and reflections from my journey."}
         </p>
       </section>
 
-      {featuredPost && (
+      {!categoryFilter && featuredPost && (
         <section className="featured-post">
-          <div className="featured-badge">Featured</div>
-          <h2>{featuredPost.title}</h2>
+          <div className="featured-badge">FEATURED</div>
+
+          <h2 className="featured-title">{featuredPost.title}</h2>
 
           <div className="featured-meta">
-            <span>{featuredPost.categoryLabel}</span>
-            <span>·</span>
-            <span>{new Date(featuredPost.date).toLocaleDateString()}</span>
+            <span className="chip">{featuredPost.categoryLabel}</span>
+            <span>•</span>
+            <span>
+              {new Date(featuredPost.date).toLocaleDateString("en-GB")}
+            </span>
           </div>
 
           <p className="featured-excerpt">{featuredPost.excerpt}</p>
@@ -34,35 +51,34 @@ function BlogPage() {
             className="featured-button"
             onClick={() => navigate(`/blog/${featuredPost.id}`)}
           >
-            what's cooking
+            what's cooking →
           </button>
         </section>
       )}
 
-      <section className="posts-list">
-        <h3>Recent posts</h3>
 
-        <div className="posts-list-inner">
-          {otherPosts.map((post) => (
+      <section className="posts-section">
+        <h3 className="posts-section-title">
+          {categoryFilter ? "Filtered posts" : "Recent posts"}
+        </h3>
+
+        <div className="posts-list">
+          {filteredPosts.map((post) => (
             <Link
-              to={`/blog/${post.id}`}
-              className="post-item-link"
               key={post.id}
+              to={`/blog/${post.id}`}
+              className="post-card"
             >
-              <article className="post-item">
-                <div className="post-main">
-                  <h4>{post.title}</h4>
-                  <p className="post-excerpt">{post.excerpt}</p>
-                </div>
+              <h4 className="post-card-title">{post.title}</h4>
+              <p className="post-card-excerpt">{post.excerpt}</p>
 
-                <div className="post-meta">
-                  <span className="post-category">{post.categoryLabel}</span>
-                  <span className="dot">•</span>
-                  <span className="post-date">
-                    {new Date(post.date).toLocaleDateString()}
-                  </span>
-                </div>
-              </article>
+              <div className="post-card-meta">
+                <span className="chip">{post.categoryLabel}</span>
+                <span>•</span>
+                <span>
+                  {new Date(post.date).toLocaleDateString("en-GB")}
+                </span>
+              </div>
             </Link>
           ))}
         </div>
