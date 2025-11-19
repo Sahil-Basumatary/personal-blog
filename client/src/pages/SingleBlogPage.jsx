@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import posts from "../data/posts";
+import ReadingProgressBar from "../components/ReadingProgressBar";
 import "./SingleBlogPage.css";
 
 function SingleBlogPage() {
@@ -12,8 +13,12 @@ function SingleBlogPage() {
 
   return (
     <div className="single-container">
+      <ReadingProgressBar />
+
       <div className="single-header">
-        <a href="/blog" className="back-link">← Back to all posts</a>
+        <a href="/blog" className="back-link">
+          ← Back to all posts
+        </a>
         <h1 className="single-title">{post.title}</h1>
 
         <div className="single-meta">
