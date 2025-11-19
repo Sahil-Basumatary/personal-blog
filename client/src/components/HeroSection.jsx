@@ -10,6 +10,7 @@ function HeroSection() {
         <h1 className="logo">Sahil's Blog</h1>
 
         <div className="nav-links desktop-nav">
+          <a href="/blog">Blog</a>
           <a href="#" className="nav-item">About</a>
           <a
             href="https://www.linkedin.com/in/sahil-basumatary/"
@@ -50,7 +51,9 @@ function HeroSection() {
             experiences, unique catches and just learn what I have learned!
           </p>
 
-          <button className="hero-btn">Start Reading</button>
+          <button className="hero-btn" onClick={() => window.location.href="/blog"}>
+            Start Reading
+          </button>
         </div>
 
         <div className="hero-image">
