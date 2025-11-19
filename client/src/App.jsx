@@ -5,7 +5,7 @@ import LifeInLondon from "./pages/LifeInLondon";
 import Motivation from "./pages/Motivation";
 import ToolsResources from "./pages/ToolsResources";
 import BlogPage from "./pages/BlogPage";
-
+import SingleBlogPage from "./pages/SingleBlogPage";
 
 function App() {
   return (
@@ -17,6 +17,7 @@ function App() {
         <Route path="/life-in-london" element={<LifeInLondon />} />
         <Route path="/motivation" element={<Motivation />} />
         <Route path="/tools" element={<ToolsResources />} />
+        <Route path="/blog/:id" element={<SingleBlogPage />} />
       </Routes>
     </BrowserRouter>
   );
