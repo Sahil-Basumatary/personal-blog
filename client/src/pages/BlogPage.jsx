@@ -1,9 +1,11 @@
 import "./BlogPage.css";
 import posts from "../data/posts";
+import { Link, useNavigate } from "react-router-dom";
 
 function BlogPage() {
   const featuredPost = posts.find((post) => post.featured);
   const otherPosts = posts.filter((post) => !post.featured);
+  const navigate = useNavigate();
 
   return (
     <div className="blog-page">
@@ -28,7 +30,12 @@ function BlogPage() {
 
           <p className="featured-excerpt">{featuredPost.excerpt}</p>
 
-          <button className="featured-button">whats cooking</button>
+          <button
+            className="featured-button"
+            onClick={() => navigate(`/blog/${featuredPost.id}`)}
+          >
+            what's cooking
+          </button>
         </section>
       )}
 
@@ -37,20 +44,26 @@ function BlogPage() {
 
         <div className="posts-list-inner">
           {otherPosts.map((post) => (
-            <article key={post.id} className="post-item">
-              <div className="post-main">
-                <h4>{post.title}</h4>
-                <p className="post-excerpt">{post.excerpt}</p>
-              </div>
+            <Link
+              to={`/blog/${post.id}`}
+              className="post-item-link"
+              key={post.id}
+            >
+              <article className="post-item">
+                <div className="post-main">
+                  <h4>{post.title}</h4>
+                  <p className="post-excerpt">{post.excerpt}</p>
+                </div>
 
-              <div className="post-meta">
-                <span className="post-category">{post.categoryLabel}</span>
-                <span className="dot">•</span>
-                <span className="post-date">
-                  {new Date(post.date).toLocaleDateString()}
-                </span>
-              </div>
-            </article>
+                <div className="post-meta">
+                  <span className="post-category">{post.categoryLabel}</span>
+                  <span className="dot">•</span>
+                  <span className="post-date">
+                    {new Date(post.date).toLocaleDateString()}
+                  </span>
+                </div>
+              </article>
+            </Link>
           ))}
         </div>
       </section>

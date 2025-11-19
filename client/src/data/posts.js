@@ -9,6 +9,7 @@ const posts = [
     featured: true,
     excerpt:
       "From watching tech YouTubers such as Mark Rober at 3am to actually writing my first real program, a reflection on how it really began.",
+    content: "a twelve year old kid, who never had any idea whatsover about what even a computer was, took his mothers mobile to play mobile games and watch Mr. Bean on repeat. Ha Ha, honestly, Mr bean was the GOAT. One day, I came accross a random nerf gun video that was where it all started. A passion, passion for creating things. I was mostly a outdoorsy person, I still am. Always used to be in the tennis courts so competitive from the womb. "
   },
   {
     id: 2,
@@ -20,6 +21,8 @@ const posts = [
     featured: false,
     excerpt:
       "Balancing coding, TFL, grocery runs, and figuring out how to not burn a damn egg in a student kitchen.",
+    content:
+    "It was chilly. A very cold, quiet breeze gushed pass my ear and flew away my walmart hat. I had never been to the UK before, so it was uhm.... interesting. I had not set up apple pay and did not know how to navigate through the exit of the airport. Thats where I got scammed. A private cab driver charged me 130 pounds for a 40 minute ride to my student accomodation. Never used a cab again. Always use the tube or the bus which can literally take you anywhere for 2.90 pounds. for zone 1 atleast. More coming soon.."
   },
   {
     id: 3,
