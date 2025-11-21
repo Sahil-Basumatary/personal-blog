@@ -18,17 +18,28 @@ function BlogPage() {
     <div className="blog-page">
       {/* HEADER */}
       <section className="blog-header">
-        <h1 className="blog-title">
-          {categoryFilter
-            ? `Posts in "${categoryFilter.replace("-", " ")}"`
-            : "All Posts"}
-        </h1>
+        <div className="blog-header-top">
+          <div>
+            <h1 className="blog-title">
+              {categoryFilter
+                ? `Posts in "${categoryFilter.replace("-", " ")}"`
+                : "All Posts"}
+            </h1>
 
-        <p className="blog-subtitle">
-          {categoryFilter
-            ? "Filtered results based on your selection"
-            : "A collection of thoughts, stories and reflections from my journey."}
-        </p>
+            <p className="blog-subtitle">
+              {categoryFilter
+                ? "Filtered results based on your selection"
+                : "A collection of thoughts, stories and reflections from my journey."}
+            </p>
+          </div>
+
+          <button
+            className="new-post-btn"
+            onClick={() => navigate("/new-post")}
+          >
+            + New post
+          </button>
+        </div>
       </section>
 
       {!categoryFilter && featuredPost && (
@@ -75,9 +86,7 @@ function BlogPage() {
               <div className="post-card-meta">
                 <span className="chip">{post.categoryLabel}</span>
                 <span>•</span>
-                <span>
-                  {new Date(post.date).toLocaleDateString("en-GB")}
-                </span>
+                <span>{new Date(post.date).toLocaleDateString("en-GB")}</span>
               </div>
             </Link>
           ))}
