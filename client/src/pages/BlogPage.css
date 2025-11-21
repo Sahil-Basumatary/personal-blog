@@ -74,10 +74,21 @@
   transform: translateY(-1px);
 }
 
+.posts-section {
+  margin-top: 3rem;
+}
+
+.posts-section-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #111;
+}
+
 .posts-list {
   display: flex;
   flex-direction: column;
-  gap: 1.4rem;
+  gap: 1.8rem;
   margin-top: 1.5rem;
 }
 
@@ -169,15 +180,15 @@
 .post-card-title {
   font-size: 1.35rem;
   font-weight: 600;
-  margin-bottom: 0.35rem;
-  color: #0f0f0f;
+  color: #111;
+  margin-bottom: 0.65rem;
 }
 
 .post-card-excerpt {
   font-size: 1.05rem;
   color: #444;
+  margin-bottom: 1rem;
   line-height: 1.6;
-  margin-bottom: 0.9rem;
 }
 
 .post-card-meta {
