@@ -6,13 +6,18 @@ function BlogPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
+  const userPosts = JSON.parse(localStorage.getItem("user_posts") || "[]");
+  const allPosts = [...userPosts, ...posts];
+
   const categoryFilter = searchParams.get("category");
 
-  const featuredPost = posts.find((post) => post.featured);
+  // Featured post from all posts
+  const featuredPost = allPosts.find((post) => post.featured);
 
+  // Apply category filter to all posts
   const filteredPosts = categoryFilter
-    ? posts.filter((p) => p.category === categoryFilter)
-    : posts;
+    ? allPosts.filter((p) => p.category === categoryFilter)
+    : allPosts;
 
   return (
     <div className="blog-page">
@@ -35,13 +40,14 @@ function BlogPage() {
 
           <button
             className="new-post-btn"
-            onClick={() => navigate("/new-post")}
+            onClick={() => navigate("/write")}
           >
             + New post
           </button>
         </div>
       </section>
 
+      {/* FEATURED */}
       {!categoryFilter && featuredPost && (
         <section className="featured-post">
           <div className="featured-badge">FEATURED</div>
@@ -67,7 +73,7 @@ function BlogPage() {
         </section>
       )}
 
-
+      {/* POSTS LIST */}
       <section className="posts-section">
         <h3 className="posts-section-title">
           {categoryFilter ? "Filtered posts" : "Recent posts"}
