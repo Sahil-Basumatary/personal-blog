@@ -4,6 +4,8 @@ import BlogPage from "./pages/BlogPage";
 import SingleBlogPage from "./pages/SingleBlogPage";
 import NewPostPage from "./pages/NewPostPage";
 
+
+
 function App() {
   return (
     <BrowserRouter>
@@ -12,6 +14,7 @@ function App() {
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:id" element={<SingleBlogPage />} />
         <Route path="/new-post" element={<NewPostPage />} />
+        <Route path="/write" element={<NewPostPage />} />
       </Routes>
     </BrowserRouter>
   );

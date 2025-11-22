@@ -4,30 +4,46 @@ import "./NewPostPage.css";
 
 function NewPostPage() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    title: "",
-    category: "cs-journey",
-    excerpt: "",
-    content: "",
-  });
 
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  }
+  const isOwner = true;
+  if (!isOwner) return navigate("/");
+
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("cs-journey");
+  const [excerpt, setExcerpt] = useState("");
+  const [content, setContent] = useState("");
 
   function handleSubmit(e) {
     e.preventDefault();
 
-    console.log("New post data:", form);
+    const newPost = {
+      id: Date.now(),
+      title,
+      category,
+      categoryLabel:
+        category === "cs-journey"
+          ? "My CS Journey"
+          : category === "life-in-london"
+          ? "Life in London"
+          : category === "motivation"
+          ? "Motivation"
+          : "Tools & Resources",
+      excerpt,
+      content,
+      date: new Date().toISOString(),
+      featured: false,
+    };
 
-    alert("Post creation coming soon. Form data logged in console.");
+    const existing = JSON.parse(localStorage.getItem("user_posts") || "[]");
+    localStorage.setItem("user_posts", JSON.stringify([...existing, newPost]));
+
     navigate("/blog");
   }
 
   return (
     <div className="new-post-page">
       <div className="new-post-card">
+
         <button
           className="back-link"
           type="button"
@@ -36,20 +52,16 @@ function NewPostPage() {
           ← Back
         </button>
 
-        <h1 className="new-post-title">Write a new post</h1>
-        <p className="new-post-subtitle">
-          Capture a memory from your journey.
-        </p>
+        <h1 className="new-post-title">Write a New Post</h1>
+        <p className="new-post-subtitle">Capture a memory from your journey.</p>
 
         <form className="new-post-form" onSubmit={handleSubmit}>
           <label className="field">
             <span>Title</span>
             <input
               type="text"
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              placeholder="How my CS journey actually started…"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               required
             />
           </label>
@@ -57,9 +69,8 @@ function NewPostPage() {
           <label className="field">
             <span>Category</span>
             <select
-              name="category"
-              value={form.category}
-              onChange={handleChange}
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
             >
               <option value="cs-journey">My CS Journey</option>
               <option value="life-in-london">Life in London</option>
@@ -72,22 +83,18 @@ function NewPostPage() {
             <span>Short description</span>
             <input
               type="text"
-              name="excerpt"
-              value={form.excerpt}
-              onChange={handleChange}
-              placeholder="One sentence summary for the list view…"
-              required
+              value={excerpt}
+              onChange={(e) => setExcerpt(e.target.value)}
+              placeholder="One sentence summary…"
             />
           </label>
 
           <label className="field">
-            <span>Post content</span>
+            <span>Content</span>
             <textarea
-              name="content"
-              value={form.content}
-              onChange={handleChange}
               rows={10}
-              placeholder="Write your story here…"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
               required
             />
           </label>
@@ -100,8 +107,9 @@ function NewPostPage() {
             >
               Cancel
             </button>
+
             <button type="submit" className="primary-btn">
-              Save draft (coming soon)
+              Publish
             </button>
           </div>
         </form>

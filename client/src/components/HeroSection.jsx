@@ -1,5 +1,6 @@
 import "./HeroSection.css";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 function HeroSection() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -19,6 +20,7 @@ function HeroSection() {
           >
             LinkedIn
           </a>
+          <Link to="/write" className="write-btn">Write</Link>
         </div>
 
         <div
