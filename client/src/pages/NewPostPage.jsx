@@ -16,6 +16,11 @@ function NewPostPage() {
   function handleSubmit(e) {
     e.preventDefault();
 
+    const finalExcerpt =
+      excerpt.trim() !== ""
+        ? excerpt.trim()
+        : content.split("\n")[0].slice(0, 140) + "...";
+
     const newPost = {
       id: Date.now(),
       title,
@@ -28,7 +33,7 @@ function NewPostPage() {
           : category === "motivation"
           ? "Motivation"
           : "Tools & Resources",
-      excerpt,
+      excerpt: finalExcerpt,
       content,
       date: new Date().toISOString(),
       featured: false,
