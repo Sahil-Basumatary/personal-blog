@@ -1,6 +1,7 @@
 import "./BlogPage.css";
 import posts from "../data/posts";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 function BlogPage() {
   const [searchParams] = useSearchParams();
@@ -11,13 +12,74 @@ function BlogPage() {
 
   const categoryFilter = searchParams.get("category");
 
-  // Featured post from all posts
   const featuredPost = allPosts.find((post) => post.featured);
 
-  // Apply category filter to all posts
   const filteredPosts = categoryFilter
     ? allPosts.filter((p) => p.category === categoryFilter)
     : allPosts;
+
+  // Voting state 
+  const [votes, setVotes] = useState({});
+
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem("post_votes") || "{}");
+    setVotes(stored);
+  }, []);
+
+  function updateVotes(newVotes) {
+    setVotes(newVotes);
+    localStorage.setItem("post_votes", JSON.stringify(newVotes));
+  }
+
+  function handleUpvote(id) {
+    setVotes((prev) => {
+      const current = prev[id] || { score: 0, userVote: null };
+      let { score, userVote } = current;
+
+      if (userVote === "up") {
+        // remove upvote
+        score -= 1;
+        userVote = null;
+      } else if (userVote === "down") {
+        // switch from down to up
+        score += 2;
+        userVote = "up";
+      } else {
+        // no vote to upvote
+        score += 1;
+        userVote = "up";
+      }
+
+      const next = { ...prev, [id]: { score, userVote } };
+      localStorage.setItem("post_votes", JSON.stringify(next));
+      return next;
+    });
+  }
+
+  function handleDownvote(id) {
+    setVotes((prev) => {
+      const current = prev[id] || { score: 0, userVote: null };
+      let { score, userVote } = current;
+
+      if (userVote === "down") {
+        // remove downvote
+        score += 1;
+        userVote = null;
+      } else if (userVote === "up") {
+        // switch from up to down
+        score -= 2;
+        userVote = "down";
+      } else {
+        // no vote to downvote
+        score -= 1;
+        userVote = "down";
+      }
+
+      const next = { ...prev, [id]: { score, userVote } };
+      localStorage.setItem("post_votes", JSON.stringify(next));
+      return next;
+    });
+  }
 
   return (
     <div className="blog-page">
@@ -80,22 +142,54 @@ function BlogPage() {
         </h3>
 
         <div className="posts-list">
-          {filteredPosts.map((post) => (
-            <Link
-              key={post.id}
-              to={`/blog/${post.id}`}
-              className="post-card"
-            >
-              <h4 className="post-card-title">{post.title}</h4>
-              <p className="post-card-excerpt">{post.excerpt}</p>
+          {filteredPosts.map((post) => {
+            const voteInfo = votes[post.id] || { score: 0, userVote: null };
 
-              <div className="post-card-meta">
-                <span className="chip">{post.categoryLabel}</span>
-                <span>•</span>
-                <span>{new Date(post.date).toLocaleDateString("en-GB")}</span>
+            const finalExcerpt =
+              post.excerpt && post.excerpt.trim().length > 0
+                ? post.excerpt
+                : post.content.substring(0, 120) + "...";
+
+            return (
+              <div key={post.id} className="post-card-wrapper">
+
+                {/* Post Card */}
+                <Link to={`/blog/${post.id}`} className="post-card">
+                  <h4 className="post-card-title">{post.title}</h4>
+                  <p className="post-card-excerpt">{finalExcerpt}</p>
+
+                  <div className="post-card-meta">
+                    <span className="chip">{post.categoryLabel}</span>
+                    <span>•</span>
+                    <span>{new Date(post.date).toLocaleDateString("en-GB")}</span>
+                  </div>
+                </Link>
+
+                {/* Vote Bar BELOW */}
+                <div className="vote-bar-below">
+                  <button
+                    className={`vote-btn up ${voteInfo.userVote === "up" ? "active" : ""}`}
+                    onClick={() => handleUpvote(post.id)}
+                  >
+                    ↑
+                  </button>
+
+                  <span className="vote-count">
+                    {voteInfo.score === 0 ? "0" : voteInfo.score}
+                  </span>
+
+                  <button
+                    className={`vote-btn down ${voteInfo.userVote === "down" ? "active" : ""}`}
+                    onClick={() => handleDownvote(post.id)}
+                  >
+                    ↓
+                  </button>
+                </div>
+
               </div>
-            </Link>
-          ))}
+
+            );
+          })}
         </div>
       </section>
     </div>
