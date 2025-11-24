@@ -5,14 +5,14 @@
   color: #111827;
 }
 
-.blog-header h1 {
+.blog-title {
   font-size: 36px;
   font-weight: 700;
   letter-spacing: -0.02em;
   margin-bottom: 8px;
 }
 
-.blog-header p {
+.blog-subtitle {
   font-size: 18px;
   color: #6b7280;
   max-width: 520px;
@@ -321,10 +321,27 @@
   align-items: center;
   gap: 14px;
 
-  margin-top: 14px;          /* More space below the card */
-  margin-left: 12px;         /* Indent to match text alignment */
+  margin-top: 14px;          
+  margin-left: 12px;         
 
-  padding: 8px 4px;          /* Adds breathing space */
+  padding: 8px 4px;          
+}
+
+.blog-header-top {
+  display: flex;
+  align-items: flex-end; 
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-right: 4px; 
+}
+
+.blog-title {
+  margin: 0;
+  padding: 0;
+}
+
+.blog-subtitle {
+  margin-top: 4px;
 }
 
 

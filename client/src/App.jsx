@@ -3,7 +3,7 @@ import HomePage from "./pages/HomePage";
 import BlogPage from "./pages/BlogPage";
 import SingleBlogPage from "./pages/SingleBlogPage";
 import NewPostPage from "./pages/NewPostPage";
-
+import EditPostPage from "./pages/EditPostPage";
 
 
 function App() {
@@ -15,6 +15,7 @@ function App() {
         <Route path="/blog/:id" element={<SingleBlogPage />} />
         <Route path="/new-post" element={<NewPostPage />} />
         <Route path="/write" element={<NewPostPage />} />
+        <Route path="/edit/:id" element={<EditPostPage />} />
       </Routes>
     </BrowserRouter>
   );
