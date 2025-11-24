@@ -26,6 +26,7 @@
   color: #3b82f6;
   text-decoration: none;
 }
+
 .back-link:hover {
   text-decoration: underline;
 }
@@ -42,17 +43,20 @@
   color: #0f0f0f;
 }
 
+.single-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  margin-bottom: 28px;
+}
+
 .single-meta {
   display: flex;
   align-items: center;
   gap: 12px;
   font-size: 0.9rem;
   color: #666;
-  margin-bottom: 2.5rem;
-}
-.single-meta span {
-  display: flex;
-  align-items: center;
 }
 
 .single-meta span:first-child {
@@ -65,6 +69,26 @@
   font-size: 0.8rem;
 }
 
+.edit-post-btn {
+  padding: 0.45rem 1.2rem;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: #111827;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.edit-post-btn:hover {
+  background: #111827;
+  color: #f9fafb;
+  border-color: #111827;
+  transform: translateY(-1px);
+}
+
 .single-content {
   background: #ffffff;
   padding: 3rem;
@@ -75,16 +99,14 @@
   line-height: 1.8;
   font-size: 1.15rem;
   color: #222;
+  margin-top: 2rem;
 }
 
 .single-content p {
   margin-bottom: 1.6rem;
 }
 
-.single-content {
-  margin-top: 2rem;
-}
-
+/* Section Divider */
 .single-container::after {
   content: "";
   display: block;
@@ -94,116 +116,41 @@
   margin-top: 4rem;
 }
 
-.not-found {
-  text-align: center;
-  padding: 100px;
-  font-size: 24px;
-  color: #444;
-}
-
-.single-vote-bar {
-  margin-top: 1rem;
-}
-
-.vote-bar {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 10px;
-  margin-left: 2px;
-  font-size: 0.9rem;
-  color: #6b7280;
-}
-
-.vote-button {
-  border: none;
-  background: transparent;
-  padding: 4px 6px;
-  border-radius: 999px;
-  cursor: pointer;
-  line-height: 1;
-  font-size: 0.75rem;
+.single-footer-votes {
   display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.vote-button:hover {
-  background: #f3f4f6;
-}
-
-.vote-count {
-  min-width: 18px;
-  text-align: center;
-  font-weight: 500;
-}
-
-.vote-button.active-up {
-  color: #16a34a;
-}
-
-.vote-button.active-down {
-  color: #dc2626;
-}
-
-.single-vote-horizontal {
-  margin-top: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
   gap: 14px;
-
-  padding: 12px 18px;
-  width: fit-content;
-
-  border-radius: 20px;
-  background: rgba(250, 250, 252, 0.65);
-  backdrop-filter: blur(20px);
-  box-shadow:
-    0 8px 20px rgba(0, 0, 0, 0.06),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.55);
-}
-
-.vote-btn {
-  width: 38px;
-  height: 38px;
-  font-size: 18px;
-  font-weight: 600;
-
-  display: flex;
   align-items: center;
-  justify-content: center;
+  margin-top: 28px;
+  margin-left: 3rem; 
+  padding: 16px 0;
+  width: fit-content;
+}
 
-  border-radius: 12px;
-  border: 1px solid rgba(200, 200, 205, 0.35);
-  background: rgba(245, 245, 247, 0.9);
+.single-footer-votes .vote-btn {
+  background: #f6f7f7;
+  border: 1px solid #e5e7eb;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 16px;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: 0.15s ease;
 }
 
-.vote-btn:hover {
-  background: white;
-  transform: translateY(-2px);
+.single-footer-votes .vote-btn:hover {
+  background: #ffffff;
 }
 
-.single-vote-horizontal .vote-count {
+.single-footer-votes .vote-btn.active.up {
+  background: #d1f7d6;
+  border-color: #a5e7b0;
+}
+
+.single-footer-votes .vote-btn.active.down {
+  background: #f7d1d1;
+  border-color: #e7a5a5;
+}
+
+.single-footer-votes .vote-count {
   font-size: 18px;
   font-weight: 600;
-  color: #1c1c1e;
-  min-width: 22px;
-  text-align: center;
-}
-
-.vote-btn.up.active {
-  background: rgba(52, 199, 89, 0.18);
-  border-color: rgba(52, 199, 89, 0.45);
-  color: #34c759;
-  box-shadow: 0 0 6px rgba(52, 199, 89, 0.35);
-}
-
-.vote-btn.down.active {
-  background: rgba(255, 59, 48, 0.18);
-  border-color: rgba(255, 59, 48, 0.45);
-  color: #ff3b30;
-  box-shadow: 0 0 6px rgba(255, 59, 48, 0.35);
 }
