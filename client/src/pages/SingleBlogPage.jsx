@@ -72,6 +72,24 @@ function SingleBlogPage() {
     );
   }
 
+  function handleDelete() {
+    const ok = window.confirm("Are you sure you want to delete this post?");
+    if (!ok) return;
+
+    const existing = JSON.parse(localStorage.getItem("user_posts") || "[]");
+
+    const updated = existing.filter((p) => String(p.id) !== String(id));
+
+    localStorage.setItem("user_posts", JSON.stringify(updated));
+
+    // Also remove votes for this post
+    const votes = JSON.parse(localStorage.getItem("post_votes") || "{}");
+    delete votes[id];
+    localStorage.setItem("post_votes", JSON.stringify(votes));
+
+    navigate("/blog");
+  }
+
   if (!post) return <div className="not-found">Post not found.</div>;
 
   return (
@@ -92,13 +110,23 @@ function SingleBlogPage() {
           </div>
 
           {isUserPost && (
-            <button
-              type="button"
-              className="edit-post-btn"
-              onClick={() => navigate(`/edit/${post.id}`)}
-            >
-              Edit post
-            </button>
+            <div className="single-edit-delete">
+              <button
+                type="button"
+                className="edit-post-btn"
+                onClick={() => navigate(`/edit/${post.id}`)}
+              >
+                Edit post
+              </button>
+
+                <button
+                  type="button"
+                  className="delete-post-btn"
+                  onClick={handleDelete}
+                >
+                  Delete
+              </button>
+            </div>
           )}
         </div>
       </div>
