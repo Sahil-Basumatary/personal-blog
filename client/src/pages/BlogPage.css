@@ -344,4 +344,57 @@
   margin-top: 4px;
 }
 
+.view-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #1c1c1e;
+
+  background: rgba(250, 250, 252, 0.55);
+  border-radius: 999px;
+  border: 1px solid rgba(200, 200, 205, 0.4);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.05),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+
+  margin-top: 8px;
+}
+
+.post-card-wrapper {
+  position: relative;
+}
+
+.post-card-views {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  z-index: 10;
+}
+
+.post-card-wrapper .view-pill {
+  display: inline-block;
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  color: #444;
+  background: rgba(245, 247, 250, 0.85);
+  border-radius: 999px;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  transition: transform 0.12s ease;
+}
+
+.post-card-wrapper .view-pill:hover {
+  transform: translateY(-1px);
+}
+
 

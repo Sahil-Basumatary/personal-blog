@@ -150,8 +150,15 @@ function BlogPage() {
                 ? post.excerpt
                 : post.content.substring(0, 120) + "...";
 
+            const allViews = JSON.parse(localStorage.getItem("post_views") || "{}");
+            const views = allViews[post.id] || 0;
+
             return (
               <div key={post.id} className="post-card-wrapper">
+
+                <div className="post-card-views">
+                  <span className="view-pill"> {views} views</span>
+                </div>
 
                 {/* Post Card */}
                 <Link to={`/blog/${post.id}`} className="post-card">
