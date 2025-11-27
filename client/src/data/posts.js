@@ -22,7 +22,7 @@ const posts = [
     excerpt:
       "Balancing coding, TFL, grocery runs, and figuring out how to not burn a damn egg in a student kitchen.",
     content:
-    "It was chilly. A very cold, quiet breeze gushed pass my ear and flew away my walmart hat. I had never been to the UK before, so it was uhm.... interesting. I had not set up apple pay and did not know how to navigate through the exit of the airport. Thats where I got scammed. A private cab driver charged me 130 pounds for a 40 minute ride to my student accomodation. Never used a cab again. Always use the tube or the bus which can literally take you anywhere for 2.90 pounds. for zone 1 atleast. More coming soon.."
+    "It was chilly. A very cold, quiet breeze gushed pass my ear and flew away my walmart hat. I had never been to the UK before, so it was uhm.... interesting. I had not set up apple pay and did not know how to navigate through the exit of the airport. Thats where I got scammed. A private cab driver charged me 130 pounds for a 40 minute ride to my student accomodation. Never used a cab again. Always use the tube or the bus which can literally take you anywhere for 2.90 pounds. for zone 1 atleast. More coming soon..."
   },
   {
     id: 3,
@@ -34,6 +34,8 @@ const posts = [
     featured: false,
     excerpt:
       "The gap between what you want to build and what you can currently code is brutal. Here's how I'm dealing with it.",
+    content:
+    "More coming soon. A deeper dive into how I stay consistent, and not lose hope while coding."
   },
   {
     id: 4,
@@ -45,6 +47,8 @@ const posts = [
     featured: false,
     excerpt:
       "From dev environment setups to note-taking and time blocking, the tools that are quietly holding my life together.",
+    content:
+    "More coming soon! Stay tuned, we will dive deep into all technicals!"
   },
 ];
 

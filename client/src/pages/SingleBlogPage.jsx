@@ -3,6 +3,7 @@ import posts from "../data/posts";
 import ReadingProgressBar from "../components/ReadingProgressBar";
 import "./SingleBlogPage.css";
 import { useEffect, useState } from "react";
+import { useRef } from "react";
 
 function SingleBlogPage() {
   const { id } = useParams();
@@ -16,9 +17,24 @@ function SingleBlogPage() {
   const isUserPost =
     post?.isUserPost || userPosts.some((p) => String(p.id) === String(id));
 
+  function incrementViews(postId) {
+    const stored = JSON.parse(localStorage.getItem("post_views") || "{}");
+    stored[postId] = (stored[postId] || 0) + 1;
+    localStorage.setItem("post_views", JSON.stringify(stored));
+  }
+
+  const hasIncremented = useRef(false);
+
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("post_votes") || "{}");
     if (stored[id]) setVotes(stored[id]);
+  }, [id]);
+
+  useEffect(() => {
+    if (!hasIncremented.current) {
+      incrementViews(id);
+      hasIncremented.current = true;
+    }
   }, [id]);
 
   function syncVotes(next) {
@@ -72,6 +88,8 @@ function SingleBlogPage() {
     );
   }
 
+  const views = JSON.parse(localStorage.getItem("post_views") || "{}")[id] || 0;
+
   function handleDelete() {
     const ok = window.confirm("Are you sure you want to delete this post?");
     if (!ok) return;
@@ -82,7 +100,7 @@ function SingleBlogPage() {
 
     localStorage.setItem("user_posts", JSON.stringify(updated));
 
-    // Also remove votes for this post
+
     const votes = JSON.parse(localStorage.getItem("post_votes") || "{}");
     delete votes[id];
     localStorage.setItem("post_votes", JSON.stringify(votes));
@@ -104,9 +122,15 @@ function SingleBlogPage() {
 
         <div className="single-meta-row">
           <div className="single-meta">
-            <span className="chip">{post.categoryLabel}</span>
-            <span>•</span>
-            <span>{new Date(post.date).toLocaleDateString("en-GB")}</span>
+            <div className="meta-left">
+              <span className="chip">{post.categoryLabel}</span>
+              <span>•</span>
+              <span>{new Date(post.date).toLocaleDateString("en-GB")}</span>
+            </div>
+
+            <div className="meta-right">
+              <span className="view-pill">{views} views</span>
+            </div>
           </div>
 
           {isUserPost && (
