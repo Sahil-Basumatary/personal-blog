@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./NewPostPage.css";
 
@@ -8,13 +8,34 @@ function NewPostPage() {
   const isOwner = true;
   if (!isOwner) return navigate("/");
 
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("cs-journey");
-  const [excerpt, setExcerpt] = useState("");
-  const [content, setContent] = useState("");
+  const savedDraft = JSON.parse(localStorage.getItem("new_post_draft") || "{}");
+
+  const [title, setTitle] = useState(savedDraft.title || "");
+  const [category, setCategory] = useState(savedDraft.category || "cs-journey");
+  const [excerpt, setExcerpt] = useState(savedDraft.excerpt || "");
+  const [content, setContent] = useState(savedDraft.content || "");
+
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    const draft = { title, category, excerpt, content };
+    localStorage.setItem("new_post_draft", JSON.stringify(draft));
+  }, [title, category, excerpt, content]);
+
+  function validate() {
+    const err = {};
+    if (title.trim().length < 3) err.title = "Title must be at least 3 characters.";
+    if (content.trim().length < 30)
+      err.content = "Content must be at least 30 characters.";
+    if (!category) err.category = "Category is required.";
+
+    setErrors(err);
+    return Object.keys(err).length === 0;
+  }
 
   function handleSubmit(e) {
     e.preventDefault();
+    if (!validate()) return;
 
     const finalExcerpt =
       excerpt.trim() !== ""
@@ -43,13 +64,21 @@ function NewPostPage() {
     const existing = JSON.parse(localStorage.getItem("user_posts") || "[]");
     localStorage.setItem("user_posts", JSON.stringify([...existing, newPost]));
 
+    localStorage.removeItem("new_post_draft");
+
     navigate("/blog");
   }
+
+  function handleCancel() {
+    localStorage.removeItem("new_post_draft");
+    navigate("/blog");
+  }
+
+  const isValid = title.trim().length >= 3 && content.trim().length >= 30;
 
   return (
     <div className="new-post-page">
       <div className="new-post-card">
-
         <button
           className="back-link"
           type="button"
@@ -62,16 +91,23 @@ function NewPostPage() {
         <p className="new-post-subtitle">Capture a memory from your journey.</p>
 
         <form className="new-post-form" onSubmit={handleSubmit}>
+
+          {/* Title */}
           <label className="field">
             <span>Title</span>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              required
             />
+            {errors.title && (
+              <p style={{ color: "#dc2626", fontSize: "0.85rem" }}>
+                {errors.title}
+              </p>
+            )}
           </label>
 
+          {/* Category */}
           <label className="field">
             <span>Category</span>
             <select
@@ -83,8 +119,15 @@ function NewPostPage() {
               <option value="motivation">Motivation</option>
               <option value="tools">Tools & Resources</option>
             </select>
+
+            {errors.category && (
+              <p style={{ color: "#dc2626", fontSize: "0.85rem" }}>
+                {errors.category}
+              </p>
+            )}
           </label>
 
+          {/* Short Description */}
           <label className="field">
             <span>Short description</span>
             <input
@@ -95,29 +138,40 @@ function NewPostPage() {
             />
           </label>
 
+          {/* Content */}
           <label className="field">
             <span>Content</span>
             <textarea
               rows={10}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              required
             />
+            {errors.content && (
+              <p style={{ color: "#dc2626", fontSize: "0.85rem" }}>
+                {errors.content}
+              </p>
+            )}
           </label>
 
           <div className="form-actions">
             <button
               type="button"
               className="ghost-btn"
-              onClick={() => navigate("/blog")}
+              onClick={handleCancel}
             >
               Cancel
             </button>
 
-            <button type="submit" className="primary-btn">
+            <button
+              type="submit"
+              className="primary-btn"
+              disabled={!isValid}
+              style={{ opacity: isValid ? 1 : 0.5, cursor: isValid ? "pointer" : "not-allowed" }}
+            >
               Publish
             </button>
           </div>
+
         </form>
       </div>
     </div>
