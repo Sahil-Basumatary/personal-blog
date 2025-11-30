@@ -4,6 +4,8 @@ import ReadingProgressBar from "../components/ReadingProgressBar";
 import "./SingleBlogPage.css";
 import { useEffect, useState, useRef } from "react";
 
+const isAdmin = true; // temporary until real login system
+
 function useClickOutside(handler) {
   const ref = useRef();
   useEffect(() => {
@@ -26,8 +28,7 @@ function SingleBlogPage() {
   const allPosts = [...userPosts, ...posts];
 
   const post = allPosts.find((p) => String(p.id) === String(id));
-  const isUserPost =
-    post?.isUserPost || userPosts.some((p) => String(p.id) === String(id));
+  const isUserPost = isAdmin || post?.isUserPost;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useClickOutside(() => setMenuOpen(false));

@@ -13,6 +13,9 @@
     0 8px 20px rgba(15, 23, 42, 0.08),
     0 1px 3px rgba(15, 23, 42, 0.06);
   border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
 }
 
 .new-post-title {
@@ -102,6 +105,7 @@
 .primary-btn {
   background: #111827;
   color: #f9fafb;
+  margin-top: 18px;
 }
 
 .primary-btn:hover {

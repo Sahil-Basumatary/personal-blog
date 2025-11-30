@@ -210,6 +210,7 @@
 
 .post-card-wrapper {
   margin-bottom: 18px;
+  position: relative;
 }
 
 .vote-bar {
@@ -341,7 +342,8 @@
 }
 
 .blog-subtitle {
-  margin-top: 4px;
+  margin-top: 18px;
+  margin-bottom: 21px;
 }
 
 .view-pill {
@@ -374,9 +376,12 @@
 
 .post-card-views {
   position: absolute;
-  top: 8px;
-  right: 12px;
-  z-index: 10;
+  top: 22px;
+  right: 16px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .post-card-wrapper .view-pill {
@@ -553,5 +558,106 @@
 
 .live-view-all:hover {
   background: rgba(235, 240, 255, 0.5);
+}
+
+/* THREE DOTS BUTTON */
+.three-dots-wrapper {
+  position: relative;
+}
+
+.three-dots-btn {
+  background: rgba(245, 247, 250, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+
+  width: 34px;
+  height: 30px;
+  border-radius: 999px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  transition: 0.15s ease;
+  backdrop-filter: blur(10px);
+}
+
+
+.three-dots-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  transform: translateY(-1px);
+}
+
+/* MENU */
+.action-menu {
+  position: absolute;
+  top: 42px;
+  right: 0;
+
+  min-width: 180px;
+  padding: 6px 0;
+
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.08);
+
+  backdrop-filter: blur(14px) saturate(180%);
+  box-shadow:
+      0 8px 28px rgba(0,0,0,0.12),
+      0 4px 10px rgba(0,0,0,0.06);
+
+  animation: menuFade 0.18s ease-out forwards;
+  z-index: 1000;
+}
+
+@keyframes menuFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* MENU ITEM */
+.action-item {
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  font-size: 0.94rem;
+  color: #222;
+  cursor: pointer;
+
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.action-item:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.action-item svg {
+  flex-shrink: 0;
+}
+
+/* DELETE ITEM */
+.action-item.delete {
+  color: #d33;
+}
+
+.action-item.delete:hover {
+  background: rgba(255, 0, 0, 0.08);
+}
+
+/* DIVIDER */
+.divider {
+  height: 1px;
+  background: rgba(0,0,0,0.08);
+  margin: 4px 0;
 }
 
