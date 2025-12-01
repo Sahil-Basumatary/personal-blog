@@ -212,7 +212,11 @@ function SingleBlogPage() {
           className={`vote-btn up ${votes.userVote === "up" ? "active" : ""}`}
           onClick={handleUpvote}
         >
-          ↑
+          <img
+            src="/icons/thumb-up.svg"
+            alt="Upvote"
+            className="vote-icon"
+          />
         </button>
 
         <span className="vote-count">
@@ -223,7 +227,11 @@ function SingleBlogPage() {
           className={`vote-btn down ${votes.userVote === "down" ? "active" : ""}`}
           onClick={handleDownvote}
         >
-          ↓
+          <img
+            src="/icons/thumb-down.svg"
+            alt="Downvote"
+            className="vote-icon"
+          />
         </button>
       </div>
     </div>

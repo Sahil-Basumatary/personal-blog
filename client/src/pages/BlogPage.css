@@ -661,3 +661,10 @@
   margin: 4px 0;
 }
 
+.vote-icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+  pointer-events: none;
+}
+

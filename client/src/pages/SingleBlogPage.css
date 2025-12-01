@@ -291,3 +291,10 @@
   background: rgba(0,0,0,0.08);
   margin: 4px 0;
 }
+
+.vote-icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+  pointer-events: none;
+}

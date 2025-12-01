@@ -504,7 +504,11 @@ function BlogPage() {
                     className={`vote-btn up ${voteInfo.userVote === "up" ? "active" : ""}`}
                     onClick={() => handleUpvote(post.id)}
                   >
-                    ↑
+                    <img
+                      src="/icons/thumb-up.svg"
+                      alt="Upvote"
+                      className="vote-icon"
+                    />
                   </button>
 
                   <span className="vote-count">
@@ -515,7 +519,11 @@ function BlogPage() {
                     className={`vote-btn down ${voteInfo.userVote === "down" ? "active" : ""}`}
                     onClick={() => handleDownvote(post.id)}
                   >
-                    ↓
+                    <img
+                      src="/icons/thumb-down.svg"
+                      alt="Downvote"
+                      className="vote-icon"
+                    />
                   </button>
                 </div>
               </div>
