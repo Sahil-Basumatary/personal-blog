@@ -272,6 +272,9 @@ function BlogPage() {
       <section className="blog-header">
         <div className="blog-header-top">
           <div>
+            <Link to="/" className="home-pill">
+              <img src="/icons/home.svg" alt="Home" className="home-icon" /> Home
+            </Link>
             <h1 className="blog-title">
               {categoryFilter
                 ? `Posts in "${categoryFilter.replace("-", " ")}"`

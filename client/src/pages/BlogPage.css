@@ -668,3 +668,42 @@
   pointer-events: none;
 }
 
+.home-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #111;
+
+  background: rgba(245, 245, 247, 0.6);
+  border-radius: 999px;
+  border: 1px solid rgba(200, 200, 205, 0.45);
+
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.05),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+
+  cursor: pointer;
+  text-decoration: none;
+
+  transition: all 0.2s ease;
+  margin-bottom: 24px;
+}
+
+.home-pill:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.home-icon {
+  width: 12px;
+  height: 12px;
+  position: relative;
+
+}
