@@ -178,6 +178,7 @@ header.hero {
   padding: 20px 32px;
 }
 
+.desktop-nav
 .logo {
   font-size: 26px;
   font-weight: 700;
@@ -187,6 +188,7 @@ header.hero {
 .desktop-nav {
   display: flex;
   gap: 28px;
+  align-items: center;
 }
 
 .nav-item {

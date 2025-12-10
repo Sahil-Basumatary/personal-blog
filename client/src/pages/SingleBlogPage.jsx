@@ -132,7 +132,18 @@ function SingleBlogPage() {
 
       {/* HEADER */}
       <div className="single-header">
-        <a href="/blog" className="back-link">← Back to all posts</a>
+        <div className="single-header-top">
+          <a href="/blog" className="back-link">← Back to all posts</a>
+
+          <a href="/" className="home-pill">
+            <img
+              src="/icons/home.svg"
+              alt="Home"
+              className="home-icon"
+            />
+            Home
+          </a>
+        </div>
 
         <h1 className="single-title">{post.title}</h1>
 
