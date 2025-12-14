@@ -1,11 +1,29 @@
 import express from "express";
+import {
+  getPosts,
+  getPostById,
+  createPost,
+  updatePost,
+  deletePost,
+  incrementViews,
+  votePost
+} from "../controllers/postsController.js";
+
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  return res.status(200).json([
-    { id: 1, title: "My CS Journey", content: "Learning to code..." },
-    { id: 2, title: "Life in London", content: "A coder's perspective" }
-  ]);
-});
+// List posts, with optional ?search=&category=
+router.get("/", getPosts);
+
+router.get("/:id", getPostById);
+
+router.post("/", createPost);
+
+router.put("/:id", updatePost);
+
+router.delete("/:id", deletePost);
+
+router.post("/:id/view", incrementViews);
+
+router.post("/:id/vote", votePost);
 
 export default router;
