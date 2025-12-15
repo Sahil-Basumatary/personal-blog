@@ -3,6 +3,22 @@ import posts from "../data/posts";
 import ReadingProgressBar from "../components/ReadingProgressBar";
 import "./SingleBlogPage.css";
 import { useEffect, useState, useRef } from "react";
+import { fetchPostById } from "../api/posts";
+
+function mapPostFromApi(p) {
+  return {
+    id: p._id,
+    slug: p.slug || p._id,
+    title: p.title,
+    content: p.content || "",
+    category: p.category || "general",
+    categoryLabel: p.categoryLabel || (p.category ? p.category : "General"),
+    date: p.date || p.createdAt || new Date().toISOString(),
+    featured: p.isFeatured,
+    excerpt: p.excerpt || "",
+    isUserPost: false
+  };
+}
 
 const isAdmin = true; // temporary until real login system
 
@@ -22,13 +38,46 @@ function useClickOutside(handler) {
 function SingleBlogPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [votes, setVotes] = useState({ score: 0, userVote: null });
 
   const userPosts = JSON.parse(localStorage.getItem("user_posts") || "[]");
-  const allPosts = [...userPosts, ...posts];
-
-  const post = allPosts.find((p) => String(p.id) === String(id));
   const isUserPost = isAdmin || post?.isUserPost;
+
+    useEffect(() => {
+    let active = true;
+
+    async function loadPost() {
+      try {
+        const apiPost = await fetchPostById(id);
+        if (!active) return;
+        const mapped = mapPostFromApi(apiPost);
+        setPost(mapped);
+      } catch (err) {
+        console.error("Failed to fetch post from backend, falling back to local", err);
+        if (!active) return;
+
+        const allPosts = [...userPosts, ...posts];
+        const localPost = allPosts.find((p) => String(p.id) === String(id));
+
+        if (localPost) {
+          setPost(localPost);
+        } else {
+          setError("Post not found");
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    loadPost();
+    return () => {
+      active = false;
+    };
+  }, [id]);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useClickOutside(() => setMenuOpen(false));
@@ -124,7 +173,13 @@ function SingleBlogPage() {
     navigate("/blog");
   }
 
-  if (!post) return <div className="not-found">Post not found.</div>;
+  if (loading) {
+  return <div className="single-container">Loading post...</div>;
+  }
+
+  if (!post || error) {
+    return <div className="not-found">Post not found.</div>;
+  }
 
   return (
     <div className="single-container">

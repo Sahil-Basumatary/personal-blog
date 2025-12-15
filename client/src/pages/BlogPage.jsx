@@ -2,6 +2,7 @@ import "./BlogPage.css";
 import posts from "../data/posts";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
+import { fetchPosts } from "../api/posts";
 
 // search feat helpers
 function tokenize(text) {
@@ -57,6 +58,21 @@ function debounce(fn, delay) {
   };
 }
 
+function mapPostFromApi(p) {
+  return {
+    id: p._id,
+    slug: p.slug || p._id,
+    title: p.title,
+    content: p.content || "",
+    category: p.category || "general",
+    categoryLabel: p.categoryLabel || (p.category ? p.category : "General"),
+    date: p.date || p.createdAt || new Date().toISOString(),
+    featured: p.isFeatured,
+    excerpt: p.excerpt || "",
+    isUserPost: false
+  };
+}
+
 function BlogPage() {
   const isAdmin = true; // temporary
   const menuRef = useRef(null);
@@ -70,6 +86,9 @@ function BlogPage() {
 
   const [queryInput, setQueryInput] = useState("");  // immediate typing
 
+  const [backendPosts, setBackendPosts] = useState([]);
+  const [postsError, setPostsError] = useState(null);
+
   useEffect(() => {
     function handleClickOutside(e) {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -79,6 +98,27 @@ function BlogPage() {
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+    useEffect(() => {
+    let active = true;
+
+    async function loadPosts() {
+      try {
+        const apiPosts = await fetchPosts();
+        if (!active) return;
+        const mapped = apiPosts.map(mapPostFromApi);
+        setBackendPosts(mapped);
+      } catch (err) {
+        console.error("Failed to fetch posts from backend", err);
+        if (active) setPostsError("Failed to load posts from server");
+      }
+    }
+
+    loadPosts();
+    return () => {
+      active = false;
+    };
   }, []);
 
   function saveRecent(term) {
@@ -98,7 +138,10 @@ function BlogPage() {
   }
 
   const userPosts = JSON.parse(localStorage.getItem("user_posts") || "[]");
-  const allPosts = [...userPosts, ...posts];
+
+  const sourcePosts =
+    backendPosts.length > 0 ? backendPosts : posts;
+  const allPosts = [...userPosts, ...sourcePosts];
 
   const categoryFilter = searchParams.get("category");
 
