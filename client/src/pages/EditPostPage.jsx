@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./NewPostPage.css"; 
+import { fetchPostById, updatePost } from "../api/posts";
 
 function EditPostPage() {
   const { id } = useParams();
@@ -22,43 +23,97 @@ function EditPostPage() {
       return;
     }
 
-    const existing = JSON.parse(localStorage.getItem("user_posts") || "[]");
-    const target = existing.find((p) => String(p.id) === String(id));
+    let active = true;
 
-    if (!target) {
-      setNotFound(true);
-      setLoading(false);
-      return;
+    async function loadPost() {
+      try {
+        // Try backend first
+        const apiPost = await fetchPostById(id);
+        if (!active) return;
+
+        setTitle(apiPost.title || "");
+        setCategory(apiPost.category || "cs-journey");
+        setExcerpt(apiPost.excerpt || "");
+        setContent(apiPost.content || "");
+        setLoading(false);
+      } catch (err) {
+        console.error("Failed to load post from backend, falling back to local", err);
+        if (!active) return;
+
+        // Fallback: local user_posts 
+        const existing = JSON.parse(localStorage.getItem("user_posts") || "[]");
+        const target = existing.find((p) => String(p.id) === String(id));
+
+        if (!target) {
+          setNotFound(true);
+        } else {
+          setTitle(target.title || "");
+          setCategory(target.category || "cs-journey");
+          setExcerpt(target.excerpt || "");
+          setContent(target.content || "");
+        }
+        setLoading(false);
+      }
     }
 
-    setTitle(target.title || "");
-    setCategory(target.category || "cs-journey");
-    setExcerpt(target.excerpt || "");
-    setContent(target.content || "");
-    setLoading(false);
+    loadPost();
+    return () => {
+      active = false;
+    };
   }, [id, isOwner, navigate]);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
-    const existing = JSON.parse(localStorage.getItem("user_posts") || "[]");
+    const categoryLabel =
+      category === "cs-journey"
+        ? "My CS Journey"
+        : category === "life-in-london"
+        ? "Life in London"
+        : category === "motivation"
+        ? "Motivation"
+        : "Tools & Resources";
 
-    const updated = existing.map((p) =>
-      String(p.id) === String(id)
-        ? {
-            ...p,
-            title,
-            category,
-            excerpt,
-            content,
-            isUserPost: true,
-            updatedAt: new Date().toISOString(),
-          }
-        : p
-    );
+    const finalExcerpt =
+      excerpt.trim() !== ""
+        ? excerpt.trim()
+        : content.split("\n")[0].slice(0, 140) + "...";
 
-    localStorage.setItem("user_posts", JSON.stringify(updated));
-    navigate(`/blog/${id}`);
+    const payload = {
+      title: title.trim(),
+      content: content.trim(),
+      category,
+      categoryLabel,
+      excerpt: finalExcerpt,
+    };
+
+    try {
+      // Try backend update
+      await updatePost(id, payload);
+      navigate(`/blog/${id}`);
+    } catch (err) {
+      console.error("Failed to update post on backend, err:", err);
+
+      // Fallback: local storage
+      const existing = JSON.parse(localStorage.getItem("user_posts") || "[]");
+
+      const updated = existing.map((p) =>
+        String(p.id) === String(id)
+          ? {
+              ...p,
+              title,
+              category,
+              excerpt: finalExcerpt,
+              content,
+              isUserPost: true,
+              updatedAt: new Date().toISOString(),
+            }
+          : p
+      );
+
+      localStorage.setItem("user_posts", JSON.stringify(updated));
+      navigate(`/blog/${id}`);
+    }
   }
 
   if (!isOwner) return null;
@@ -98,7 +153,7 @@ function EditPostPage() {
         </button>
 
         <h1 className="new-post-title">Edit post</h1>
-        <p className="new-post-subtitle">Refine your story.</p>
+        <p className="new-post-subtitle">Edit your story.</p>
 
         <form className="new-post-form" onSubmit={handleSubmit}>
           <label className="field">

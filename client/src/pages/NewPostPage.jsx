@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./NewPostPage.css";
+import { createPost } from "../api/posts";
 
 function NewPostPage() {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ function NewPostPage() {
     return Object.keys(err).length === 0;
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!validate()) return;
 
@@ -42,31 +43,60 @@ function NewPostPage() {
         ? excerpt.trim()
         : content.split("\n")[0].slice(0, 140) + "...";
 
-    const newPost = {
-      id: Date.now(),
-      title,
+    const categoryLabel =
+      category === "cs-journey"
+        ? "My CS Journey"
+        : category === "life-in-london"
+        ? "Life in London"
+        : category === "motivation"
+        ? "Motivation"
+        : "Tools & Resources";
+
+    // Shape to send to backend
+    const payload = {
+      title: title.trim(),
+      content: content.trim(),
       category,
-      categoryLabel:
-        category === "cs-journey"
-          ? "My CS Journey"
-          : category === "life-in-london"
-          ? "Life in London"
-          : category === "motivation"
-          ? "Motivation"
-          : "Tools & Resources",
+      categoryLabel,
       excerpt: finalExcerpt,
-      content,
-      date: new Date().toISOString(),
-      featured: false,
-      isUserPost: true,
+      isFeatured: false,
     };
 
-    const existing = JSON.parse(localStorage.getItem("user_posts") || "[]");
-    localStorage.setItem("user_posts", JSON.stringify([...existing, newPost]));
+    try {
+      // Try backend first
+      const created = await createPost(payload);
 
-    localStorage.removeItem("new_post_draft");
+      // Clear draft once backend succeeds
+      localStorage.removeItem("new_post_draft");
 
-    navigate("/blog");
+      // If backend returns _id, go straight to that post
+      if (created && created._id) {
+        navigate(`/blog/${created._id}`);
+      } else {
+        navigate("/blog");
+      }
+    } catch (err) {
+      console.error("Failed to create post on backend, falling back to local", err);
+      
+      // Fallback: Save to localStorage
+      const localPost = {
+        id: Date.now(),
+        title,
+        category,
+        categoryLabel,
+        excerpt: finalExcerpt,
+        content,
+        date: new Date().toISOString(),
+        featured: false,
+        isUserPost: true,
+      };
+
+      const existing = JSON.parse(localStorage.getItem("user_posts") || "[]");
+      localStorage.setItem("user_posts", JSON.stringify([...existing, localPost]));
+
+      localStorage.removeItem("new_post_draft");
+      navigate("/blog");
+    }
   }
 
   function handleCancel() {
