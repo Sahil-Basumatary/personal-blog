@@ -1,21 +1,24 @@
 .new-post-page {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 4rem 2rem 5rem;
+  min-height: calc(100vh - 80px);
+  padding: 4rem 1.5rem 5rem;
+  display: flex;
+  justify-content: center;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
 }
 
 .new-post-card {
+  width: 100%;
+  max-width: 760px;          
   background: #ffffff;
   border-radius: 18px;
   padding: 2.5rem 2.8rem;
   box-shadow:
-    0 8px 20px rgba(15, 23, 42, 0.08),
-    0 1px 3px rgba(15, 23, 42, 0.06);
+    0 18px 45px rgba(15, 23, 42, 0.08),
+    0 1px 3px rgba(15, 23, 42, 0.04);
   border: 1px solid #e5e7eb;
   display: flex;
-  align-items: flex-start;
   flex-direction: column;
+  align-items: stretch;      
 }
 
 .new-post-title {
@@ -26,29 +29,49 @@
 }
 
 .new-post-subtitle {
-  font-size: 1rem;
+  font-size: 1.2rem;
   color: #6b7280;
   margin-bottom: 2rem;
+  margin-top: 1.3rem;
 }
 
 .back-link {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+
   border: none;
-  background: none;
-  padding: 0;
-  margin-bottom: 1.5rem;
-  font-size: 0.95rem;
-  color: #3b82f6;
+  background: transparent;
+  padding: 0.3rem 0rem;
+  margin-bottom: 1.8rem;
+
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #4b5563;
   cursor: pointer;
+
+  border-radius: 999px;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
 
 .back-link:hover {
-  text-decoration: underline;
+  background: #f3f4f6;
+  color: #111827;
+  transform: translateX(-1px);
 }
 
 .new-post-form {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.field {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .field span {
@@ -59,34 +82,38 @@
   margin-bottom: 0.45rem;
 }
 
-.field input,
-.field select,
-.field textarea {
+.new-post-card .field input,
+.new-post-card .field select,
+.new-post-card .field textarea {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 0.75rem 0.9rem;
   border-radius: 10px;
   border: 1px solid #d1d5db;
   font-size: 0.98rem;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease,
+    background-color 0.15s ease;
   background: #f9fafb;
 }
 
-.field textarea {
+.new-post-card .field textarea {
   resize: vertical;
+  min-height: 160px;
 }
 
-.field input:focus,
-.field select:focus,
-.field textarea:focus {
+.new-post-card .field input:focus,
+.new-post-card .field select:focus,
+.new-post-card .field textarea:focus {
   border-color: #3b82f6;
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.25);
   background: #ffffff;
 }
 
 .form-actions {
-  margin-top: 1rem;
+  margin-top: 1.25rem;
   display: flex;
   justify-content: flex-end;
   gap: 0.8rem;
@@ -105,26 +132,35 @@
 .primary-btn {
   background: #111827;
   color: #f9fafb;
-  margin-top: 18px;
+  transition: background 0.15s ease, transform 0.1s ease;
 }
 
-.primary-btn:hover {
+.primary-btn:hover:not(:disabled) {
   background: #020617;
+  transform: translateY(-1px);
+}
+
+.primary-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .ghost-btn {
   background: transparent;
   border: 1px solid #d1d5db;
   color: #374151;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .ghost-btn:hover {
   background: #f3f4f6;
+  border-color: #9ca3af;
 }
 
 @media (max-width: 640px) {
   .new-post-card {
-    padding: 2rem 1.5rem;
+    padding: 2rem 1.6rem 2.2rem;
+    border-radius: 16px;
   }
 
   .new-post-title {
@@ -134,5 +170,12 @@
   .form-actions {
     flex-direction: column-reverse;
     align-items: stretch;
+  }
+
+  .primary-btn,
+  .ghost-btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
   }
 }
