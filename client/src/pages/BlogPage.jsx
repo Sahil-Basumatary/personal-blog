@@ -2,7 +2,7 @@ import "./BlogPage.css";
 import posts from "../data/posts";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
-import { fetchPosts } from "../api/posts";
+import { fetchPosts, voteOnPost} from "../api/posts";
 
 // search feat helpers
 function tokenize(text) {
@@ -69,7 +69,7 @@ function mapPostFromApi(p) {
     date: p.date || p.createdAt || new Date().toISOString(),
     featured: p.isFeatured,
     excerpt: p.excerpt || "",
-    isUserPost: false
+    isUserPost: false, views: typeof p.views === "number" ? p.views : 0
   };
 }
 
@@ -201,21 +201,18 @@ function BlogPage() {
     localStorage.setItem("post_votes", JSON.stringify(newVotes));
   }
 
-  function handleUpvote(id) {
+  async function handleUpvote(id) {
     setVotes((prev) => {
       const current = prev[id] || { score: 0, userVote: null };
       let { score, userVote } = current;
 
       if (userVote === "up") {
-        // remove upvote
         score -= 1;
         userVote = null;
       } else if (userVote === "down") {
-        // switch from down to up
         score += 2;
         userVote = "up";
       } else {
-        // no vote to upvote
         score += 1;
         userVote = "up";
       }
@@ -224,23 +221,26 @@ function BlogPage() {
       localStorage.setItem("post_votes", JSON.stringify(next));
       return next;
     });
+
+    try {
+      await voteOnPost(id, "up");
+    } catch (err) {
+      console.error("Failed to sync upvote to backend", err);
+    }
   }
 
-  function handleDownvote(id) {
+  async function handleDownvote(id) {
     setVotes((prev) => {
       const current = prev[id] || { score: 0, userVote: null };
       let { score, userVote } = current;
 
       if (userVote === "down") {
-        // remove downvote
         score += 1;
         userVote = null;
       } else if (userVote === "up") {
-        // switch from up to down
         score -= 2;
         userVote = "down";
       } else {
-        // no vote to downvote
         score -= 1;
         userVote = "down";
       }
@@ -249,6 +249,12 @@ function BlogPage() {
       localStorage.setItem("post_votes", JSON.stringify(next));
       return next;
     });
+
+    try {
+      await voteOnPost(id, "down");
+    } catch (err) {
+      console.error("Failed to sync downvote to backend", err);
+    }
   }
 
   const debouncedSearch = debounce((value) => {
@@ -468,7 +474,8 @@ function BlogPage() {
                 : post.content.substring(0, 120) + "...";
 
             const allViews = JSON.parse(localStorage.getItem("post_views") || "{}");
-            const views = allViews[post.id] || 0;
+            const localViews = allViews[post.id] || 0;
+            const views = post.views != null ? post.views : localViews;
 
             return (
               <div key={post.id} className="post-card-wrapper">

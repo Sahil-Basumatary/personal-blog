@@ -3,7 +3,7 @@ import posts from "../data/posts";
 import ReadingProgressBar from "../components/ReadingProgressBar";
 import "./SingleBlogPage.css";
 import { useEffect, useState, useRef } from "react";
-import { fetchPostById } from "../api/posts";
+import { fetchPostById, incrementPostViews, voteOnPost } from "../api/posts";
 
 function mapPostFromApi(p) {
   return {
@@ -16,7 +16,7 @@ function mapPostFromApi(p) {
     date: p.date || p.createdAt || new Date().toISOString(),
     featured: p.isFeatured,
     excerpt: p.excerpt || "",
-    isUserPost: false
+    isUserPost: false, views: typeof p.views === "number" ? p.views : 0
   };
 }
 
@@ -43,6 +43,7 @@ function SingleBlogPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [votes, setVotes] = useState({ score: 0, userVote: null });
+  const [backendViews, setBackendViews] = useState(null);
 
   const userPosts = JSON.parse(localStorage.getItem("user_posts") || "[]");
   const isUserPost = isAdmin || post?.isUserPost;
@@ -54,8 +55,12 @@ function SingleBlogPage() {
       try {
         const apiPost = await fetchPostById(id);
         if (!active) return;
-        const mapped = mapPostFromApi(apiPost);
-        setPost(mapped);
+        if (typeof apiPost.views === "number") {
+         setBackendViews(apiPost.views);
+       }
+
+       const mapped = mapPostFromApi(apiPost);
+       setPost(mapped);
       } catch (err) {
         console.error("Failed to fetch post from backend, falling back to local", err);
         if (!active) return;
@@ -82,10 +87,11 @@ function SingleBlogPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useClickOutside(() => setMenuOpen(false));
 
-  function incrementViews(postId) {
+  function incrementViewsLocal(postId) {
     const stored = JSON.parse(localStorage.getItem("post_views") || "{}");
     stored[postId] = (stored[postId] || 0) + 1;
     localStorage.setItem("post_views", JSON.stringify(stored));
+    return stored[postId];
   }
 
   const hasIncremented = useRef(false);
@@ -96,10 +102,32 @@ function SingleBlogPage() {
   }, [id]);
 
   useEffect(() => {
-    if (!hasIncremented.current) {
-      incrementViews(id);
+    let cancelled = false;
+
+    async function bumpViews() {
+      if (hasIncremented.current) return;
       hasIncremented.current = true;
+
+      try {
+        const updated = await incrementPostViews(id);
+
+        if (!cancelled && updated && typeof updated.views === "number") {
+          setBackendViews(updated.views);
+        }
+      } catch (err) {
+        console.error("Failed to increment views on backend, using local only", err);
+        const localCount = incrementViewsLocal(id);
+        if (!cancelled) {
+          setBackendViews((prev) => (prev == null ? localCount : prev));
+        }
+      }
     }
+
+    bumpViews();
+
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   function syncVotes(next) {
@@ -109,51 +137,65 @@ function SingleBlogPage() {
     localStorage.setItem("post_votes", JSON.stringify(all));
   }
 
-  function handleUpvote() {
-    syncVotes(
-      ((prev) => {
-        const current = prev || { score: 0, userVote: null };
-        let { score, userVote } = current;
+  async function handleUpvote() {
+    const next = ((prev) => {
+      const current = prev || { score: 0, userVote: null };
+      let { score, userVote } = current;
 
-        if (userVote === "up") {
-          score -= 1;
-          userVote = null;
-        } else if (userVote === "down") {
-          score += 2;
-          userVote = "up";
-        } else {
-          score += 1;
-          userVote = "up";
-        }
+      if (userVote === "up") {
+        score -= 1;
+        userVote = null;
+      } else if (userVote === "down") {
+        score += 2;
+        userVote = "up";
+      } else {
+        score += 1;
+        userVote = "up";
+      }
 
-        return { score, userVote };
-      })(votes)
-    );
+      return { score, userVote };
+    })(votes);
+
+    syncVotes(next);
+
+    try {
+      await voteOnPost(id, "up");
+    } catch (err) {
+      console.error("Failed to sync upvote to backend", err);
+    }
   }
 
-  function handleDownvote() {
-    syncVotes(
-      ((prev) => {
-        const current = prev || { score: 0, userVote: null };
-        let { score, userVote } = current;
+  async function handleDownvote() {
+    const next = ((prev) => {
+      const current = prev || { score: 0, userVote: null };
+      let { score, userVote } = current;
 
-        if (userVote === "down") {
-          score += 1;
-          userVote = null;
-        } else if (userVote === "up") {
-          score -= 2;
-          userVote = "down";
-        } else {
-          score -= 1;
-          userVote = "down";
-        }
+      if (userVote === "down") {
+        score += 1;
+        userVote = null;
+      } else if (userVote === "up") {
+        score -= 2;
+        userVote = "down";
+      } else {
+        score -= 1;
+        userVote = "down";
+      }
 
-        return { score, userVote };
-      })(votes)
-    );
+      return { score, userVote };
+    })(votes);
+
+    syncVotes(next);
+
+    try {
+      await voteOnPost(id, "down");
+    } catch (err) {
+      console.error("Failed to sync downvote to backend", err);
+    }
   }
 
-  const views = JSON.parse(localStorage.getItem("post_views") || "{}")[id] || 0;
+  const localViews =
+    JSON.parse(localStorage.getItem("post_views") || "{}")[id] || 0;
+  const views = backendViews != null ? backendViews : localViews;
 
   function handleDelete() {
     const ok = window.confirm("Are you sure you want to delete this post?");
