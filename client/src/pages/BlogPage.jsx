@@ -3,6 +3,8 @@ import posts from "../data/posts";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { fetchPosts, voteOnPost} from "../api/posts";
+import { useUser } from "@clerk/clerk-react";
+import { OWNER_USER_ID } from "../config/authOwner";
 
 // search feat helpers
 function tokenize(text) {
@@ -74,7 +76,9 @@ function mapPostFromApi(p) {
 }
 
 function BlogPage() {
-  const isAdmin = true; // temporary
+  const { isLoaded, isSignedIn, user } = useUser();
+  const isOwner = isLoaded && isSignedIn && user?.id === OWNER_USER_ID;
+
   const menuRef = useRef(null);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -196,12 +200,12 @@ function BlogPage() {
     setVotes(stored);
   }, []);
 
-  function updateVotes(newVotes) {
-    setVotes(newVotes);
-    localStorage.setItem("post_votes", JSON.stringify(newVotes));
-  }
-
   async function handleUpvote(id) {
+    if (!isSignedIn) {
+      navigate("/sign-in");
+      return;
+    }
+
     setVotes((prev) => {
       const current = prev[id] || { score: 0, userVote: null };
       let { score, userVote } = current;
@@ -230,6 +234,11 @@ function BlogPage() {
   }
 
   async function handleDownvote(id) {
+    if (!isSignedIn) {
+      navigate("/sign-in");
+      return;
+    }
+
     setVotes((prev) => {
       const current = prev[id] || { score: 0, userVote: null };
       let { score, userVote } = current;
@@ -411,12 +420,14 @@ function BlogPage() {
             </div>
           </div>
 
-          <button
-            className="new-post-btn"
-            onClick={() => navigate("/write")}
-          >
-            + New post
-          </button>
+          {isOwner && (
+            <button
+              className="new-post-btn"
+              onClick={() => navigate("/write")}
+            >
+              + New post
+            </button>
+          )}
         </div>
       </section>
 
@@ -484,7 +495,7 @@ function BlogPage() {
                 <div className="post-card-views">
                   <span className="view-pill">{views} views</span>
 
-                  {(isAdmin || post.isUserPost) && (
+                  {isOwner && (
                     <div className="three-dots-wrapper">
                       <button
                         className="three-dots-btn"
