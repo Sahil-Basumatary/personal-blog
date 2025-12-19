@@ -2,12 +2,24 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./NewPostPage.css";
 import { createPost } from "../api/posts";
+import { useUser } from "@clerk/clerk-react";
+import { OWNER_USER_ID } from "../config/authOwner";
 
 function NewPostPage() {
   const navigate = useNavigate();
+  const { user, isLoaded, isSignedIn } = useUser();
 
-  const isOwner = true;
-  if (!isOwner) return navigate("/");
+  const isOwner = isSignedIn && user?.id === OWNER_USER_ID;
+
+  useEffect(() => {
+    if (isLoaded && !isOwner) {
+      navigate("/", { replace: true });
+    }
+  }, [isLoaded, isOwner, navigate]);
+
+  if (!isLoaded || !isOwner) {
+    return null;
+  }
 
   const savedDraft = JSON.parse(localStorage.getItem("new_post_draft") || "{}");
 

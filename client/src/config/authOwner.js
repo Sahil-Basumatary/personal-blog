@@ -1,0 +1,1 @@
+export const OWNER_USER_ID = import.meta.env.VITE_OWNER_USER_ID || "";

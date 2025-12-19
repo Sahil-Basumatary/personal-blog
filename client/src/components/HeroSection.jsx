@@ -1,9 +1,14 @@
 import "./HeroSection.css";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
+import { OWNER_USER_ID } from "../config/authOwner";
 
 function HeroSection() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { isSignedIn, user } = useUser();
+
+  const isOwner = isSignedIn && user?.id === OWNER_USER_ID;
 
   return (
     <header className="hero hero-hybrid">
@@ -20,7 +25,12 @@ function HeroSection() {
           >
             LinkedIn
           </a>
-          <Link to="/write" className="write-btn">Write</Link>
+
+          {isOwner && (
+            <Link to="/write" className="write-btn">
+              Write
+            </Link>
+          )}
         </div>
 
         <div
