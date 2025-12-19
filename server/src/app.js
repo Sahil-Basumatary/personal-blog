@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
+import { ClerkExpressWithAuth } from "@clerk/express";
 
 import connectDB from "./db/index.js";
 import postsRouter from "./routes/posts.js";
@@ -24,6 +25,13 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
+
+// Attach Clerk auth info to every request
+app.use(
+  ClerkExpressWithAuth({
+    // TODO: optional config 
+  })
+);
 
 app.use("/api/posts", postsRouter);
 
