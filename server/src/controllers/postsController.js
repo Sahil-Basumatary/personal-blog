@@ -1,5 +1,7 @@
 import Post from "../models/postsModel.js";
 
+const OWNER_USER_ID = process.env.OWNER_USER_ID;
+
 // GET /api/posts
 export const getPosts = async (req, res) => {
   try {
@@ -38,6 +40,12 @@ export const getPostById = async (req, res) => {
 // POST /api/posts
 export const createPost = async (req, res) => {
   try {
+    const authUserId = req.auth?.userId;
+
+    if (!authUserId || authUserId !== OWNER_USER_ID) {
+      return res.status(403).json({ message: "Only Sahil can create posts." });
+    }
+
     const { title, content, category, isFeatured } = req.body;
 
     if (!title || !content) {
@@ -61,6 +69,12 @@ export const createPost = async (req, res) => {
 // PUT /api/posts/:id
 export const updatePost = async (req, res) => {
   try {
+    const authUserId = req.auth?.userId;
+
+    if (!authUserId || authUserId !== OWNER_USER_ID) {
+      return res.status(403).json({ message: "Only Sahil can edit posts." });
+    }
+
     const { title, content, category, isFeatured } = req.body;
 
     const post = await Post.findById(req.params.id);
@@ -82,6 +96,12 @@ export const updatePost = async (req, res) => {
 // DELETE /api/posts/:id
 export const deletePost = async (req, res) => {
   try {
+    const authUserId = req.auth?.userId;
+
+    if (!authUserId || authUserId !== OWNER_USER_ID) {
+      return res.status(403).json({ message: "Only Sahil can delete posts." });
+    }
+
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found" });
 
@@ -112,6 +132,11 @@ export const incrementViews = async (req, res) => {
 // POST /api/posts/:id/vote
 export const votePost = async (req, res) => {
   try {
+    const authUserId = req.auth?.userId;
+    if (!authUserId) {
+      return res.status(401).json({ message: "Login required to vote." });
+    }
+
     const { direction } = req.body;
     if (!["up", "down"].includes(direction)) {
       return res.status(400).json({ message: "direction must be 'up' or 'down'" });

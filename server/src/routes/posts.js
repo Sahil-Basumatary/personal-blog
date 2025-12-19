@@ -1,4 +1,5 @@
 import express from "express";
+import { ClerkExpressRequireAuth } from "@clerk/express";
 import {
   getPosts,
   getPostById,
@@ -11,19 +12,15 @@ import {
 
 const router = express.Router();
 
-// List posts, with optional ?search=&category=
+// Public routes
 router.get("/", getPosts);
-
 router.get("/:id", getPostById);
-
-router.post("/", createPost);
-
-router.put("/:id", updatePost);
-
-router.delete("/:id", deletePost);
-
 router.post("/:id/view", incrementViews);
 
-router.post("/:id/vote", votePost);
+// Protected routes
+router.post("/", ClerkExpressRequireAuth(), createPost);
+router.put("/:id", ClerkExpressRequireAuth(), updatePost);
+router.delete("/:id", ClerkExpressRequireAuth(), deletePost);
+router.post("/:id/vote", ClerkExpressRequireAuth(), votePost);
 
 export default router;
