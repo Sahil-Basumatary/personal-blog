@@ -17,10 +17,6 @@ function NewPostPage() {
     }
   }, [isLoaded, isOwner, navigate]);
 
-  if (!isLoaded || !isOwner) {
-    return null;
-  }
-
   const savedDraft = JSON.parse(localStorage.getItem("new_post_draft") || "{}");
 
   const [title, setTitle] = useState(savedDraft.title || "");
@@ -34,6 +30,18 @@ function NewPostPage() {
     const draft = { title, category, excerpt, content };
     localStorage.setItem("new_post_draft", JSON.stringify(draft));
   }, [title, category, excerpt, content]);
+
+  if (!isLoaded) {
+    return (
+      <div className="new-post-page">
+        <div className="new-post-card">
+          <p>Loading…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isOwner) return null;
 
   function validate() {
     const err = {};

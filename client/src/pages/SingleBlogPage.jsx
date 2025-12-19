@@ -4,6 +4,8 @@ import ReadingProgressBar from "../components/ReadingProgressBar";
 import "./SingleBlogPage.css";
 import { useEffect, useState, useRef } from "react";
 import { fetchPostById, incrementPostViews, voteOnPost } from "../api/posts";
+import { useUser } from "@clerk/clerk-react";
+import { OWNER_USER_ID } from "../config/authOwner";
 
 function mapPostFromApi(p) {
   return {
@@ -19,8 +21,6 @@ function mapPostFromApi(p) {
     isUserPost: false, views: typeof p.views === "number" ? p.views : 0
   };
 }
-
-const isAdmin = true; // temporary until real login system
 
 function useClickOutside(handler) {
   const ref = useRef();
@@ -39,6 +39,9 @@ function SingleBlogPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const { isLoaded, isSignedIn, user } = useUser();
+  const isOwner = isLoaded && isSignedIn && user?.id === OWNER_USER_ID;
+
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -46,7 +49,7 @@ function SingleBlogPage() {
   const [backendViews, setBackendViews] = useState(null);
 
   const userPosts = JSON.parse(localStorage.getItem("user_posts") || "[]");
-  const isUserPost = isAdmin || post?.isUserPost;
+  const isUserPost = isOwner || post?.isUserPost;
 
     useEffect(() => {
     let active = true;
@@ -138,6 +141,11 @@ function SingleBlogPage() {
   }
 
   async function handleUpvote() {
+    if (!isSignedIn) {
+      navigate("/sign-in");
+      return;
+    }
+
     const next = ((prev) => {
       const current = prev || { score: 0, userVote: null };
       let { score, userVote } = current;
@@ -166,6 +174,11 @@ function SingleBlogPage() {
   }
 
   async function handleDownvote() {
+    if (!isSignedIn) {
+      navigate("/sign-in");
+      return;
+    }
+
     const next = ((prev) => {
       const current = prev || { score: 0, userVote: null };
       let { score, userVote } = current;
