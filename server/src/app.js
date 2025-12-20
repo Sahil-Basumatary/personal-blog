@@ -12,7 +12,6 @@ dotenv.config();
 
 const app = express();
 
-// connect to MongoDB once at startup
 connectDB();
 
 app.use(

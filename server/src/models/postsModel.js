@@ -2,38 +2,66 @@ import mongoose from "mongoose";
 
 const postSchema = new mongoose.Schema(
   {
+    authorId: {
+      type: String,
+      required: true,
+      index: true,
+    },
+
     title: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
+
     content: {
       type: String,
-      required: true
+      required: true,
     },
+
     category: {
       type: String,
-      default: "General"
+      default: "general",
     },
+
+    categoryLabel: {
+      type: String,
+      default: "",
+    },
+
+    excerpt: {
+      type: String,
+      default: "",
+    },
+
+    slug: {
+      type: String,
+      unique: false,
+      sparse: true, 
+    },
+
     isFeatured: {
       type: Boolean,
-      default: false
+      default: false,
     },
+
     views: {
       type: Number,
-      default: 0
+      default: 0,
     },
+
     upvotes: {
       type: Number,
-      default: 0
+      default: 0,
     },
+
     downvotes: {
       type: Number,
-      default: 0
-    }
+      default: 0,
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 

@@ -2,7 +2,6 @@ import Post from "../models/postsModel.js";
 
 const OWNER_USER_ID = process.env.OWNER_USER_ID;
 
-// GET /api/posts
 export const getPosts = async (req, res) => {
   try {
     const { search, category } = req.query;
@@ -25,7 +24,6 @@ export const getPosts = async (req, res) => {
   }
 };
 
-// GET /api/posts/:id
 export const getPostById = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -37,7 +35,6 @@ export const getPostById = async (req, res) => {
   }
 };
 
-// POST /api/posts
 export const createPost = async (req, res) => {
   try {
     const authUserId = req.auth?.userId;
@@ -46,17 +43,36 @@ export const createPost = async (req, res) => {
       return res.status(403).json({ message: "Only Sahil can create posts." });
     }
 
-    const { title, content, category, isFeatured } = req.body;
+    const {
+      title,
+      content,
+      category,
+      isFeatured,
+      excerpt = "",
+      categoryLabel = "",
+    } = req.body;
 
     if (!title || !content) {
       return res.status(400).json({ message: "Title and content are required" });
     }
 
+    // simple for now, will improve later
+    const baseSlug =
+      title
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "") || undefined;
+
     const post = await Post.create({
+      authorId: authUserId,
       title,
       content,
-      category,
-      isFeatured: !!isFeatured
+      category: category || "general",
+      categoryLabel,
+      excerpt,
+      slug: baseSlug,
+      isFeatured: !!isFeatured,
     });
 
     return res.status(201).json(post);
@@ -66,34 +82,41 @@ export const createPost = async (req, res) => {
   }
 };
 
-// PUT /api/posts/:id
 export const updatePost = async (req, res) => {
   try {
     const authUserId = req.auth?.userId;
+    console.log("updatePost id:", req.params.id);
+    console.log("updatePost authUserId:", authUserId, "OWNER_USER_ID:", OWNER_USER_ID);
 
     if (!authUserId || authUserId !== OWNER_USER_ID) {
       return res.status(403).json({ message: "Only Sahil can edit posts." });
     }
 
     const { title, content, category, isFeatured } = req.body;
+    console.log("updatePost body:", { title, content, category, isFeatured });
 
-    const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ message: "Post not found" });
+    const post = await Post.findById(req.params.id).exec();
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
 
-    if (title !== undefined) post.title = title;
-    if (content !== undefined) post.content = content;
-    if (category !== undefined) post.category = category;
+    if (!post.authorId) {
+      post.authorId = OWNER_USER_ID;
+    }
+
+    if (typeof title === "string") post.title = title.trim();
+    if (typeof content === "string") post.content = content.trim();
+    if (typeof category === "string") post.category = category;
     if (typeof isFeatured === "boolean") post.isFeatured = isFeatured;
 
     const updated = await post.save();
     return res.json(updated);
   } catch (err) {
-    console.error("updatePost error:", err.message);
-    return res.status(500).json({ message: "Server error" });
+    console.error("updatePost error:", err);
+    return res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
-// DELETE /api/posts/:id
 export const deletePost = async (req, res) => {
   try {
     const authUserId = req.auth?.userId;
@@ -113,7 +136,6 @@ export const deletePost = async (req, res) => {
   }
 };
 
-// POST /api/posts/:id/view
 export const incrementViews = async (req, res) => {
   try {
     const post = await Post.findByIdAndUpdate(
@@ -129,7 +151,6 @@ export const incrementViews = async (req, res) => {
   }
 };
 
-// POST /api/posts/:id/vote
 export const votePost = async (req, res) => {
   try {
     const authUserId = req.auth?.userId;

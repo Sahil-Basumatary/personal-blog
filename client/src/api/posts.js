@@ -1,13 +1,7 @@
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5001/api";
 
-function buildHeaders(token) {
-  const headers = { "Content-Type": "application/json" };
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-  return headers;
-}
+// public routes
 
 export async function fetchPosts({ search = "", category = "" } = {}) {
   const params = new URLSearchParams();
@@ -29,44 +23,9 @@ export async function fetchPostById(id) {
   return res.json();
 }
 
-export async function createPost(payload, token) {
-  const res = await fetch(`${API_BASE_URL}/posts`, {
-    method: "POST",
-    headers: buildHeaders(token),
-    body: JSON.stringify(payload)
-  });
-  if (!res.ok) {
-    throw new Error("Failed to create post");
-  }
-  return res.json();
-}
-
-export async function updatePost(id, payload, token) {
-  const res = await fetch(`${API_BASE_URL}/posts/${id}`, {
-    method: "PUT",
-    headers: buildHeaders(token),
-    body: JSON.stringify(payload)
-  });
-  if (!res.ok) {
-    throw new Error("Failed to update post");
-  }
-  return res.json();
-}
-
-export async function deletePost(id, token) {
-  const res = await fetch(`${API_BASE_URL}/posts/${id}`, {
-    method: "DELETE",
-    headers: buildHeaders(token)
-  });
-  if (!res.ok) {
-    throw new Error("Failed to delete post");
-  }
-  return res.json();
-}
-
 export async function incrementPostViews(id) {
   const res = await fetch(`${API_BASE_URL}/posts/${id}/view`, {
-    method: "POST"
+    method: "POST",
   });
   if (!res.ok) {
     throw new Error("Failed to increment views");
@@ -74,14 +33,53 @@ export async function incrementPostViews(id) {
   return res.json();
 }
 
-export async function voteOnPost(id, direction, token) {
-  const res = await fetch(`${API_BASE_URL}/posts/${id}/vote`, {
-    method: "POST",
-    headers: buildHeaders(token),
-    body: JSON.stringify({ direction })
+// helper for protected routes
+
+async function authedJson(path, options = {}) {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    credentials: "include", 
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+    ...options,
   });
+
   if (!res.ok) {
-    throw new Error("Failed to vote on post");
+    const text = await res.text().catch(() => "");
+    throw new Error(
+      `Request failed: ${res.status} ${res.statusText} – ${text || "no body"}`
+    );
   }
+
   return res.json();
+}
+
+//protected routes
+
+export async function createPost(payload) {
+  return authedJson("/posts", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updatePost(id, payload) {
+  return authedJson(`/posts/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deletePost(id) {
+  return authedJson(`/posts/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export async function voteOnPost(id, direction) {
+  return authedJson(`/posts/${id}/vote`, {
+    method: "POST",
+    body: JSON.stringify({ direction }),
+  });
 }
