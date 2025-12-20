@@ -3,7 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
-import { ClerkExpressWithAuth } from "@clerk/express";
+import { clerkMiddleware } from "@clerk/express";
 
 import connectDB from "./db/index.js";
 import postsRouter from "./routes/posts.js";
@@ -18,7 +18,7 @@ connectDB();
 app.use(
   cors({
     origin: process.env.CLIENT_ORIGIN,
-    credentials: true
+    credentials: true,
   })
 );
 
@@ -26,10 +26,10 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
 
-// Attach Clerk auth info to every request
 app.use(
-  ClerkExpressWithAuth({
-    // TODO: optional config 
+  clerkMiddleware({
+    publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
+    secretKey: process.env.CLERK_SECRET_KEY,
   })
 );
 
@@ -39,7 +39,7 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 app.get("/", (req, res) => {
   res.send("Hello from personal-blog server");
