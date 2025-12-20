@@ -1,5 +1,4 @@
 import express from "express";
-import { ClerkExpressRequireAuth } from "@clerk/express";
 import {
   getPosts,
   getPostById,
@@ -7,7 +6,7 @@ import {
   updatePost,
   deletePost,
   incrementViews,
-  votePost
+  votePost,
 } from "../controllers/postsController.js";
 
 const router = express.Router();
@@ -18,9 +17,9 @@ router.get("/:id", getPostById);
 router.post("/:id/view", incrementViews);
 
 // Protected routes
-router.post("/", ClerkExpressRequireAuth(), createPost);
-router.put("/:id", ClerkExpressRequireAuth(), updatePost);
-router.delete("/:id", ClerkExpressRequireAuth(), deletePost);
-router.post("/:id/vote", ClerkExpressRequireAuth(), votePost);
+router.post("/", createPost);
+router.put("/:id", updatePost);
+router.delete("/:id", deletePost);
+router.post("/:id/vote", votePost);
 
 export default router;

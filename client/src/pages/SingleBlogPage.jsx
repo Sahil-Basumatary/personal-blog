@@ -4,7 +4,7 @@ import ReadingProgressBar from "../components/ReadingProgressBar";
 import "./SingleBlogPage.css";
 import { useEffect, useState, useRef } from "react";
 import { fetchPostById, incrementPostViews, voteOnPost } from "../api/posts";
-import { useUser } from "@clerk/clerk-react";
+import { useUser, useAuth } from "@clerk/clerk-react";
 import { OWNER_USER_ID } from "../config/authOwner";
 
 function mapPostFromApi(p) {
@@ -40,6 +40,7 @@ function SingleBlogPage() {
   const navigate = useNavigate();
 
   const { isLoaded, isSignedIn, user } = useUser();
+  const { getToken } = useAuth();
   const isOwner = isLoaded && isSignedIn && user?.id === OWNER_USER_ID;
 
   const [post, setPost] = useState(null);
@@ -167,7 +168,8 @@ function SingleBlogPage() {
     syncVotes(next);
 
     try {
-      await voteOnPost(id, "up");
+      const token = await getToken();
+      await voteOnPost(id, "up", token);
     } catch (err) {
       console.error("Failed to sync upvote to backend", err);
     }
@@ -200,7 +202,8 @@ function SingleBlogPage() {
     syncVotes(next);
 
     try {
-      await voteOnPost(id, "down");
+      const token = await getToken();
+      await voteOnPost(id, "down", token);
     } catch (err) {
       console.error("Failed to sync downvote to backend", err);
     }

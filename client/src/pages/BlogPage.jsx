@@ -3,7 +3,7 @@ import posts from "../data/posts";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { fetchPosts, voteOnPost} from "../api/posts";
-import { useUser } from "@clerk/clerk-react";
+import { useUser, useAuth } from "@clerk/clerk-react";
 import { OWNER_USER_ID } from "../config/authOwner";
 
 // search feat helpers
@@ -77,6 +77,7 @@ function mapPostFromApi(p) {
 
 function BlogPage() {
   const { isLoaded, isSignedIn, user } = useUser();
+  const { getToken } = useAuth(); 
   const isOwner = isLoaded && isSignedIn && user?.id === OWNER_USER_ID;
 
   const menuRef = useRef(null);
@@ -227,7 +228,8 @@ function BlogPage() {
     });
 
     try {
-      await voteOnPost(id, "up");
+      const token = await getToken();
+      await voteOnPost(id, "up", token);
     } catch (err) {
       console.error("Failed to sync upvote to backend", err);
     }
@@ -260,7 +262,8 @@ function BlogPage() {
     });
 
     try {
-      await voteOnPost(id, "down");
+      const token = await getToken();
+      await voteOnPost(id, "down", token);
     } catch (err) {
       console.error("Failed to sync downvote to backend", err);
     }

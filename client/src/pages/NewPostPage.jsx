@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./NewPostPage.css";
 import { createPost } from "../api/posts";
-import { useUser } from "@clerk/clerk-react";
+import { useUser, useAuth } from "@clerk/clerk-react";
 import { OWNER_USER_ID } from "../config/authOwner";
 
 function NewPostPage() {
   const navigate = useNavigate();
   const { user, isLoaded, isSignedIn } = useUser();
+  const { getToken } = useAuth();
 
   const isOwner = isSignedIn && user?.id === OWNER_USER_ID;
 
@@ -84,7 +85,8 @@ function NewPostPage() {
 
     try {
       // Try backend first
-      const created = await createPost(payload);
+      const token = await getToken();
+      const created = await createPost(payload, token);
 
       // Clear draft once backend succeeds
       localStorage.removeItem("new_post_draft");
