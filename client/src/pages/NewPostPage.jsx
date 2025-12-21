@@ -91,9 +91,10 @@ function NewPostPage() {
       // Clear draft once backend succeeds
       localStorage.removeItem("new_post_draft");
 
-      // If backend returns _id, go straight to that post
-      if (created && created._id) {
-        navigate(`/blog/${created._id}`);
+      // If backend returns slug or _id, go straight to that post
+      if (created && (created.slug || created._id)) {
+        const slugOrId = created.slug || created._id;
+        navigate(`/blog/${slugOrId}`);
       } else {
         navigate("/blog");
       }

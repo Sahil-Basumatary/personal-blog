@@ -96,11 +96,11 @@
 
 .subscribe-wrapper {
   width: 100%;
-  background: #1a1d24; /* clean dark background like before */
+  background: #1a1d24; 
   padding: 14px 0; 
 }
 .subscribe {
-  margin: 0 auto; /* REMOVE big margin */
+  margin: 0 auto; 
 }
 
 

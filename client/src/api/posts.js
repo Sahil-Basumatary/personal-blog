@@ -1,8 +1,6 @@
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5001/api";
 
-// public routes
-
 export async function fetchPosts({ search = "", category = "" } = {}) {
   const params = new URLSearchParams();
   if (search) params.append("search", search);
@@ -33,16 +31,20 @@ export async function incrementPostViews(id) {
   return res.json();
 }
 
-// helper for protected routes
+async function authedJson(path, options = {}, token) {
+  const headers = {
+    "Content-Type": "application/json",
+    ...(options.headers || {}),
+  };
 
-async function authedJson(path, options = {}) {
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${API_BASE_URL}${path}`, {
     credentials: "include", 
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    },
     ...options,
+    headers,
   });
 
   if (!res.ok) {
@@ -55,31 +57,29 @@ async function authedJson(path, options = {}) {
   return res.json();
 }
 
-//protected routes
-
-export async function createPost(payload) {
+export async function createPost(payload, token) {
   return authedJson("/posts", {
     method: "POST",
     body: JSON.stringify(payload),
-  });
+  }, token);
 }
 
-export async function updatePost(id, payload) {
+export async function updatePost(id, payload, token) {
   return authedJson(`/posts/${id}`, {
     method: "PUT",
     body: JSON.stringify(payload),
-  });
+  }, token);
 }
 
-export async function deletePost(id) {
+export async function deletePost(id, token) {
   return authedJson(`/posts/${id}`, {
     method: "DELETE",
-  });
+  }, token);
 }
 
-export async function voteOnPost(id, direction) {
+export async function voteOnPost(id, direction, token) {
   return authedJson(`/posts/${id}/vote`, {
     method: "POST",
     body: JSON.stringify({ direction }),
-  });
+  }, token);
 }

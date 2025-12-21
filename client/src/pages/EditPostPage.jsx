@@ -2,10 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./NewPostPage.css"; 
 import { fetchPostById, updatePost } from "../api/posts";
+import { useAuth } from "@clerk/clerk-react";
 
 function EditPostPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const { getToken } = useAuth();
+  const [slug, setSlug] = useState(null);
 
   const isOwner = true; // TODO: replace with real auth later
 
@@ -35,6 +39,7 @@ function EditPostPage() {
         setCategory(apiPost.category || "cs-journey");
         setExcerpt(apiPost.excerpt || "");
         setContent(apiPost.content || "");
+        setSlug(apiPost.slug || apiPost._id);
         setLoading(false);
       } catch (err) {
         console.error("Failed to load post from backend, falling back to local", err);
@@ -51,6 +56,7 @@ function EditPostPage() {
           setCategory(target.category || "cs-journey");
           setExcerpt(target.excerpt || "");
           setContent(target.content || "");
+          setSlug(target.slug || target.id);
         }
         setLoading(false);
       }
@@ -90,7 +96,7 @@ function EditPostPage() {
     try {
       // Try backend update
       await updatePost(id, payload);
-      navigate(`/blog/${id}`);
+      navigate(`/blog/${slug || id}`);
     } catch (err) {
       console.error("Failed to update post on backend, err:", err);
 
@@ -203,7 +209,7 @@ function EditPostPage() {
             <button
               type="button"
               className="ghost-btn"
-              onClick={() => navigate(`/blog/${id}`)}
+              onClick={() => navigate(`/blog/${slug || id}`)}
             >
               Cancel
             </button>

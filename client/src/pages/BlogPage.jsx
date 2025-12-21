@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import { fetchPosts, voteOnPost} from "../api/posts";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { OWNER_USER_ID } from "../config/authOwner";
+import UserChip from "../components/UserChip";
 
 // search feat helpers
 function tokenize(text) {
@@ -80,6 +81,9 @@ function BlogPage() {
   const { getToken } = useAuth(); 
   const isOwner = isLoaded && isSignedIn && user?.id === OWNER_USER_ID;
 
+  const makePostPath = (post) =>
+  post.slug ? `/blog/${post.slug}` : `/blog/${post.id}`;
+
   const menuRef = useRef(null);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -89,7 +93,7 @@ function BlogPage() {
     JSON.parse(localStorage.getItem("recent_searches") || "[]")
   );
 
-  const [queryInput, setQueryInput] = useState("");  // immediate typing
+  const [queryInput, setQueryInput] = useState("");  
 
   const [backendPosts, setBackendPosts] = useState([]);
   const [postsError, setPostsError] = useState(null);
@@ -331,6 +335,7 @@ function BlogPage() {
     <div className="blog-page">
       {/* HEADER */}
       <section className="blog-header">
+        <UserChip surface="light" />
         <div className="blog-header-top">
           <div>
             <Link to="/" className="home-pill">
@@ -372,7 +377,7 @@ function BlogPage() {
                     <div
                       key={post.id}
                       className="live-result-item"
-                      onClick={() => navigate(`/blog/${post.id}`)}
+                      onClick={() => navigate(makePostPath(post))}
                     >
                       <div className="live-result-title">{post.title}</div>
                       <div className="live-result-sub">
@@ -422,15 +427,17 @@ function BlogPage() {
               )}
             </div>
           </div>
-
-          {isOwner && (
-            <button
-              className="new-post-btn"
-              onClick={() => navigate("/write")}
-            >
-              + New post
-            </button>
-          )}
+          
+          <div className="blog-header-right">
+            {isOwner && (
+              <button
+                className="new-post-btn"
+                onClick={() => navigate("/write")}
+              >
+                + New post
+              </button>
+            )}
+          </div>
         </div>
       </section>
 
@@ -453,7 +460,7 @@ function BlogPage() {
 
           <button
             className="featured-button"
-            onClick={() => navigate(`/blog/${featuredPost.id}`)}
+            onClick={() => navigate(makePostPath(featuredPost))}
           >
             what's cooking →
           </button>
@@ -553,8 +560,7 @@ function BlogPage() {
                   )}
                 </div>
 
-                {/* --- Post Card Content --- */}
-                <Link to={`/blog/${post.id}`} className="post-card">
+                <Link to={makePostPath(post)} className="post-card">
                   <h4 className="post-card-title">{post.title}</h4>
                   <p className="post-card-excerpt">{finalExcerpt}</p>
 
@@ -565,7 +571,7 @@ function BlogPage() {
                   </div>
                 </Link>
 
-                {/* --- Votes --- */}
+                {/*Votes*/}
                 <div className="vote-bar-below">
                   <button
                     className={`vote-btn up ${voteInfo.userVote === "up" ? "active" : ""}`}
