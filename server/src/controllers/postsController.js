@@ -1,6 +1,19 @@
 import Post from "../models/postsModel.js";
+import mongoose from "mongoose";
 
 const OWNER_USER_ID = process.env.OWNER_USER_ID;
+
+function makeBaseSlug(title) {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function isValidObjectId(value) {
+  return mongoose.Types.ObjectId.isValid(value);
+}
 
 export const getPosts = async (req, res) => {
   try {
@@ -26,7 +39,17 @@ export const getPosts = async (req, res) => {
 
 export const getPostById = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
+    const key = req.params.id;
+    let post = null;
+
+    if (isValidObjectId(key)) {
+      post = await Post.findById(key);
+    }
+
+    if (!post) {
+      post = await Post.findOne({ slug: key });
+    }
+
     if (!post) return res.status(404).json({ message: "Post not found" });
     return res.json(post);
   } catch (err) {
@@ -53,16 +76,25 @@ export const createPost = async (req, res) => {
     } = req.body;
 
     if (!title || !content) {
-      return res.status(400).json({ message: "Title and content are required" });
+      return res
+        .status(400)
+        .json({ message: "Title and content are required" });
     }
 
-    // simple for now, will improve later
-    const baseSlug =
-      title
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, "") || undefined;
+    const baseSlug = makeBaseSlug(title);
+    let slug = baseSlug || undefined;
+
+    if (slug) {
+      let candidate = slug;
+      let counter = 2;
+
+      while (await Post.exists({ slug: candidate })) {
+        candidate = `${slug}-${counter}`;
+        counter += 1;
+      }
+
+      slug = candidate;
+    }
 
     const post = await Post.create({
       authorId: authUserId,
@@ -71,7 +103,7 @@ export const createPost = async (req, res) => {
       category: category || "general",
       categoryLabel,
       excerpt,
-      slug: baseSlug,
+      slug,
       isFeatured: !!isFeatured,
     });
 
@@ -85,8 +117,15 @@ export const createPost = async (req, res) => {
 export const updatePost = async (req, res) => {
   try {
     const authUserId = req.auth?.userId;
-    console.log("updatePost id:", req.params.id);
-    console.log("updatePost authUserId:", authUserId, "OWNER_USER_ID:", OWNER_USER_ID);
+    const key = req.params.id;
+
+    console.log("updatePost id/slug:", key);
+    console.log(
+      "updatePost authUserId:",
+      authUserId,
+      "OWNER_USER_ID:",
+      OWNER_USER_ID
+    );
 
     if (!authUserId || authUserId !== OWNER_USER_ID) {
       return res.status(403).json({ message: "Only Sahil can edit posts." });
@@ -95,7 +134,15 @@ export const updatePost = async (req, res) => {
     const { title, content, category, isFeatured } = req.body;
     console.log("updatePost body:", { title, content, category, isFeatured });
 
-    const post = await Post.findById(req.params.id).exec();
+    let post = null;
+
+    if (isValidObjectId(key)) {
+      post = await Post.findById(key).exec();
+    }
+    if (!post) {
+      post = await Post.findOne({ slug: key }).exec();
+    }
+
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
@@ -113,19 +160,30 @@ export const updatePost = async (req, res) => {
     return res.json(updated);
   } catch (err) {
     console.error("updatePost error:", err);
-    return res.status(500).json({ message: "Server error", error: err.message });
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
   }
 };
 
 export const deletePost = async (req, res) => {
   try {
     const authUserId = req.auth?.userId;
+    const key = req.params.id;
 
     if (!authUserId || authUserId !== OWNER_USER_ID) {
       return res.status(403).json({ message: "Only Sahil can delete posts." });
     }
 
-    const post = await Post.findById(req.params.id);
+    let post = null;
+
+    if (isValidObjectId(key)) {
+      post = await Post.findById(key);
+    }
+    if (!post) {
+      post = await Post.findOne({ slug: key });
+    }
+
     if (!post) return res.status(404).json({ message: "Post not found" });
 
     await post.deleteOne();
@@ -138,11 +196,25 @@ export const deletePost = async (req, res) => {
 
 export const incrementViews = async (req, res) => {
   try {
-    const post = await Post.findByIdAndUpdate(
-      req.params.id,
-      { $inc: { views: 1 } },
-      { new: true }
-    );
+    const key = req.params.id;
+    let post = null;
+
+    if (isValidObjectId(key)) {
+      post = await Post.findByIdAndUpdate(
+        key,
+        { $inc: { views: 1 } },
+        { new: true }
+      );
+    }
+
+    if (!post) {
+      post = await Post.findOneAndUpdate(
+        { slug: key },
+        { $inc: { views: 1 } },
+        { new: true }
+      );
+    }
+
     if (!post) return res.status(404).json({ message: "Post not found" });
     return res.json(post);
   } catch (err) {
@@ -160,15 +232,25 @@ export const votePost = async (req, res) => {
 
     const { direction } = req.body;
     if (!["up", "down"].includes(direction)) {
-      return res.status(400).json({ message: "direction must be 'up' or 'down'" });
+      return res
+        .status(400)
+        .json({ message: "direction must be 'up' or 'down'" });
     }
 
+    const key = req.params.id;
     const update =
-      direction === "up" ? { $inc: { upvotes: 1 } } : { $inc: { downvotes: 1 } };
+      direction === "up"
+        ? { $inc: { upvotes: 1 } }
+        : { $inc: { downvotes: 1 } };
 
-    const post = await Post.findByIdAndUpdate(req.params.id, update, {
-      new: true
-    });
+    let post = null;
+
+    if (isValidObjectId(key)) {
+      post = await Post.findByIdAndUpdate(key, update, { new: true });
+    }
+    if (!post) {
+      post = await Post.findOneAndUpdate({ slug: key }, update, { new: true });
+    }
 
     if (!post) return res.status(404).json({ message: "Post not found" });
 

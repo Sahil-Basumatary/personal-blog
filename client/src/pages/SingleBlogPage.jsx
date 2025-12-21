@@ -70,7 +70,9 @@ function SingleBlogPage() {
         if (!active) return;
 
         const allPosts = [...userPosts, ...posts];
-        const localPost = allPosts.find((p) => String(p.id) === String(id));
+        const localPost = allPosts.find(
+          (p) => String(p.id) === String(id) || p.slug === id
+        );
 
         if (localPost) {
           setPost(localPost);

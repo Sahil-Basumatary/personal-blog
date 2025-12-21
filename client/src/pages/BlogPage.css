@@ -328,13 +328,35 @@
   padding: 8px 4px;          
 }
 
+.blog-header {
+  position: relative;
+}
+
+.blog-header > .user-chip--light {
+  position: absolute;
+  top: 0;   
+  right: 0; 
+}
+
 .blog-header-top {
   display: flex;
-  align-items: flex-end; 
+  align-items: center; 
   justify-content: space-between;
   margin-bottom: 2rem;
-  padding-right: 4px; 
 }
+
+.blog-header-right {
+  display: flex;
+  justify-content: flex-end;   
+  align-items: flex-start;
+  margin-left: auto;           
+  padding-right: 0;           
+}
+
+.blog-header-right .new-post-btn {
+  margin-top: 38px; 
+}
+
 
 .blog-title {
   margin: 0;
@@ -402,7 +424,6 @@
   transform: translateY(-1px);
 }
 
-/* === SEARCH BAR === */
 .search-container {
   position: relative;
   width: 100%;
@@ -434,7 +455,6 @@
   background: rgba(255, 255, 255, 0.75);
 }
 
-/* === RECENT SEARCH DROPDOWN (Spotlight style) === */
 .recent-dropdown {
   position: absolute;
   top: 54px;
@@ -510,7 +530,6 @@
   letter-spacing: -0.2px;
 }
 
-/* --- Live Search Dropdown --- */
 .live-dropdown {
   position: absolute;
   margin-top: 8px;
@@ -547,7 +566,6 @@
   margin-top: 2px;
 }
 
-/* bottom "view all" button */
 .live-view-all {
   padding: 10px 14px;
   font-size: 0.85rem;
@@ -560,7 +578,6 @@
   background: rgba(235, 240, 255, 0.5);
 }
 
-/* THREE DOTS BUTTON */
 .three-dots-wrapper {
   position: relative;
 }
@@ -590,7 +607,6 @@
   transform: translateY(-1px);
 }
 
-/* MENU */
 .action-menu {
   position: absolute;
   top: 42px;
@@ -623,7 +639,6 @@
   }
 }
 
-/* MENU ITEM */
 .action-item {
   padding: 10px 14px;
   display: flex;
@@ -645,7 +660,6 @@
   flex-shrink: 0;
 }
 
-/* DELETE ITEM */
 .action-item.delete {
   color: #d33;
 }
@@ -654,7 +668,6 @@
   background: rgba(255, 0, 0, 0.08);
 }
 
-/* DIVIDER */
 .divider {
   height: 1px;
   background: rgba(0,0,0,0.08);

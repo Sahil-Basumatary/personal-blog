@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { OWNER_USER_ID } from "../config/authOwner";
+import UserChip from "./UserChip";
 
 function HeroSection() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -13,14 +14,19 @@ function HeroSection() {
   return (
     <header className="hero hero-hybrid">
       <nav className="navbar hero-nav">
-        <h1 className="logo">Sahil's Blog</h1>
+        <h1 className="logo">Sahil&apos;s Blog</h1>
 
         <div className="nav-links desktop-nav">
-          <a href="/blog">Blog</a>
-          <a href="#" className="nav-item">About</a>
+          <a href="/blog" className="nav-item">
+            Blog
+          </a>
+          <a href="#" className="nav-item">
+            About
+          </a>
           <a
             href="https://www.linkedin.com/in/sahil-basumatary/"
             target="_blank"
+            rel="noreferrer"
             className="nav-item"
           >
             LinkedIn
@@ -31,6 +37,8 @@ function HeroSection() {
               Write
             </Link>
           )}
+
+          <UserChip />
         </div>
 
         <div
@@ -44,10 +52,13 @@ function HeroSection() {
       </nav>
 
       <div className={`mobile-menu ${menuOpen ? "show" : ""}`}>
-        <a href="#" onClick={() => setMenuOpen(false)}>About</a>
+        <a href="#" onClick={() => setMenuOpen(false)}>
+          About
+        </a>
         <a
           href="https://www.linkedin.com/in/sahil-basumatary/"
           target="_blank"
+          rel="noreferrer"
           onClick={() => setMenuOpen(false)}
         >
           LinkedIn
@@ -63,7 +74,10 @@ function HeroSection() {
             experiences, unique catches and just learn what I have learned!
           </p>
 
-          <button className="hero-btn" onClick={() => window.location.href="/blog"}>
+          <button
+            className="hero-btn"
+            onClick={() => (window.location.href = "/blog")}
+          >
             Start Reading
           </button>
         </div>

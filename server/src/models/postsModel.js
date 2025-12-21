@@ -36,7 +36,7 @@ const postSchema = new mongoose.Schema(
 
     slug: {
       type: String,
-      unique: false,
+      unique: true,
       sparse: true, 
     },
 
@@ -64,6 +64,8 @@ const postSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+postSchema.index({ slug: 1 }, { unique: true, sparse: true });
 
 const Post = mongoose.model("Post", postSchema);
 
