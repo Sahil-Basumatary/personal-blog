@@ -29,8 +29,29 @@ export const getPosts = async (req, res) => {
       query.category = category;
     }
 
-    const posts = await Post.find(query).sort({ createdAt: -1 });
-    return res.json(posts);
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limitRaw = parseInt(req.query.limit, 10);
+    const limit = Math.min(Math.max(limitRaw || 10, 1), 50); 
+
+    const skip = (page - 1) * limit;
+
+    const [items, total] = await Promise.all([
+      Post.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Post.countDocuments(query),
+    ]);
+
+    const totalPages = Math.max(Math.ceil(total / limit) || 1, 1);
+
+    return res.json({
+      items,
+      total,
+      page,
+      pageSize: limit,
+      totalPages,
+    });
   } catch (err) {
     console.error("getPosts error:", err.message);
     return res.status(500).json({ message: "Server error" });
