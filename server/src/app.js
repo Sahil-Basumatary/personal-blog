@@ -5,14 +5,11 @@ import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import { clerkMiddleware } from "@clerk/express";
 
-import connectDB from "./db/index.js";
 import postsRouter from "./routes/posts.js";
 
 dotenv.config();
 
 const app = express();
-
-connectDB();
 
 app.use(
   cors({
@@ -38,12 +35,8 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-const PORT = process.env.PORT || 5001;
-
 app.get("/", (req, res) => {
   res.send("Hello from personal-blog server");
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+export default app;

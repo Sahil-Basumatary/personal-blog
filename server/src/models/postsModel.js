@@ -65,8 +65,6 @@ const postSchema = new mongoose.Schema(
   }
 );
 
-postSchema.index({ slug: 1 }, { unique: true, sparse: true });
-
 const Post = mongoose.model("Post", postSchema);
 
 export default Post;
