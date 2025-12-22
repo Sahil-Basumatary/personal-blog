@@ -62,9 +62,11 @@ function debounce(fn, delay) {
 }
 
 function mapPostFromApi(p) {
+  const slugOrId = p.slug || p._id;
+
   return {
-    id: p._id,
-    slug: p.slug || p._id,
+    id: slugOrId,                   
+    slug: slugOrId,                  
     title: p.title,
     content: p.content || "",
     category: p.category || "general",
@@ -72,7 +74,8 @@ function mapPostFromApi(p) {
     date: p.date || p.createdAt || new Date().toISOString(),
     featured: p.isFeatured,
     excerpt: p.excerpt || "",
-    isUserPost: false, views: typeof p.views === "number" ? p.views : 0
+    isUserPost: false,
+    views: typeof p.views === "number" ? p.views : 0,
   };
 }
 
@@ -80,6 +83,11 @@ function BlogPage() {
   const { isLoaded, isSignedIn, user } = useUser();
   const { getToken } = useAuth(); 
   const isOwner = isLoaded && isSignedIn && user?.id === OWNER_USER_ID;
+
+  const PAGE_SIZE = 5;
+
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const makePostPath = (post) =>
   post.slug ? `/blog/${post.slug}` : `/blog/${post.id}`;
@@ -110,31 +118,40 @@ function BlogPage() {
   }, []);
 
     useEffect(() => {
-    let active = true;
+      let active = true;
 
-    async function loadPosts() {
-      try {
-        const apiPosts = await fetchPosts();
-        if (!active) return;
-        const mapped = apiPosts.map(mapPostFromApi);
-        setBackendPosts(mapped);
-      } catch (err) {
-        console.error("Failed to fetch posts from backend", err);
-        if (active) setPostsError("Failed to load posts from server");
+      async function loadPosts() {
+        try {
+          const apiResult = await fetchPosts({ page, limit: PAGE_SIZE });
+          if (!active) return;
+
+          const mapped = (apiResult.items || []).map(mapPostFromApi);
+          setBackendPosts(mapped);
+          setPostsError(null);
+
+          if (typeof apiResult.totalPages === "number") {
+            setTotalPages(apiResult.totalPages || 1);
+          } else {
+            setTotalPages(1);
+          }
+        } catch (err) {
+          console.error("Failed to fetch posts from backend", err);
+          if (active) setPostsError("Failed to load posts from server");
+          setBackendPosts([]); 
+        }
       }
-    }
 
-    loadPosts();
-    return () => {
-      active = false;
-    };
-  }, []);
+      loadPosts();
+      return () => {
+        active = false;
+      };
+    }, [page]);
 
   function saveRecent(term) {
     if (!term.trim()) return;
 
     let updated = [term, ...recentSearches.filter((t) => t !== term)];
-    updated = updated.slice(0, 5); // max 5
+    updated = updated.slice(0, 5); 
 
     setRecentSearches(updated);
     localStorage.setItem("recent_searches", JSON.stringify(updated));
@@ -146,15 +163,14 @@ function BlogPage() {
     localStorage.setItem("recent_searches", JSON.stringify(updated));
   }
 
-  const userPosts = JSON.parse(localStorage.getItem("user_posts") || "[]");
-
-  const sourcePosts =
-    backendPosts.length > 0 ? backendPosts : posts;
-  const allPosts = [...userPosts, ...sourcePosts];
-
   const categoryFilter = searchParams.get("category");
 
-  const featuredPost = allPosts.find((post) => post.featured);
+  const allPosts = backendPosts;
+
+  const featuredPost =
+    !categoryFilter && !query.trim()
+      ? allPosts.find((post) => post.featured)
+      : null;
 
   const basePosts = categoryFilter
     ? allPosts.filter((p) => p.category === categoryFilter)
@@ -602,6 +618,30 @@ function BlogPage() {
               </div>
             );
           })}
+
+          {!query.trim() && totalPages > 1 && (
+            <div className="pagination">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                ← Previous
+              </button>
+
+              <span className="pagination-info">
+                Page {page} of {totalPages}
+              </span>
+
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
+                Next →
+              </button>
+            </div>
+          )}
         </div>
       </section>
     </div>

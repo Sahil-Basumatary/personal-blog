@@ -1,10 +1,17 @@
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5001/api";
 
-export async function fetchPosts({ search = "", category = "" } = {}) {
+export async function fetchPosts({
+  search = "",
+  category = "",
+  page = 1,
+  limit = 10,
+} = {}) {
   const params = new URLSearchParams();
   if (search) params.append("search", search);
   if (category) params.append("category", category);
+  params.append("page", String(page));
+  params.append("limit", String(limit));
 
   const res = await fetch(`${API_BASE_URL}/posts?${params.toString()}`);
   if (!res.ok) {
