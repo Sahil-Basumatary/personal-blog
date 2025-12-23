@@ -18,7 +18,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  // tidy posts up for clean run for my eyes
+  // tidy posts up for clean run easy for my eyes
   await Post.deleteMany({});
 });
 
@@ -68,7 +68,7 @@ describe("GET /api/posts with pagination", () => {
     });
 
     const createdAt = res.body.items.map((p) =>
-    new Date(p.createdAt).getTime()
+      new Date(p.createdAt).getTime()
     );
     const sorted = [...createdAt].sort((a, b) => b - a);
     expect(createdAt).toEqual(sorted);
@@ -105,5 +105,100 @@ describe("GET /api/posts search and category", () => {
     expect(res.body.items[0].title).toBe(
       "Life in London as a CS Student"
     );
+  });
+});
+
+describe("GET /api/posts/:id or slug", () => {
+  it("returns a single post by ObjectId", async () => {
+    const created = await Post.create({
+      authorId: "test-author",
+      title: "Fetch by ID",
+      content: "Body",
+      category: "test",
+      categoryLabel: "Test",
+      excerpt: "Excerpt",
+    });
+
+    const res = await request(app).get(`/api/posts/${created._id.toString()}`);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body._id).toBe(created._id.toString());
+    expect(res.body.title).toBe("Fetch by ID");
+  });
+
+  it("returns a single post by slug when id is not an ObjectId", async () => {
+    const created = await Post.create({
+      authorId: "test-author",
+      title: "Fetch by Slug",
+      content: "Body",
+      category: "test",
+      categoryLabel: "Test",
+      excerpt: "Excerpt",
+      slug: "fetch-by-slug-test",
+    });
+
+    const res = await request(app).get(`/api/posts/${created.slug}`);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.slug).toBe("fetch-by-slug-test");
+    expect(res.body.title).toBe("Fetch by Slug");
+  });
+
+  it("returns 404 for a missing post", async () => {
+    const res = await request(app).get("/api/posts/this-slug-does-not-exist");
+    expect(res.statusCode).toBe(404);
+  });
+});
+
+describe("POST /api/posts/:id/view", () => {
+  it("increments views when using ObjectId", async () => {
+    const created = await Post.create({
+      authorId: "test-author",
+      title: "View by ID",
+      content: "Body",
+      category: "test",
+      categoryLabel: "Test",
+      excerpt: "Excerpt",
+      views: 0,
+    });
+
+    const res1 = await request(app).post(
+      `/api/posts/${created._id.toString()}/view`
+    );
+
+    expect(res1.statusCode).toBe(200);
+    expect(res1.body.views).toBe(1);
+
+    const res2 = await request(app).post(
+      `/api/posts/${created._id.toString()}/view`
+    );
+
+    expect(res2.statusCode).toBe(200);
+    expect(res2.body.views).toBe(2);
+  });
+
+  it("increments views when using slug", async () => {
+    const created = await Post.create({
+      authorId: "test-author",
+      title: "View by Slug",
+      content: "Body",
+      category: "test",
+      categoryLabel: "Test",
+      excerpt: "Excerpt",
+      views: 5,
+      slug: "view-by-slug-test",
+    });
+
+    const res = await request(app).post(
+      `/api/posts/${created.slug}/view`
+    );
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.views).toBe(6);
+  });
+
+  it("returns 404 for unknown id/slug", async () => {
+    const res = await request(app).post("/api/posts/unknown-slug/view");
+    expect(res.statusCode).toBe(404);
   });
 });
