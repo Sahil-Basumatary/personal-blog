@@ -22,12 +22,24 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
 
-app.use(
-  clerkMiddleware({
-    publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
-    secretKey: process.env.CLERK_SECRET_KEY,
-  })
-);
+if (process.env.NODE_ENV === "test") {
+  app.use((req, _res, next) => {
+    const testUserId = req.header("x-test-user-id");
+    if (testUserId) {
+      req.auth = { userId: testUserId };
+    } else {
+      req.auth = undefined;
+    }
+    next();
+  });
+} else {
+  app.use(
+    clerkMiddleware({
+      publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
+      secretKey: process.env.CLERK_SECRET_KEY,
+    })
+  );
+}
 
 app.use("/api/posts", postsRouter);
 

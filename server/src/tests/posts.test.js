@@ -2,16 +2,52 @@ import { jest } from "@jest/globals";
 import request from "supertest";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
-
-import app from "../app.js";
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import morgan from "morgan";
+import postsRouter from "../routes/posts.js";
 import connectDB from "../db/index.js";
 import Post from "../models/postsModel.js";
 
+const TEST_OWNER_ID = "test-owner-id";
+
 jest.setTimeout(30000);
+
+function createTestApp() {
+  const app = express();
+
+  app.use(cors());
+  app.use(express.json());
+  app.use(cookieParser());
+  app.use(morgan("dev"));
+  app.use((req, _res, next) => {
+    const testUserId = req.header("x-test-user-id");
+    if (testUserId) {
+      req.auth = { userId: testUserId };
+    }
+    next();
+  });
+
+  app.use("/api/posts", postsRouter);
+
+  app.get("/api/health", (_req, res) => {
+    res.json({ status: "ok" });
+  });
+
+  app.get("/", (_req, res) => {
+    res.send("Hello from personal-blog test server");
+  });
+
+  return app;
+}
+
+const app = createTestApp();
 
 let mongoServer;
 
 beforeAll(async () => {
+  process.env.OWNER_USER_ID = TEST_OWNER_ID;
   mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
   await connectDB(uri, { isTest: true });
@@ -200,5 +236,72 @@ describe("POST /api/posts/:id/view", () => {
   it("returns 404 for unknown id/slug", async () => {
     const res = await request(app).post("/api/posts/unknown-slug/view");
     expect(res.statusCode).toBe(404);
+  });
+});
+
+describe("POST /api/posts auth and validation", () => {
+  it("rejects unauthenticated create with 403", async () => {
+    const res = await request(app)
+      .post("/api/posts")
+      .send({
+        title: "No auth post",
+        content: "No auth content",
+        category: "test",
+      });
+
+    expect(res.statusCode).toBe(403);
+    expect(res.body.message).toBe("Only Sahil can create posts.");
+  });
+
+  it("rejects create when user is not owner", async () => {
+    const res = await request(app)
+      .post("/api/posts")
+      .set("x-test-user-id", "some-other-user")
+      .send({
+        title: "Not owner",
+        content: "Should be rejected",
+        category: "test",
+      });
+
+    expect(res.statusCode).toBe(403);
+    expect(res.body.message).toBe("Only Sahil can create posts.");
+  });
+
+  it("rejects missing title/content with 400", async () => {
+    const res = await request(app)
+      .post("/api/posts")
+      .set("x-test-user-id", TEST_OWNER_ID)
+      .send({
+        title: "",
+        content: "",
+        category: "test",
+      });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toBe("Title and content are required");
+  });
+
+  it("creates a post when user is owner and data is valid", async () => {
+    const res = await request(app)
+      .post("/api/posts")
+      .set("x-test-user-id", TEST_OWNER_ID)
+      .send({
+        title: "My New Test Post",
+        content: "Some content for my post",
+        category: "test",
+        categoryLabel: "Test",
+        excerpt: "Some content for my post",
+        isFeatured: true,
+      });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.title).toBe("My New Test Post");
+    expect(res.body.authorId).toBe(TEST_OWNER_ID);
+    expect(res.body.isFeatured).toBe(true);
+    expect(res.body.slug).toBe("my-new-test-post");
+
+    const inDb = await Post.findById(res.body._id);
+    expect(inDb).not.toBeNull();
+    expect(inDb.title).toBe("My New Test Post");
   });
 });

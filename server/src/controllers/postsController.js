@@ -1,7 +1,12 @@
 import Post from "../models/postsModel.js";
 import mongoose from "mongoose";
 
-const OWNER_USER_ID = process.env.OWNER_USER_ID;
+function resolveOwnerUserId() {
+  if (process.env.NODE_ENV === "test") {
+    return process.env.OWNER_USER_ID || "test-owner-id";
+  }
+  return process.env.OWNER_USER_ID;
+}
 
 function makeBaseSlug(title) {
   return title
@@ -82,8 +87,9 @@ export const getPostById = async (req, res) => {
 export const createPost = async (req, res) => {
   try {
     const authUserId = req.auth?.userId;
+    const ownerId = resolveOwnerUserId();
 
-    if (!authUserId || authUserId !== OWNER_USER_ID) {
+    if (!authUserId || authUserId !== ownerId) {
       return res.status(403).json({ message: "Only Sahil can create posts." });
     }
 
@@ -138,6 +144,7 @@ export const createPost = async (req, res) => {
 export const updatePost = async (req, res) => {
   try {
     const authUserId = req.auth?.userId;
+    const ownerId = resolveOwnerUserId();
     const key = req.params.id;
 
     console.log("updatePost id/slug:", key);
@@ -145,10 +152,10 @@ export const updatePost = async (req, res) => {
       "updatePost authUserId:",
       authUserId,
       "OWNER_USER_ID:",
-      OWNER_USER_ID
+      ownerId
     );
 
-    if (!authUserId || authUserId !== OWNER_USER_ID) {
+    if (!authUserId || authUserId !== ownerId) {
       return res.status(403).json({ message: "Only Sahil can edit posts." });
     }
 
@@ -190,9 +197,10 @@ export const updatePost = async (req, res) => {
 export const deletePost = async (req, res) => {
   try {
     const authUserId = req.auth?.userId;
+    const ownerId = resolveOwnerUserId();
     const key = req.params.id;
 
-    if (!authUserId || authUserId !== OWNER_USER_ID) {
+    if (!authUserId || authUserId !== ownerId) {
       return res.status(403).json({ message: "Only Sahil can delete posts." });
     }
 
