@@ -1,8 +1,7 @@
 import "./BlogPage.css";
-import posts from "../data/posts";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
-import { fetchPosts, voteOnPost} from "../api/posts";
+import { fetchPosts, voteOnPost, deletePost} from "../api/posts";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { OWNER_USER_ID } from "../config/authOwner";
 import UserChip from "../components/UserChip";
@@ -331,20 +330,25 @@ function BlogPage() {
 
   const [menuOpenFor, setMenuOpenFor] = useState(null);
 
-  function handleDeleteFromList(deleteId) {
+  async function handleDeleteFromList(deleteId) {
     const ok = window.confirm("Are you sure you want to delete this post?");
     if (!ok) return;
 
-    const existing = JSON.parse(localStorage.getItem("user_posts") || "[]");
-    const updated = existing.filter((p) => String(p.id) !== String(deleteId));
-    localStorage.setItem("user_posts", JSON.stringify(updated));
+    try {
+      const token = await getToken();
+      await deletePost(deleteId, token);
 
-    // remove votes too
-    const votes = JSON.parse(localStorage.getItem("post_votes") || "{}");
-    delete votes[deleteId];
-    localStorage.setItem("post_votes", JSON.stringify(votes));
+      setBackendPosts((prev) =>
+        prev.filter((p) => String(p.id) !== String(deleteId))
+      );
 
-    window.location.reload(); // refresh list
+      const votes = JSON.parse(localStorage.getItem("post_votes") || "{}");
+      delete votes[deleteId];
+      localStorage.setItem("post_votes", JSON.stringify(votes));
+    } catch (err) {
+      console.error("Failed to delete post on backend", err);
+      alert("Failed to delete post. Please try again.");
+    }
   }
 
   return (

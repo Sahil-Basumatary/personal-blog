@@ -73,7 +73,6 @@ function NewPostPage() {
         ? "Motivation"
         : "Tools & Resources";
 
-    // Shape to send to backend
     const payload = {
       title: title.trim(),
       content: content.trim(),
@@ -84,7 +83,6 @@ function NewPostPage() {
     };
 
     try {
-      // Try backend first
       const token = await getToken();
       const created = await createPost(payload, token);
 
@@ -99,26 +97,10 @@ function NewPostPage() {
         navigate("/blog");
       }
     } catch (err) {
-      console.error("Failed to create post on backend, falling back to local", err);
-      
-      // Fallback: Save to localStorage
-      const localPost = {
-        id: Date.now(),
-        title,
-        category,
-        categoryLabel,
-        excerpt: finalExcerpt,
-        content,
-        date: new Date().toISOString(),
-        featured: false,
-        isUserPost: true,
-      };
-
-      const existing = JSON.parse(localStorage.getItem("user_posts") || "[]");
-      localStorage.setItem("user_posts", JSON.stringify([...existing, localPost]));
-
-      localStorage.removeItem("new_post_draft");
-      navigate("/blog");
+      console.error("Failed to create post on backend", err);
+      alert(
+        "Failed to publish post. Your draft is saved locally — please try again later."
+      );
     }
   }
 

@@ -305,3 +305,226 @@ describe("POST /api/posts auth and validation", () => {
     expect(inDb.title).toBe("My New Test Post");
   });
 });
+
+describe("PUT /api/posts/:id (updatePost)", () => {
+  it("rejects unauthenticated update with 403", async () => {
+    const created = await Post.create({
+      authorId: TEST_OWNER_ID,
+      title: "Original title",
+      content: "Original content",
+      category: "test",
+      categoryLabel: "Test",
+      excerpt: "Original excerpt",
+    });
+
+    const res = await request(app)
+      .put(`/api/posts/${created._id.toString()}`)
+      .send({
+        title: "Updated title",
+      });
+
+    expect(res.statusCode).toBe(403);
+    expect(res.body.message).toBe("Only Sahil can edit posts.");
+  });
+
+  it("rejects non-owner update with 403", async () => {
+    const created = await Post.create({
+      authorId: TEST_OWNER_ID,
+      title: "Original title",
+      content: "Original content",
+      category: "test",
+      categoryLabel: "Test",
+      excerpt: "Original excerpt",
+    });
+
+    const res = await request(app)
+      .put(`/api/posts/${created._id.toString()}`)
+      .set("x-test-user-id", "some-other-user")
+      .send({
+        title: "Updated title",
+      });
+
+    expect(res.statusCode).toBe(403);
+    expect(res.body.message).toBe("Only Sahil can edit posts.");
+  });
+
+  it("allows owner to update fields and persists changes", async () => {
+    const created = await Post.create({
+      authorId: TEST_OWNER_ID,
+      title: "Original title",
+      content: "Original content",
+      category: "test",
+      categoryLabel: "Test",
+      excerpt: "Original excerpt",
+      isFeatured: false,
+    });
+
+    const res = await request(app)
+      .put(`/api/posts/${created._id.toString()}`)
+      .set("x-test-user-id", TEST_OWNER_ID)
+      .send({
+        title: "Updated title",
+        content: "Updated content",
+        isFeatured: true,
+      });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.title).toBe("Updated title");
+    expect(res.body.content).toBe("Updated content");
+    expect(res.body.isFeatured).toBe(true);
+
+    const inDb = await Post.findById(created._id);
+    expect(inDb).not.toBeNull();
+    expect(inDb.title).toBe("Updated title");
+    expect(inDb.isFeatured).toBe(true);
+  });
+});
+
+describe("DELETE /api/posts/:id (deletePost)", () => {
+  it("rejects unauthenticated delete with 403", async () => {
+    const created = await Post.create({
+      authorId: TEST_OWNER_ID,
+      title: "To be deleted",
+      content: "Body",
+      category: "test",
+      categoryLabel: "Test",
+      excerpt: "Excerpt",
+    });
+
+    const res = await request(app)
+      .delete(`/api/posts/${created._id.toString()}`);
+
+    expect(res.statusCode).toBe(403);
+    expect(res.body.message).toBe("Only Sahil can delete posts.");
+  });
+
+  it("rejects non-owner delete with 403", async () => {
+    const created = await Post.create({
+      authorId: TEST_OWNER_ID,
+      title: "To be deleted",
+      content: "Body",
+      category: "test",
+      categoryLabel: "Test",
+      excerpt: "Excerpt",
+    });
+
+    const res = await request(app)
+      .delete(`/api/posts/${created._id.toString()}`)
+      .set("x-test-user-id", "some-other-user");
+
+    expect(res.statusCode).toBe(403);
+    expect(res.body.message).toBe("Only Sahil can delete posts.");
+  });
+
+  it("allows owner to delete and removes the post from DB", async () => {
+    const created = await Post.create({
+      authorId: TEST_OWNER_ID,
+      title: "To be deleted",
+      content: "Body",
+      category: "test",
+      categoryLabel: "Test",
+      excerpt: "Excerpt",
+    });
+
+    const res = await request(app)
+      .delete(`/api/posts/${created._id.toString()}`)
+      .set("x-test-user-id", TEST_OWNER_ID);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.message).toBe("Post removed");
+
+    const inDb = await Post.findById(created._id);
+    expect(inDb).toBeNull();
+  });
+});
+
+describe("POST /api/posts/:id/vote (votePost)", () => {
+  it("requires auth and returns 401 when unauthenticated", async () => {
+    const created = await Post.create({
+      authorId: TEST_OWNER_ID,
+      title: "Vote target",
+      content: "Body",
+      category: "test",
+      categoryLabel: "Test",
+      excerpt: "Excerpt",
+    });
+
+    const res = await request(app)
+      .post(`/api/posts/${created._id.toString()}/vote`)
+      .send({ direction: "up" });
+
+    expect(res.statusCode).toBe(401);
+    expect(res.body.message).toBe("Login required to vote.");
+  });
+
+  it("returns 400 for invalid direction", async () => {
+    const created = await Post.create({
+      authorId: TEST_OWNER_ID,
+      title: "Vote target",
+      content: "Body",
+      category: "test",
+      categoryLabel: "Test",
+      excerpt: "Excerpt",
+    });
+
+    const res = await request(app)
+      .post(`/api/posts/${created._id.toString()}/vote`)
+      .set("x-test-user-id", "voter-1")
+      .send({ direction: "sideways" });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toBe("direction must be 'up' or 'down'");
+  });
+
+  it("increments upvotes when direction is 'up'", async () => {
+    const created = await Post.create({
+      authorId: TEST_OWNER_ID,
+      title: "Vote target",
+      content: "Body",
+      category: "test",
+      categoryLabel: "Test",
+      excerpt: "Excerpt",
+      upvotes: 0,
+      downvotes: 0,
+    });
+
+    const res = await request(app)
+      .post(`/api/posts/${created._id.toString()}/vote`)
+      .set("x-test-user-id", "voter-1")
+      .send({ direction: "up" });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.upvotes).toBe(1);
+    expect(res.body.downvotes).toBe(0);
+
+    const inDb = await Post.findById(created._id);
+    expect(inDb.upvotes).toBe(1);
+    expect(inDb.downvotes).toBe(0);
+  });
+
+  it("increments downvotes when direction is 'down'", async () => {
+    const created = await Post.create({
+      authorId: TEST_OWNER_ID,
+      title: "Vote target",
+      content: "Body",
+      category: "test",
+      categoryLabel: "Test",
+      excerpt: "Excerpt",
+      upvotes: 3,
+      downvotes: 1,
+    });
+
+    const res = await request(app)
+      .post(`/api/posts/${created._id.toString()}/vote`)
+      .set("x-test-user-id", "voter-2")
+      .send({ direction: "down" });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.upvotes).toBe(3);
+    expect(res.body.downvotes).toBe(2);
+
+    const inDb = await Post.findById(created._id);
+    expect(inDb.upvotes).toBe(3);
+    expect(inDb.downvotes).toBe(2);
+  });
+});

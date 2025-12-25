@@ -2,16 +2,18 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./NewPostPage.css"; 
 import { fetchPostById, updatePost } from "../api/posts";
-import { useAuth } from "@clerk/clerk-react";
+import { useUser, useAuth } from "@clerk/clerk-react";
+import { OWNER_USER_ID } from "../config/authOwner";  
 
 function EditPostPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user, isLoaded, isSignedIn } = useUser();
 
   const { getToken } = useAuth();
   const [slug, setSlug] = useState(null);
 
-  const isOwner = true; // TODO: replace with real auth later
+  const isOwner = isLoaded && isSignedIn && user?.id === OWNER_USER_ID;
 
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -21,52 +23,41 @@ function EditPostPage() {
   const [excerpt, setExcerpt] = useState("");
   const [content, setContent] = useState("");
 
-  useEffect(() => {
-    if (!isOwner) {
-      navigate("/");
-      return;
-    }
+    useEffect(() => {
+      if (!isLoaded) return;
 
-    let active = true;
-
-    async function loadPost() {
-      try {
-        // Try backend first
-        const apiPost = await fetchPostById(id);
-        if (!active) return;
-
-        setTitle(apiPost.title || "");
-        setCategory(apiPost.category || "cs-journey");
-        setExcerpt(apiPost.excerpt || "");
-        setContent(apiPost.content || "");
-        setSlug(apiPost.slug || apiPost._id);
-        setLoading(false);
-      } catch (err) {
-        console.error("Failed to load post from backend, falling back to local", err);
-        if (!active) return;
-
-        // Fallback: local user_posts 
-        const existing = JSON.parse(localStorage.getItem("user_posts") || "[]");
-        const target = existing.find((p) => String(p.id) === String(id));
-
-        if (!target) {
-          setNotFound(true);
-        } else {
-          setTitle(target.title || "");
-          setCategory(target.category || "cs-journey");
-          setExcerpt(target.excerpt || "");
-          setContent(target.content || "");
-          setSlug(target.slug || target.id);
-        }
-        setLoading(false);
+      if (!isOwner) {
+        navigate("/", { replace: true });
+        return;
       }
-    }
 
-    loadPost();
-    return () => {
-      active = false;
-    };
-  }, [id, isOwner, navigate]);
+      let active = true;
+
+      async function loadPost() {
+        try {
+          const apiPost = await fetchPostById(id);
+          if (!active) return;
+
+          setTitle(apiPost.title || "");
+          setCategory(apiPost.category || "cs-journey");
+          setExcerpt(apiPost.excerpt || "");
+          setContent(apiPost.content || "");
+          setSlug(apiPost.slug || apiPost._id);
+          setLoading(false);
+        } catch (err) {
+          console.error("Failed to load post from backend", err);
+          if (!active) return;
+
+          setNotFound(true);
+          setLoading(false);
+        }
+      }
+
+      loadPost();
+      return () => {
+        active = false;
+      };
+    }, [id, isLoaded, isOwner, navigate]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -93,34 +84,25 @@ function EditPostPage() {
       excerpt: finalExcerpt,
     };
 
-    try {
-      // Try backend update
-      await updatePost(id, payload);
-      navigate(`/blog/${slug || id}`);
-    } catch (err) {
-      console.error("Failed to update post on backend, err:", err);
-
-      // Fallback: local storage
-      const existing = JSON.parse(localStorage.getItem("user_posts") || "[]");
-
-      const updated = existing.map((p) =>
-        String(p.id) === String(id)
-          ? {
-              ...p,
-              title,
-              category,
-              excerpt: finalExcerpt,
-              content,
-              isUserPost: true,
-              updatedAt: new Date().toISOString(),
-            }
-          : p
-      );
-
-      localStorage.setItem("user_posts", JSON.stringify(updated));
-      navigate(`/blog/${id}`);
-    }
+        try {
+        const token = await getToken();
+        await updatePost(id, payload, token);
+        navigate(`/blog/${slug || id}`);
+      } catch (err) {
+        console.error("Failed to update post on backend:", err);
+        alert("Failed to update post. Please try again.");
+      }
   }
+
+    if (!isLoaded) {
+      return (
+        <div className="new-post-page">
+          <div className="new-post-card">
+            <p>Loading…</p>
+          </div>
+        </div>
+      );
+    }
 
   if (!isOwner) return null;
 

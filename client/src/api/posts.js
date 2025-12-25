@@ -72,16 +72,24 @@ export async function createPost(payload, token) {
 }
 
 export async function updatePost(id, payload, token) {
-  return authedJson(`/posts/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(payload),
-  }, token);
+  return authedJson(
+    `/posts/${id}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    },
+    token
+  );
 }
 
 export async function deletePost(id, token) {
-  return authedJson(`/posts/${id}`, {
-    method: "DELETE",
-  }, token);
+  return authedJson(
+    `/posts/${id}`,
+    {
+      method: "DELETE",
+    },
+    token
+  );
 }
 
 export async function voteOnPost(id, direction, token) {
