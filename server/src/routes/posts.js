@@ -8,7 +8,7 @@ import {
   incrementViews,
   votePost,
 } from "../controllers/postsController.js";
-import { writeLimiter, voteLimiter } from "../middleware/ratelimit.js";
+import { writeLimiter, voteLimiter } from "../middleware/rateLimit.js";
 
 const router = express.Router();
 
