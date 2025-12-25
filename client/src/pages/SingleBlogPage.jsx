@@ -1,16 +1,17 @@
 import { useParams, useNavigate } from "react-router-dom";
-import posts from "../data/posts";
 import ReadingProgressBar from "../components/ReadingProgressBar";
 import "./SingleBlogPage.css";
 import { useEffect, useState, useRef } from "react";
-import { fetchPostById, incrementPostViews, voteOnPost } from "../api/posts";
+import { fetchPostById, incrementPostViews, voteOnPost, deletePost } from "../api/posts";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { OWNER_USER_ID } from "../config/authOwner";
 
 function mapPostFromApi(p) {
+  const slugOrId = p.slug || p._id;
+
   return {
-    id: p._id,
-    slug: p.slug || p._id,
+    id: slugOrId,
+    slug: slugOrId,
     title: p.title,
     content: p.content || "",
     category: p.category || "general",
@@ -18,7 +19,8 @@ function mapPostFromApi(p) {
     date: p.date || p.createdAt || new Date().toISOString(),
     featured: p.isFeatured,
     excerpt: p.excerpt || "",
-    isUserPost: false, views: typeof p.views === "number" ? p.views : 0
+    isUserPost: false,
+    views: typeof p.views === "number" ? p.views : 0,
   };
 }
 
@@ -48,47 +50,36 @@ function SingleBlogPage() {
   const [error, setError] = useState(null);
   const [votes, setVotes] = useState({ score: 0, userVote: null });
   const [backendViews, setBackendViews] = useState(null);
+  const isUserPost = isOwner;
 
-  const userPosts = JSON.parse(localStorage.getItem("user_posts") || "[]");
-  const isUserPost = isOwner || post?.isUserPost;
+      useEffect(() => {
+      let active = true;
 
-    useEffect(() => {
-    let active = true;
+      async function loadPost() {
+        try {
+          const apiPost = await fetchPostById(id);
+          if (!active) return;
 
-    async function loadPost() {
-      try {
-        const apiPost = await fetchPostById(id);
-        if (!active) return;
-        if (typeof apiPost.views === "number") {
-         setBackendViews(apiPost.views);
-       }
+          if (typeof apiPost.views === "number") {
+            setBackendViews(apiPost.views);
+          }
 
-       const mapped = mapPostFromApi(apiPost);
-       setPost(mapped);
-      } catch (err) {
-        console.error("Failed to fetch post from backend, falling back to local", err);
-        if (!active) return;
-
-        const allPosts = [...userPosts, ...posts];
-        const localPost = allPosts.find(
-          (p) => String(p.id) === String(id) || p.slug === id
-        );
-
-        if (localPost) {
-          setPost(localPost);
-        } else {
+          const mapped = mapPostFromApi(apiPost);
+          setPost(mapped);
+        } catch (err) {
+          console.error("Failed to fetch post from backend", err);
+          if (!active) return;
           setError("Post not found");
+        } finally {
+          if (active) setLoading(false);
         }
-      } finally {
-        if (active) setLoading(false);
       }
-    }
 
-    loadPost();
-    return () => {
-      active = false;
-    };
-  }, [id]);
+      loadPost();
+      return () => {
+        active = false;
+      };
+    }, [id]);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useClickOutside(() => setMenuOpen(false));
@@ -215,23 +206,24 @@ function SingleBlogPage() {
     JSON.parse(localStorage.getItem("post_views") || "{}")[id] || 0;
   const views = backendViews != null ? backendViews : localViews;
 
-  function handleDelete() {
-    const ok = window.confirm("Are you sure you want to delete this post?");
-    if (!ok) return;
+    async function handleDelete() {
+      const ok = window.confirm("Are you sure you want to delete this post?");
+      if (!ok) return;
 
-    const existing = JSON.parse(localStorage.getItem("user_posts") || "[]");
+      try {
+        const token = await getToken();
+        await deletePost(id, token);
 
-    const updated = existing.filter((p) => String(p.id) !== String(id));
+        const votes = JSON.parse(localStorage.getItem("post_votes") || "{}");
+        delete votes[id];
+        localStorage.setItem("post_votes", JSON.stringify(votes));
 
-    localStorage.setItem("user_posts", JSON.stringify(updated));
-
-
-    const votes = JSON.parse(localStorage.getItem("post_votes") || "{}");
-    delete votes[id];
-    localStorage.setItem("post_votes", JSON.stringify(votes));
-
-    navigate("/blog");
-  }
+        navigate("/blog");
+      } catch (err) {
+        console.error("Failed to delete post", err);
+        alert("Failed to delete post. Please try again.");
+      }
+    }
 
   if (loading) {
   return <div className="single-container">Loading post...</div>;

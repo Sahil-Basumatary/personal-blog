@@ -8,16 +8,16 @@ import {
   incrementViews,
   votePost,
 } from "../controllers/postsController.js";
+import { writeLimiter, voteLimiter } from "../middleware/ratelimit.js";
 
 const router = express.Router();
 
 router.get("/", getPosts);
 router.get("/:id", getPostById);
 router.post("/:id/view", incrementViews);
-
-router.post("/", createPost);
-router.put("/:id", updatePost);
-router.delete("/:id", deletePost);
-router.post("/:id/vote", votePost);
+router.post("/", writeLimiter, createPost);
+router.put("/:id", writeLimiter, updatePost);
+router.delete("/:id", writeLimiter, deletePost);
+router.post("/:id/vote", voteLimiter, votePost);
 
 export default router;
