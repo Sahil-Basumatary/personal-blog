@@ -2,18 +2,15 @@
 
 <div align="center">
 
-# personal-blog
+# My Personal blog
 
 [![Tests](https://github.com/Sahil-Basumatary/personal-blog/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Sahil-Basumatary/personal-blog/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://github.com/Sahil-Basumatary/personal-blog/blob/main/LICENSE)
 [![LinkedIn](https://img.shields.io/badge/-LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/sahil-basumatary)
 
-
-A full-stack personal journal where I write about computer science, life in London, and the process of learning in public.
+A full-stack personal journal where I write about computer science, life in London, technical tools and my journey of learning in public.
 
 </div>
-
-<br />
 
 ### Tech Stack
 
@@ -38,6 +35,16 @@ A full-stack personal journal where I write about computer science, life in Lond
 [Express-url]: https://expressjs.com
 [MongoDB-shield]: https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white
 [MongoDB-url]: https://www.mongodb.com/
+[Jest-sheild]:(https://img.shields.io/badge/-jest-%23C21325?style=for-the-badge&logo=jest&logoColor=white)]
+[Jest-url]:(https://jestjs.io/)
+[React-shield]:(https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)]
+[React-url]:(https://reactjs.org/)
+[Vite-shield]:(https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)]
+[Vite-url]:(https://vitejs.dev/)
+[Router-shield]:(https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white)]
+[Router-url]:(https://reactrouter.com/)
+[Actions-shield]:(https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)]
+[Actions-url]:(https://github.com/features/actions)
 
 ## Technical Highlights
 
