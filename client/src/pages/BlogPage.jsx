@@ -497,6 +497,12 @@ function BlogPage() {
               : "Recent posts"}
         </h3>
 
+        {postsError && (
+          <div className="error-banner">
+            {postsError} - please check your connection or try again.
+          </div>
+        )}
+
         <div className="posts-list">
           {query && filteredPosts.length === 0 && (
             <div className="empty-search">
