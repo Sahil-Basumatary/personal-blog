@@ -4,9 +4,17 @@
 
 # My Personal blog
 
-[![Tests](https://github.com/Sahil-Basumatary/personal-blog/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Sahil-Basumatary/personal-blog/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://github.com/Sahil-Basumatary/personal-blog/blob/main/LICENSE)
-[![LinkedIn](https://img.shields.io/badge/-LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/sahil-basumatary)
+<p>
+  <a href="https://github.com/Sahil-Basumatary/personal-blog/actions/workflows/ci.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/Sahil-Basumatary/personal-blog/ci.yml?branch=main&style=for-the-badge&label=Tests" alt="Tests">
+  </a>
+  <a href="https://github.com/Sahil-Basumatary/personal-blog/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License: MIT">
+  </a>
+  <a href="https://linkedin.com/in/sahil-basumatary">
+    <img src="https://img.shields.io/badge/-LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
+  </a>
+</p>
 
 A full-stack personal journal where I write about computer science, life in London, technical tools and my journey of learning in public.
 
