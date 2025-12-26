@@ -23,36 +23,20 @@ A full-stack personal journal where I write about computer science, life in Lond
 ### Tech Stack
 
 **Backend**
-* [![Node.js][Node-shield]][Node-url]
-* [![Express][Express-shield]][Express-url]
-* [![MongoDB][MongoDB-shield]][MongoDB-url]
-* [![Jest][Jest-shield]][Jest-url]
+[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge&logo=express)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Jest](https://img.shields.io/badge/-jest-%23C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/)
 
 **Frontend**
-* [![React][React-shield]][React-url]
-* [![Vite][Vite-shield]][Vite-url]
-* [![React Router][Router-shield]][Router-url]
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![React Router](https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white)](https://reactrouter.com/)
 
 **Infrastructure**
-* [![GitHub Actions][Actions-shield]][Actions-url]
-* [![Clerk][Clerk-shield]][Clerk-url]
-
-[Node-shield]: https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white
-[Node-url]: https://nodejs.org/
-[Express-shield]: https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB
-[Express-url]: https://expressjs.com
-[MongoDB-shield]: https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white
-[MongoDB-url]: https://www.mongodb.com/
-[Jest-sheild]:(https://img.shields.io/badge/-jest-%23C21325?style=for-the-badge&logo=jest&logoColor=white)]
-[Jest-url]:(https://jestjs.io/)
-[React-shield]:(https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)]
-[React-url]:(https://reactjs.org/)
-[Vite-shield]:(https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)]
-[Vite-url]:(https://vitejs.dev/)
-[Router-shield]:(https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white)]
-[Router-url]:(https://reactrouter.com/)
-[Actions-shield]:(https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)]
-[Actions-url]:(https://github.com/features/actions)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/features/actions)
+[![npm](https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/)
+[![Clerk](https://img.shields.io/badge/Clerk-6C47FF?style=for-the-badge&logo=clerk&logoColor=white)](https://clerk.com/)
 
 ## Technical Highlights
 
@@ -100,8 +84,11 @@ A full-stack personal journal where I write about computer science, life in Lond
                                                 │    view counts)    │
                                                 └────────────────────┘
 
+```
+
 ## Project Structure
 
+```
 personal-blog/
 ├── client/                    # React SPA
 │   ├── src/
@@ -124,32 +111,33 @@ personal-blog/
 ├── blog/                      # Static Jekyll content 
 └── .github/workflows/         # CI pipeline
 
+```
 ## Features
 
-# Owner-Only Writing Experience
+### Owner-Only Writing Experience
 - Authenticated via Clerk with dedicated OWNER_USER_ID guard
 - Create, edit, and delete posts from a clean writing UI
 - Local draft autosave 
 - SEO-friendly slug generation with collision handling
 
-# Search and Discovery
+### Search and Discovery
 - Full-text search across title, excerpt, and content
 - Lightweight fuzzy search with typo tolerance (1-char mismatch)
 - Category filters 
 - Paginated results with configurable page size (1–50)
 
-# Blog Reading Experience
+### Blog Reading Experience
 - Featured post highlight on the main blog page
 - Reading progress bar on individual posts
 - View counter (backend source of truth with local fallback)
 - Mobile-responsive design with hamburger navigation
 
-# Engagement
+### Engagement
 - Per-post upvote/downvote system
 - Vote state persisted in local storage and synced to backend
 - Login-gated voting to prevent spam
 
-# Security & Reliability
+### Security & Reliability
 - Rate limiting: 20 writes/min, 60 votes/min per IP
 - Input validation and sanitization on all endpoints
 - Proper HTTP status codes (400, 401, 403, 404, 500)
