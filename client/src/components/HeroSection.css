@@ -341,8 +341,8 @@ header.hero {
 }
 
 .user-chip-avatar img {
-  width: 16px;
-  height: 16px;
+  width: 28px;
+  height: 28px;
   filter: grayscale(100%);
   opacity: 0.9;
 }

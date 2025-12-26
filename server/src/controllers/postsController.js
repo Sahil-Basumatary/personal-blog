@@ -1,12 +1,7 @@
 import Post from "../models/postsModel.js";
 import mongoose from "mongoose";
 
-function resolveOwnerUserId() {
-  if (process.env.NODE_ENV === "test") {
-    return process.env.OWNER_USER_ID || "test-owner-id";
-  }
-  return process.env.OWNER_USER_ID;
-}
+const OWNER_USER_ID = process.env.OWNER_USER_ID || "test-owner-id";
 
 function makeBaseSlug(title) {
   return title
@@ -87,9 +82,8 @@ export const getPostById = async (req, res) => {
 export const createPost = async (req, res) => {
   try {
     const authUserId = req.auth?.userId;
-    const ownerId = resolveOwnerUserId();
 
-    if (!authUserId || authUserId !== ownerId) {
+    if (!authUserId || authUserId !== OWNER_USER_ID) {
       return res.status(403).json({ message: "Only Sahil can create posts." });
     }
 
@@ -144,23 +138,13 @@ export const createPost = async (req, res) => {
 export const updatePost = async (req, res) => {
   try {
     const authUserId = req.auth?.userId;
-    const ownerId = resolveOwnerUserId();
-    const key = req.params.id;
 
-    console.log("updatePost id/slug:", key);
-    console.log(
-      "updatePost authUserId:",
-      authUserId,
-      "OWNER_USER_ID:",
-      ownerId
-    );
-
-    if (!authUserId || authUserId !== ownerId) {
+    if (!authUserId || authUserId !== OWNER_USER_ID) {
       return res.status(403).json({ message: "Only Sahil can edit posts." });
     }
 
+    const key = req.params.id;             
     const { title, content, category, isFeatured } = req.body;
-    console.log("updatePost body:", { title, content, category, isFeatured });
 
     let post = null;
 
@@ -187,7 +171,7 @@ export const updatePost = async (req, res) => {
     const updated = await post.save();
     return res.json(updated);
   } catch (err) {
-    console.error("updatePost error:", err);
+    console.error("updatePost error:", err.message);
     return res
       .status(500)
       .json({ message: "Server error", error: err.message });
@@ -197,13 +181,12 @@ export const updatePost = async (req, res) => {
 export const deletePost = async (req, res) => {
   try {
     const authUserId = req.auth?.userId;
-    const ownerId = resolveOwnerUserId();
-    const key = req.params.id;
 
-    if (!authUserId || authUserId !== ownerId) {
+    if (!authUserId || authUserId !== OWNER_USER_ID) {
       return res.status(403).json({ message: "Only Sahil can delete posts." });
     }
 
+    const key = req.params.id;        
     let post = null;
 
     if (isValidObjectId(key)) {
