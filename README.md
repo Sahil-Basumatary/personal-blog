@@ -2,7 +2,7 @@
 
 <div align="center">
 
-# My Personal blog
+# My Personal Blog
 
 <p>
   <a href="https://github.com/Sahil-Basumatary/personal-blog/actions/workflows/ci.yml">
@@ -22,21 +22,11 @@ A full-stack personal journal where I write about computer science, life in Lond
 
 ### Tech Stack
 
-**Backend**
-[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge&logo=express)](https://expressjs.com/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![Jest](https://img.shields.io/badge/-jest-%23C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/)
-
-**Frontend**
-[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
-[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![React Router](https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white)](https://reactrouter.com/)
-
-**Infrastructure**
-![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/features/actions)
-[![npm](https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/)
-[![Clerk](https://img.shields.io/badge/Clerk-6C47FF?style=for-the-badge&logo=clerk&logoColor=white)](https://clerk.com/)
+| Area           | Stack |
+| -------------- | ----- |
+| **Backend**    | [![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/) [![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge&logo=express)](https://expressjs.com/) [![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/) [![Jest](https://img.shields.io/badge/-jest-%23C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/) |
+| **Frontend**   | [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/) [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/) [![React Router](https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white)](https://reactrouter.com/) |
+| **Infrastructure** | [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/features/actions) [![npm](https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/) [![Clerk](https://img.shields.io/badge/Clerk-6C47FF?style=for-the-badge&logo=clerk&logoColor=white)](https://clerk.com/) |
 
 ## Technical Highlights
 
@@ -142,4 +132,134 @@ personal-blog/
 - Input validation and sanitization on all endpoints
 - Proper HTTP status codes (400, 401, 403, 404, 500)
 - Error handling throughout the stack
+
+## API Reference
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/api/posts` | Public | List posts (paginated, searchable, filterable) |
+| `GET` | `/api/posts/:idOrSlug` | Public | Get single post by ID or slug |
+| `POST` | `/api/posts` | Owner | Create new post |
+| `PUT` | `/api/posts/:idOrSlug` | Owner | Update existing post |
+| `DELETE` | `/api/posts/:idOrSlug` | Owner | Delete post |
+| `POST` | `/api/posts/:idOrSlug/view` | Public | Increment view count |
+| `POST` | `/api/posts/:idOrSlug/vote` | Logged in | Upvote or downvote (`{ direction: "up" \| "down" }`) |
+| `GET` | `/api/health` | Public | Health check |
+
+### Query Parameters for `GET /api/posts`
+
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| `page` | number | 1 | Page number |
+| `limit` | number | 10 | Items per page (max 50) |
+| `search` | string | — | Search term (matches title, case-insensitive) |
+| `category` | string | — | Filter by category slug |
+
+---
+
+## Setup
+
+### Prerequisites
+- Node.js 18+ (LTS recommended)
+- npm or pnpm
+- MongoDB instance (local or [MongoDB Atlas](https://www.mongodb.com/atlas))
+- [Clerk](https://clerk.com) app
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/Sahil-Basumatary/personal-blog.git
+cd personal-blog
+```
+
+### Backend Setup
+
+```
+cd server
+npm install
+
+```
+
+### Create server/.env:
+
+```
+MONGODB_URI=mongodb+srv://...
+OWNER_USER_ID=user_xxxxxxxxxxxxx
+CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+PORT=5001
+
+```
+
+### Start the development server:
+
+```
+npm run dev
+```
+
+This starts the API on http://localhost:5001.
+
+### Frontend Setup
+
+```
+cd client
+npm install
+```
+
+### Create client/.env:
+
+```
+VITE_API_BASE_URL=http://localhost:5001/api
+VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
+```
+
+### Start the dev server:
+
+```
+npm run dev
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Testing
+
+Backend tests use Jest + supertest against an in-memory MongoDB instance:
+
+```
+cd server
+npm test
+```
+
+### Test Coverage
+
+- [x]Area Status
+- [x]Health check endpoint	
+- [x]Pagination + sorting	
+- [x]Search + category filtering	
+- [x]Fetch by ID and slug	
+- [x]View count increment	
+- [x]Create post (auth + validation)	
+- [x]Update post (auth + field updates)	
+- [x]Delete post (auth + removal)	
+- [x]Voting (auth + direction validation)
+
+## CI/CD
+
+- GitHub Actions runs on every push to main:
+
+- Server tests — `npm test` in `server/`
+- Client build — `npm run build` in `client/`
+- GitHub Actions workflow runs on every push to `main`
+
+## License
+
+Distributed under the MIT License. See LICENSE for details.
+
+## Contact
+
+GitHub: [@Sahil-Basumatary](https://github.com/Sahil-Basumatary)
+LinkedIn: [Sahil Basumatary](https://www.linkedin.com/in/sahil-basumatary/)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p> ```
+
 
