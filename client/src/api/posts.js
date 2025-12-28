@@ -22,9 +22,19 @@ export async function fetchPosts({
 
 export async function fetchPostById(id) {
   const res = await fetch(`${API_BASE_URL}/posts/${id}`);
+
   if (!res.ok) {
-    throw new Error("Failed to get post");
+    if (res.status === 404) {
+      const err = new Error("Post not found");
+      err.status = 404;
+      throw err;
+    }
+
+    const err = new Error("Failed to get post");
+    err.status = res.status;
+    throw err;
   }
+
   return res.json();
 }
 

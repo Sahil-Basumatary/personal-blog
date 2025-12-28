@@ -4,8 +4,8 @@ function SubscribeSection() {
     <section className="subscribe">
       <h3>Be a part of my journey!</h3>
       <p>
-        Get updates when I share something new — reflections, lessons,
-        and little victories along the way.
+        Get updates when I share something new which will be but not limited to reflections, lessons,
+        and little victories along the way!!!
       </p>
 
       <div className="subscribe-btns">

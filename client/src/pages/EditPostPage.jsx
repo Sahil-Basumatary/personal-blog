@@ -9,15 +9,12 @@ function EditPostPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, isLoaded, isSignedIn } = useUser();
-
   const { getToken } = useAuth();
   const [slug, setSlug] = useState(null);
-
   const isOwner = isLoaded && isSignedIn && user?.id === OWNER_USER_ID;
-
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-
+  const [submitError, setSubmitError] = useState(null);
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("cs-journey");
   const [excerpt, setExcerpt] = useState("");
@@ -61,6 +58,7 @@ function EditPostPage() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    setSubmitError(null);
 
     const categoryLabel =
       category === "cs-journey"
@@ -87,16 +85,17 @@ function EditPostPage() {
         try {
         const token = await getToken();
         await updatePost(id, payload, token);
+        setSubmitError(null);
         navigate(`/blog/${slug || id}`);
       } catch (err) {
         console.error("Failed to update post on backend:", err);
-        alert("Failed to update post. Please try again.");
+        setSubmitError("Failed to update post. Please try again.");
       }
   }
 
     if (!isLoaded) {
       return (
-        <div className="new-post-page">
+        <div className="new-post-page page-shell">
           <div className="new-post-card">
             <p>Loading…</p>
           </div>
@@ -108,7 +107,7 @@ function EditPostPage() {
 
   if (loading) {
     return (
-      <div className="new-post-page">
+      <div className="new-post-page page-shell">
         <div className="new-post-card">
           <p>Loading post…</p>
         </div>
@@ -118,7 +117,7 @@ function EditPostPage() {
 
   if (notFound) {
     return (
-      <div className="new-post-page">
+      <div className="new-post-page page-shell">
         <div className="new-post-card">
           <p>This post wasn't created via your blog writer, so it can't be edited here.</p>
           <button className="primary-btn" onClick={() => navigate("/blog")}>
@@ -130,7 +129,7 @@ function EditPostPage() {
   }
 
   return (
-    <div className="new-post-page">
+    <div className="new-post-page page-shell">
       <div className="new-post-card">
         <button
           className="back-link"
@@ -142,6 +141,12 @@ function EditPostPage() {
 
         <h1 className="new-post-title">Edit post</h1>
         <p className="new-post-subtitle">Edit your story.</p>
+
+        {submitError && (
+          <div className="error-banner">
+            {submitError}
+          </div>
+        )}
 
         <form className="new-post-form" onSubmit={handleSubmit}>
           <label className="field">

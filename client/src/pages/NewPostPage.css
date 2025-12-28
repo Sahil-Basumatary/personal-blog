@@ -1,6 +1,6 @@
 .new-post-page {
   min-height: calc(100vh - 80px);
-  padding: 4rem 1.5rem 5rem;
+  padding: 4rem 0 5rem;
   display: flex;
   justify-content: center;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
@@ -8,7 +8,7 @@
 
 .new-post-card {
   width: 100%;
-  max-width: 760px;          
+  max-width: 840px;          
   background: #ffffff;
   border-radius: 18px;
   padding: 2.5rem 2.8rem;

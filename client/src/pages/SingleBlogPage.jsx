@@ -45,41 +45,51 @@ function SingleBlogPage() {
   const { getToken } = useAuth();
   const isOwner = isLoaded && isSignedIn && user?.id === OWNER_USER_ID;
 
-  const [post, setPost] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [votes, setVotes] = useState({ score: 0, userVote: null });
-  const [backendViews, setBackendViews] = useState(null);
-  const isUserPost = isOwner;
+    const [post, setPost] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);      
+    const [notFound, setNotFound] = useState(false); 
+    const [votes, setVotes] = useState({ score: 0, userVote: null });
+    const [backendViews, setBackendViews] = useState(null);
+    const isUserPost = isOwner;
 
-      useEffect(() => {
-      let active = true;
+          useEffect(() => {
+            let active = true;
 
-      async function loadPost() {
-        try {
-          const apiPost = await fetchPostById(id);
-          if (!active) return;
+            async function loadPost() {
+              try {
+                const apiPost = await fetchPostById(id);
+                if (!active) return;
 
-          if (typeof apiPost.views === "number") {
-            setBackendViews(apiPost.views);
-          }
+                if (typeof apiPost.views === "number") {
+                  setBackendViews(apiPost.views);
+                }
 
-          const mapped = mapPostFromApi(apiPost);
-          setPost(mapped);
-        } catch (err) {
-          console.error("Failed to fetch post from backend", err);
-          if (!active) return;
-          setError("Post not found");
-        } finally {
-          if (active) setLoading(false);
-        }
-      }
+                const mapped = mapPostFromApi(apiPost);
+                setPost(mapped);
+                setError(null);
+                setNotFound(false);
+              } catch (err) {
+                console.error("Failed to fetch post from backend", err);
+                if (!active) return;
 
-      loadPost();
-      return () => {
-        active = false;
-      };
-    }, [id]);
+                if (err.status === 404) {
+                  setNotFound(true);
+                  setError(null);
+                } else {
+                  setError("Failed to load this post");
+                  setNotFound(false);
+                }
+              } finally {
+                if (active) setLoading(false);
+              }
+            }
+
+            loadPost();
+            return () => {
+              active = false;
+            };
+          }, [id]);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useClickOutside(() => setMenuOpen(false));
@@ -225,17 +235,33 @@ function SingleBlogPage() {
       }
     }
 
-  if (loading) {
-  return <div className="single-container">Loading post...</div>;
-  }
+    if (loading) {
+      return <div className="single-container page-shell">Loading post...</div>;
+    }
 
-  if (!post || error) {
-    return <div className="not-found">Post not found.</div>;
-  }
+    if (notFound) {
+      return <div className="not-found page-shell">Post not found.</div>;
+    }
+
+    if (!post) {
+      return (
+        <div className="single-container page-shell">
+          <div className="error-banner">
+            Something went wrong loading this post - please try again.
+          </div>
+        </div>
+      );
+    }
 
   return (
-    <div className="single-container">
+    <div className="single-container page-shell">
       <ReadingProgressBar />
+
+      {error && (
+        <div className="error-banner">
+          {error} - please check your connection or try again.
+        </div>
+      )}
 
       {/* HEADER */}
       <div className="single-header">

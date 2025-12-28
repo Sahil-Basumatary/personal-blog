@@ -9,7 +9,6 @@ function NewPostPage() {
   const navigate = useNavigate();
   const { user, isLoaded, isSignedIn } = useUser();
   const { getToken } = useAuth();
-
   const isOwner = isSignedIn && user?.id === OWNER_USER_ID;
 
   useEffect(() => {
@@ -19,13 +18,12 @@ function NewPostPage() {
   }, [isLoaded, isOwner, navigate]);
 
   const savedDraft = JSON.parse(localStorage.getItem("new_post_draft") || "{}");
-
   const [title, setTitle] = useState(savedDraft.title || "");
   const [category, setCategory] = useState(savedDraft.category || "cs-journey");
   const [excerpt, setExcerpt] = useState(savedDraft.excerpt || "");
   const [content, setContent] = useState(savedDraft.content || "");
-
   const [errors, setErrors] = useState({});
+  const [submitError, setSubmitError] = useState(null);
 
   useEffect(() => {
     const draft = { title, category, excerpt, content };
@@ -34,7 +32,7 @@ function NewPostPage() {
 
   if (!isLoaded) {
     return (
-      <div className="new-post-page">
+      <div className="new-post-page page-shell">
         <div className="new-post-card">
           <p>Loading…</p>
         </div>
@@ -57,6 +55,7 @@ function NewPostPage() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    setSubmitError(null);
     if (!validate()) return;
 
     const finalExcerpt =
@@ -85,8 +84,6 @@ function NewPostPage() {
     try {
       const token = await getToken();
       const created = await createPost(payload, token);
-
-      // Clear draft once backend succeeds
       localStorage.removeItem("new_post_draft");
 
       // If backend returns slug or _id, go straight to that post
@@ -96,9 +93,9 @@ function NewPostPage() {
       } else {
         navigate("/blog");
       }
-    } catch (err) {
+        } catch (err) {
       console.error("Failed to create post on backend", err);
-      alert(
+      setSubmitError(
         "Failed to publish post. Your draft is saved locally — please try again later."
       );
     }
@@ -112,7 +109,7 @@ function NewPostPage() {
   const isValid = title.trim().length >= 3 && content.trim().length >= 30;
 
   return (
-    <div className="new-post-page">
+    <div className="new-post-page page-shell">
       <div className="new-post-card">
         <button
           className="back-link"
@@ -124,6 +121,12 @@ function NewPostPage() {
 
         <h1 className="new-post-title">Write a New Post</h1>
         <p className="new-post-subtitle">Capture a memory from your journey.</p>
+
+        {submitError && (
+          <div className="error-banner">
+            {submitError}
+          </div>
+        )}
 
         <form className="new-post-form" onSubmit={handleSubmit}>
 
