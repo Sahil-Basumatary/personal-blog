@@ -23,6 +23,24 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --page-max-width: 1120px;
+  --page-horizontal-gutter: 32px;
+}
+
+.page-shell {
+  width: 100%;
+  max-width: var(--page-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--page-horizontal-gutter);
+  padding-right: var(--page-horizontal-gutter);
+}
+
+@media (max-width: 768px) {
+  .page-shell {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 }
 
 a {

@@ -352,7 +352,7 @@ function BlogPage() {
   }
 
   return (
-    <div className="blog-page">
+    <div className="blog-page page-shell">
       {/* HEADER */}
       <section className="blog-header">
         <UserChip surface="light" />
