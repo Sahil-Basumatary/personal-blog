@@ -1,7 +1,60 @@
 import Post from "../models/postsModel.js";
 import mongoose from "mongoose";
 
-const OWNER_USER_ID = process.env.OWNER_USER_ID || "test-owner-id";
+function getOwnerId() {
+  return (
+    process.env.OWNER_USER_ID ||
+    process.env.VITE_OWNER_USER_ID || 
+    "test-owner-id"
+  );
+}
+
+function requireSignedInOwner(req, opts = {}) {
+  const {
+    unauthStatus = 401,
+    unauthMessage = "You must be signed in to perform this action.",
+    forbiddenStatus = 403,
+    forbiddenMessage = "You are not allowed to modify posts.",
+    misconfigStatus = 500,
+    misconfigMessage = "Server is not configured for write access yet.",
+  } = opts;
+
+  const authUserId = req.auth?.userId;
+  const ownerId = getOwnerId();
+  const isTestEnv = process.env.NODE_ENV === "test";
+
+  console.log("requireSignedInOwner:", {
+    authUserId,
+    ownerId,
+    rawOwner: process.env.OWNER_USER_ID,
+    nodeEnv: process.env.NODE_ENV,
+  });
+  if (!authUserId) {
+    return {
+      ok: false,
+      status: unauthStatus,
+      message: unauthMessage,
+    };
+  }
+  if (!ownerId || (!isTestEnv && ownerId === "test-owner-id")) {
+    console.warn(
+      "OWNER_USER_ID is not set correctly so denying write operation."
+    );
+    return {
+      ok: false,
+      status: misconfigStatus,
+      message: misconfigMessage,
+    };
+  }
+  if (authUserId !== ownerId) {
+    return {
+      ok: false,
+      status: forbiddenStatus,
+      message: forbiddenMessage,
+    };
+  }
+  return { ok: true, authUserId };
+}
 
 function makeBaseSlug(title) {
   return title
@@ -81,11 +134,16 @@ export const getPostById = async (req, res) => {
 
 export const createPost = async (req, res) => {
   try {
-    const authUserId = req.auth?.userId;
-
-    if (!authUserId || authUserId !== OWNER_USER_ID) {
-      return res.status(403).json({ message: "Only Sahil can create posts." });
+    const gate = requireSignedInOwner(req, {
+      unauthStatus: 403,
+      unauthMessage: "Only Sahil can create posts.",
+      forbiddenStatus: 403,
+      forbiddenMessage: "Only Sahil can create posts.",
+    });
+    if (!gate.ok) {
+      return res.status(gate.status).json({ message: gate.message });
     }
+    const authUserId = gate.authUserId;
 
     const {
       title,
@@ -137,13 +195,17 @@ export const createPost = async (req, res) => {
 
 export const updatePost = async (req, res) => {
   try {
-    const authUserId = req.auth?.userId;
-
-    if (!authUserId || authUserId !== OWNER_USER_ID) {
-      return res.status(403).json({ message: "Only Sahil can edit posts." });
+    const gate = requireSignedInOwner(req, {
+      unauthStatus: 403,
+      unauthMessage: "Only Sahil can edit posts.",
+      forbiddenStatus: 403,
+      forbiddenMessage: "Only Sahil can edit posts.",
+    });
+    if (!gate.ok) {
+      return res.status(gate.status).json({ message: gate.message });
     }
 
-    const key = req.params.id;             
+    const key = req.params.id;
     const { title, content, category, isFeatured } = req.body;
 
     let post = null;
@@ -160,7 +222,7 @@ export const updatePost = async (req, res) => {
     }
 
     if (!post.authorId) {
-      post.authorId = OWNER_USER_ID;
+      post.authorId = gate.authUserId;
     }
 
     if (typeof title === "string") post.title = title.trim();
@@ -180,13 +242,17 @@ export const updatePost = async (req, res) => {
 
 export const deletePost = async (req, res) => {
   try {
-    const authUserId = req.auth?.userId;
-
-    if (!authUserId || authUserId !== OWNER_USER_ID) {
-      return res.status(403).json({ message: "Only Sahil can delete posts." });
+    const gate = requireSignedInOwner(req, {
+      unauthStatus: 403,
+      unauthMessage: "Only Sahil can delete posts.",
+      forbiddenStatus: 403,
+      forbiddenMessage: "Only Sahil can delete posts.",
+    });
+    if (!gate.ok) {
+      return res.status(gate.status).json({ message: gate.message });
     }
 
-    const key = req.params.id;        
+    const key = req.params.id;
     let post = null;
 
     if (isValidObjectId(key)) {
