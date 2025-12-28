@@ -1,13 +1,14 @@
+import { Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
-
-import HomePage from "./pages/HomePage";
-import BlogPage from "./pages/BlogPage";
-import SingleBlogPage from "./pages/SingleBlogPage";
-import NewPostPage from "./pages/NewPostPage";
-import EditPostPage from "./pages/EditPostPage";
 import AuthSignInPage from "./pages/AuthSignInPage.jsx";
 import AuthSignUpPage from "./pages/AuthSignUpPage.jsx";
+
+const HomePage = lazy(() => import("./pages/HomePage"));
+const BlogPage = lazy(() => import("./pages/BlogPage"));
+const SingleBlogPage = lazy(() => import("./pages/SingleBlogPage"));
+const NewPostPage = lazy(() => import("./pages/NewPostPage"));
+const EditPostPage = lazy(() => import("./pages/EditPostPage"));
 
 function RequireAuth({ children }) {
   return (
@@ -22,39 +23,47 @@ function RequireAuth({ children }) {
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/blog" element={<BlogPage />} />
-      <Route path="/blog/:id" element={<SingleBlogPage />} />
+    <Suspense
+      fallback={
+        <div className="page-shell" style={{ padding: "2rem" }}>
+          <p>Loading page…</p>
+        </div>
+      }
+    >
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/blog" element={<BlogPage />} />
+        <Route path="/blog/:id" element={<SingleBlogPage />} />
 
-      <Route
-        path="/new-post"
-        element={
-          <RequireAuth>
-            <NewPostPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/write"
-        element={
-          <RequireAuth>
-            <NewPostPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/edit/:id"
-        element={
-          <RequireAuth>
-            <EditPostPage />
-          </RequireAuth>
-        }
-      />
+        <Route
+          path="/new-post"
+          element={
+            <RequireAuth>
+              <NewPostPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/write"
+          element={
+            <RequireAuth>
+              <NewPostPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/edit/:id"
+          element={
+            <RequireAuth>
+              <EditPostPage />
+            </RequireAuth>
+          }
+        />
 
-      <Route path="/sign-in" element={<AuthSignInPage />} />
-      <Route path="/sign-up" element={<AuthSignUpPage />} />
-    </Routes>
+        <Route path="/sign-in" element={<AuthSignInPage />} />
+        <Route path="/sign-up" element={<AuthSignUpPage />} />
+      </Routes>
+    </Suspense>
   );
 }
 

@@ -73,7 +73,15 @@ function SingleBlogPage() {
                 console.error("Failed to fetch post from backend", err);
                 if (!active) return;
 
-                if (err.status === 404) {
+                const message =
+                  (err && typeof err.message === "string" && err.message) ||
+                  (typeof err === "string" ? err : "");
+
+                const isNotFound =
+                  (err && err.status === 404) ||
+                  (message && message.toLowerCase().includes("not found"));
+
+                if (isNotFound) {
                   setNotFound(true);
                   setError(null);
                 } else {

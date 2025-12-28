@@ -5,6 +5,7 @@ import { fetchPosts, voteOnPost, deletePost} from "../api/posts";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { OWNER_USER_ID } from "../config/authOwner";
 import UserChip from "../components/UserChip";
+import { useMemo } from "react";
 
 // search feat helpers
 function tokenize(text) {
@@ -165,23 +166,24 @@ function BlogPage() {
   const categoryFilter = searchParams.get("category");
 
   const allPosts = backendPosts;
+  const basePostsForSearch = categoryFilter
+  ? allPosts.filter((p) => p.category === categoryFilter)
+  : allPosts;
 
   const featuredPost =
     !categoryFilter && !query.trim()
       ? allPosts.find((post) => post.featured)
       : null;
 
-  const basePosts = categoryFilter
-    ? allPosts.filter((p) => p.category === categoryFilter)
-    : allPosts;
+  const filteredPosts = useMemo(() => {
+    if (!query.trim()) {
+      return basePostsForSearch;
+    }
 
-  let filteredPosts = basePosts;
-
-  if (query.trim()) {
     const q = query.trim().toLowerCase();
     const results = [];
 
-    for (const post of basePosts) {
+    for (const post of basePostsForSearch) {
       const titleTokens = tokenize(post.title || "");
       const excerptTokens = tokenize(post.excerpt || "");
       const categoryTokens = tokenize(post.categoryLabel || "");
@@ -193,7 +195,7 @@ function BlogPage() {
       score += prefixScore(categoryTokens, q, 4);
       score += prefixScore(contentTokens, q, 2);
 
-      if (post.title.toLowerCase().startsWith(q)) score += 50;
+      if ((post.title || "").toLowerCase().startsWith(q)) score += 50;
 
       if (score === 0) {
         score += fuzzyPrefixScore(titleTokens, q, 3);
@@ -209,8 +211,8 @@ function BlogPage() {
       return new Date(b.post.date) - new Date(a.post.date);
     });
 
-    filteredPosts = results.map((r) => r.post);
-  }
+    return results.map((r) => r.post);
+  }, [basePostsForSearch, query]);
 
   // Voting state 
   const [votes, setVotes] = useState({});
@@ -299,7 +301,7 @@ function BlogPage() {
   if (showLiveDropdown) {
     const q = query.trim().toLowerCase();
 
-    for (const post of basePosts) {
+    for (const post of basePostsForSearch) {
       const titleTokens = tokenize(post.title || "");
       const excerptTokens = tokenize(post.excerpt || "");
       const categoryTokens = tokenize(post.categoryLabel || "");
