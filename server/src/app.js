@@ -9,6 +9,7 @@ import YAML from "yamljs";
 import path from "path";
 import { fileURLToPath } from "url";
 import postsRouter from "./routes/posts.js";
+import helmet from "helmet";
 
 dotenv.config();
 
@@ -20,6 +21,14 @@ const swaggerDocument = YAML.load(
 );
 
 const app = express();
+
+app.use(
+  helmet({
+    contentSecurityPolicy: false, //todo: improve this later :)
+  })
+);
+
+app.set("trust proxy", 1);
 
 app.use(
   cors({
