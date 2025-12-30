@@ -22,10 +22,6 @@ const swaggerDocument = YAML.load(
 
 const app = express();
 
-if (process.env.NODE_ENV === "production") {
-  app.use(helmet());
-}
-
 app.use(
   helmet({
     contentSecurityPolicy: false, //todo: improve this later :)
