@@ -1,52 +1,50 @@
-import { useUser, useClerk } from "@clerk/clerk-react";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  SignOutButton,
+  useUser,
+} from "@clerk/clerk-react";
+import "./UserChip.css";
 
 function UserChip({ surface = "dark" }) {
-  const { isSignedIn, user, isLoaded } = useUser();
-  const { signOut, openSignIn } = useClerk();
+  const { user } = useUser();
 
-  if (!isLoaded) return null;
-
-  const displayName =
+  const firstName =
     user?.firstName ||
+    (user?.fullName ? user.fullName.split(" ")[0] : null) ||
     user?.username ||
-    (user?.primaryEmailAddress &&
-      user.primaryEmailAddress.emailAddress.split("@")[0]) ||
     "there";
 
-  const containerClass = `user-chip user-chip--${surface}`;
-
-  if (!isSignedIn) {
-    return (
-      <button
-        className={`nav-signin ${
-          surface === "light" ? "nav-signin--light" : ""
-        }`}
-        onClick={() => openSignIn()}
-      >
-        Sign in
-      </button>
-    );
-  }
-
   return (
-    <div className={containerClass}>
-      <div className="user-chip-main">
-        <div className="user-chip-avatar">
-          <img src="/icons/user.svg" alt="User avatar" />
+    <div className={`user-chip user-chip--${surface}`}>
+      <SignedOut>
+        <SignInButton mode="redirect">
+          <button type="button" className="user-chip-signin">
+            <span className="user-chip-signin-label">Sign in</span>
+          </button>
+        </SignInButton>
+      </SignedOut>
+      <SignedIn>
+        <div className="user-chip-main">
+          <div className="user-chip-avatar">
+            {user?.imageUrl && (
+              <img src={user.imageUrl} alt={firstName} />
+            )}
+          </div>
+
+          <div className="user-chip-text">
+            <span className="user-chip-greeting">Hi,</span>
+            <span className="user-chip-name">{firstName}</span>
+          </div>
         </div>
 
-      <div className="user-chip-text">
-        <span className="user-chip-greeting">Hi,</span>
-        <span className="user-chip-name">{displayName}</span>
-      </div>
-      </div>
-
-      <button
-        className="user-chip-signout"
-        onClick={() => signOut({ redirectUrl: "/" })}
-      >
-        Sign out
-      </button>
+        <SignOutButton>
+          <button type="button" className="user-chip-signout">
+            Sign out
+          </button>
+        </SignOutButton>
+      </SignedIn>
     </div>
   );
 }

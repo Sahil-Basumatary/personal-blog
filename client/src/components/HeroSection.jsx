@@ -38,7 +38,7 @@ function HeroSection() {
             </Link>
           )}
 
-          <UserChip />
+          <UserChip surface="dark"/>
         </div>
 
         <div

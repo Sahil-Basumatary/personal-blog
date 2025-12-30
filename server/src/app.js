@@ -30,9 +30,20 @@ app.use(
 
 app.set("trust proxy", 1);
 
+const rawOrigins = process.env.CLIENT_ORIGIN || "";
+const allowedOrigins = rawOrigins
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN,
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+    },
     credentials: true,
   })
 );
