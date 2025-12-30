@@ -1,5 +1,13 @@
 import Post from "../models/postsModel.js";
 import mongoose from "mongoose";
+import {
+  getCachedPostsList,
+  setCachedPostsList,
+  getCachedPost,
+  setCachedPost,
+  invalidatePostsCache,
+} from "../services/postsCache.js";
+import PostVote from "../models/postVoteModel.js";
 
 function getOwnerId() {
   return (
@@ -9,7 +17,28 @@ function getOwnerId() {
   );
 }
 
-function requireSignedInOwner(req, opts = {}) {
+function getAuthUserIdFromReq(req) {
+  try {
+    if (typeof req.auth === "function") {
+      const auth = req.auth();
+      return auth?.userId || null;
+    }
+
+    if (req.auth && typeof req.auth === "object") {
+      return req.auth.userId || null;
+    }
+
+    return null;
+  } catch (err) {
+    console.error("Error accessing req.auth:", err.message);
+    return null;
+  }
+}
+
+function requireSignedInOwner(
+  req,
+  opts = {}
+) {
   const {
     unauthStatus = 401,
     unauthMessage = "You must be signed in to perform this action.",
@@ -19,16 +48,9 @@ function requireSignedInOwner(req, opts = {}) {
     misconfigMessage = "Server is not configured for write access yet.",
   } = opts;
 
-  const authUserId = req.auth?.userId;
+  const authUserId = getAuthUserIdFromReq(req);
   const ownerId = getOwnerId();
   const isTestEnv = process.env.NODE_ENV === "test";
-
-  console.log("requireSignedInOwner:", {
-    authUserId,
-    ownerId,
-    rawOwner: process.env.OWNER_USER_ID,
-    nodeEnv: process.env.NODE_ENV,
-  });
   if (!authUserId) {
     return {
       ok: false,
@@ -68,69 +90,100 @@ function isValidObjectId(value) {
   return mongoose.Types.ObjectId.isValid(value);
 }
 
-export const getPosts = async (req, res) => {
+export async function getPosts(req, res, next) {
   try {
-    const { search, category } = req.query;
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(
+      20,
+      Math.max(1, parseInt(req.query.limit, 10) || 5)
+    );
+
+    const category = req.query.category || null;
+    const search = req.query.search || null;
+
+    const cacheParams = { page, limit, category, search };
+    const cached = getCachedPostsList(cacheParams);
+
+    if (cached) {
+      res.set(
+        "Cache-Control",
+        "public, max-age=30, stale-while-revalidate=30"
+      );
+      return res.json(cached);
+    }
 
     const query = {};
+    if (category) query.category = category;
 
     if (search) {
-      query.title = { $regex: search, $options: "i" };
+      const regex = new RegExp(search, "i");
+      query.$or = [{ title: regex }, { content: regex }, { excerpt: regex }];
     }
-
-    if (category) {
-      query.category = category;
-    }
-
-    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
-    const limitRaw = parseInt(req.query.limit, 10);
-    const limit = Math.min(Math.max(limitRaw || 10, 1), 50); 
-
-    const skip = (page - 1) * limit;
 
     const [items, total] = await Promise.all([
       Post.find(query)
         .sort({ createdAt: -1 })
-        .skip(skip)
+        .skip((page - 1) * limit)
         .limit(limit),
       Post.countDocuments(query),
     ]);
 
-    const totalPages = Math.max(Math.ceil(total / limit) || 1, 1);
-
-    return res.json({
+    const payload = {
       items,
       total,
       page,
       pageSize: limit,
-      totalPages,
-    });
+      totalPages: Math.ceil(total / limit),
+    };
+
+    setCachedPostsList(cacheParams, payload);
+    res.set(
+      "Cache-Control",
+      "public, max-age=30, stale-while-revalidate=30"
+    );
+
+    return res.json(payload);
   } catch (err) {
-    console.error("getPosts error:", err.message);
-    return res.status(500).json({ message: "Server error" });
+    next(err);
   }
-};
+}
 
-export const getPostById = async (req, res) => {
+export async function getPostById(req, res, next) {
   try {
-    const key = req.params.id;
-    let post = null;
+    const key = req.params.id; 
+    const cached = getCachedPost(key);
+    if (cached) {
+      res.set(
+        "Cache-Control",
+        "public, max-age=60, stale-while-revalidate=60"
+      );
+      return res.json(cached);
+    }
 
-    if (isValidObjectId(key)) {
-      post = await Post.findById(key);
+    const { id } = req.params;
+    let post;
+
+    if (isValidObjectId(id)) {
+      post = await Post.findById(id);
+    } else {
+      post = await Post.findOne({ slug: id });
     }
 
     if (!post) {
-      post = await Post.findOne({ slug: key });
+      return res.status(404).json({ message: "Post not found" });
     }
 
-    if (!post) return res.status(404).json({ message: "Post not found" });
+    setCachedPost(key, post);
+    res.set(
+      "Cache-Control",
+      "public, max-age=60, stale-while-revalidate=60"
+    );
+
     return res.json(post);
   } catch (err) {
-    console.error("getPostById error:", err.message);
-    return res.status(500).json({ message: "Server error" });
+    next(err);
   }
-};
+}
 
 export const createPost = async (req, res) => {
   try {
@@ -186,6 +239,9 @@ export const createPost = async (req, res) => {
       isFeatured: !!isFeatured,
     });
 
+    invalidatePostsCache();
+    res.set("Cache-Control", "no-store");
+
     return res.status(201).json(post);
   } catch (err) {
     console.error("createPost error:", err.message);
@@ -231,6 +287,10 @@ export const updatePost = async (req, res) => {
     if (typeof isFeatured === "boolean") post.isFeatured = isFeatured;
 
     const updated = await post.save();
+
+    invalidatePostsCache();
+    res.set("Cache-Control", "no-store");
+
     return res.json(updated);
   } catch (err) {
     console.error("updatePost error:", err.message);
@@ -265,6 +325,9 @@ export const deletePost = async (req, res) => {
     if (!post) return res.status(404).json({ message: "Post not found" });
 
     await post.deleteOne();
+    invalidatePostsCache();
+    res.set("Cache-Control", "no-store");
+
     return res.json({ message: "Post removed" });
   } catch (err) {
     console.error("deletePost error:", err.message);
@@ -294,6 +357,10 @@ export const incrementViews = async (req, res) => {
     }
 
     if (!post) return res.status(404).json({ message: "Post not found" });
+
+    invalidatePostsCache();
+    res.set("Cache-Control", "no-store");
+
     return res.json(post);
   } catch (err) {
     console.error("incrementViews error:", err.message);
@@ -303,7 +370,7 @@ export const incrementViews = async (req, res) => {
 
 export const votePost = async (req, res) => {
   try {
-    const authUserId = req.auth?.userId;
+    const authUserId = getAuthUserIdFromReq(req);
     if (!authUserId) {
       return res.status(401).json({ message: "Login required to vote." });
     }
@@ -316,23 +383,72 @@ export const votePost = async (req, res) => {
     }
 
     const key = req.params.id;
-    const update =
-      direction === "up"
-        ? { $inc: { upvotes: 1 } }
-        : { $inc: { downvotes: 1 } };
 
     let post = null;
-
     if (isValidObjectId(key)) {
-      post = await Post.findByIdAndUpdate(key, update, { new: true });
+      post = await Post.findById(key).exec();
     }
     if (!post) {
-      post = await Post.findOneAndUpdate({ slug: key }, update, { new: true });
+      post = await Post.findOne({ slug: key }).exec();
+    }
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
     }
 
-    if (!post) return res.status(404).json({ message: "Post not found" });
+    const postId = post._id;
+    let existing = await PostVote.findOne({ postId, userId: authUserId }).exec();
+    let deltaUp = 0;
+    let deltaDown = 0;
 
-    return res.json(post);
+    if (!existing) {
+      if (direction === "up") {
+        deltaUp = 1;
+      } else {
+        deltaDown = 1;
+      }
+
+      existing = await PostVote.create({
+        postId,
+        userId: authUserId,
+        direction,
+      });
+    } else if (existing.direction === direction) {
+      if (direction === "up") {
+        deltaUp = -1;
+      } else {
+        deltaDown = -1;
+      }
+
+      await existing.deleteOne();
+      existing = null;
+    } else {
+      if (direction === "up") {
+        deltaUp = 1;
+        deltaDown = -1;
+      } else {
+        deltaUp = -1;
+        deltaDown = 1;
+      }
+
+      existing.direction = direction;
+      await existing.save();
+    }
+    const update = {};
+    if (deltaUp !== 0) update.upvotes = (update.upvotes || 0) + deltaUp;
+    if (deltaDown !== 0) update.downvotes = (update.downvotes || 0) + deltaDown;
+
+    let updatedPost = post;
+    if (deltaUp !== 0 || deltaDown !== 0) {
+      updatedPost = await Post.findByIdAndUpdate(
+        postId,
+        { $inc: update },
+        { new: true }
+      ).exec();
+    }
+    invalidatePostsCache();
+    res.set("Cache-Control", "no-store");
+
+    return res.json(updatedPost);
   } catch (err) {
     console.error("votePost error:", err.message);
     return res.status(500).json({ message: "Server error" });

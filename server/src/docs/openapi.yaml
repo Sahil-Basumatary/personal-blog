@@ -1,0 +1,553 @@
+openapi: 3.0.3
+info:
+  title: Sahil Blog API
+  version: 1.0.0
+  description: >
+    REST API for my personal blog platform supporting posts, views, and voting.
+    
+    **Authentication:** Handled via Clerk. Write operations require owner authentication.
+    
+    **Rate Limits:**
+    - Write operations (POST/PUT/DELETE /posts): 20 requests/minute per IP
+    - Vote operations: 60 requests/minute per IP
+    
+    **Base URL:** `/api`
+
+servers:
+  - url: http://localhost:5001/api
+    description: Local development
+  - url: TBC
+    description: Production
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Posts
+    description: Blog posts CRUD, views, and voting
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: Returns basic status to confirm API is running.
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /posts:
+    get:
+      tags: [Posts]
+      summary: List blog posts with pagination and filters
+      description: >
+        Returns a paginated list of blog posts. Supports search and category filtering.
+        Posts are sorted by creation date (newest first).
+      parameters:
+        - name: page
+          in: query
+          description: Page number (1-based, defaults to 1)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          example: 1
+        - name: limit
+          in: query
+          description: Posts per page (capped at 20, defaults to 5)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 5
+          example: 5
+        - name: category
+          in: query
+          description: Filter by category slug (exact match)
+          required: false
+          schema:
+            type: string
+            enum: [cs-journey, life-in-london, motivation, tools, general]
+          example: life-in-london
+        - name: search
+          in: query
+          description: Case-insensitive search across title, content, and excerpt using MongoDB $regex and an $or condition.
+          required: false
+          schema:
+            type: string
+          example: london
+      responses:
+        '200':
+          description: Paginated list of posts
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, total, page, pageSize, totalPages]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Post'
+                  total:
+                    type: integer
+                    description: Total number of posts matching the query
+                    example: 42
+                  page:
+                    type: integer
+                    description: Current page number
+                    example: 1
+                  pageSize:
+                    type: integer
+                    description: Number of items per page
+                    example: 10
+                  totalPages:
+                    type: integer
+                    description: Total number of pages
+                    example: 5
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    post:
+      tags: [Posts]
+      summary: Create a new post (owner only)
+      description: >
+        Creates a new blog post. Requires authentication and owner authorization.
+        A unique slug is automatically generated from the title with collision detection.
+      security:
+        - ClerkAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCreateInput'
+      responses:
+        '201':
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /posts/{id}:
+    get:
+      tags: [Posts]
+      summary: Get a single post by ID or slug
+      description: Retrieve a specific post using either MongoDB ObjectId or URL slug.
+      parameters:
+        - $ref: '#/components/parameters/PostIdOrSlug'
+      responses:
+        '200':
+          description: The requested post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    put:
+      tags: [Posts]
+      summary: Update a post (owner only)
+      description: Update an existing post. Requires owner authentication.
+      security:
+        - ClerkAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostIdOrSlug'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostUpdateInput'
+      responses:
+        '200':
+          description: Post updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    delete:
+      tags: [Posts]
+      summary: Delete a post (owner only)
+      description: Permanently delete a post. Requires owner authentication.
+      security:
+        - ClerkAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostIdOrSlug'
+      responses:
+        '200':
+          description: Post deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Post removed
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /posts/{id}/view:
+    post:
+      tags: [Posts]
+      summary: Increment view count
+      description: >
+        Increments the view counter for the specified post.
+        No authentication required. Can be called multiple times.
+      parameters:
+        - $ref: '#/components/parameters/PostIdOrSlug'
+      responses:
+        '200':
+          description: View count incremented
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /posts/{id}/vote:
+    post:
+      tags: [Posts]
+      summary: Vote on a post (one vote per user)
+      description: >
+        Records a vote for the given post by the authenticated user.
+
+        The backend enforces at most one vote per user per post:
+        - First request in a direction increments that counter.
+        - Sending the same direction again removes the user's vote.
+        - Sending the opposite direction switches the vote
+          (decrementing the old counter and incrementing the new one).
+      security:
+        - ClerkAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostIdOrSlug'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [direction]
+              properties:
+                direction:
+                  type: string
+                  enum: [up, down]
+                  description: Direction to apply ("up" or "down")
+                  example: up
+      responses:
+        '200':
+          description: Vote recorded and counters updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          description: Invalid direction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "direction must be 'up' or 'down'"
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+components:
+  securitySchemes:
+    ClerkAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Clerk JWT token (obtained from Clerk authentication)
+
+  parameters:
+    PostIdOrSlug:
+      name: id
+      in: path
+      required: true
+      description: MongoDB ObjectId or URL slug
+      schema:
+        type: string
+      examples:
+        objectId:
+          value: 6650df28b617141eff6d5a8e
+          summary: MongoDB ObjectId
+        slug:
+          value: life-in-london-as-an-international-student
+          summary: URL slug
+
+  schemas:
+    Post:
+      type: object
+      required: [_id, title, content, authorId, createdAt, updatedAt]
+      properties:
+        _id:
+          type: string
+          description: MongoDB ObjectId
+          example: 6650df28b617141eff6d5a8e
+        title:
+          type: string
+          example: Life in London as an International Student
+        content:
+          type: string
+          description: Full post content (plain text, newline-separated paragraphs)
+          example: "Paragraph one.\n\nParagraph two."
+        category:
+          type: string
+          description: Category slug
+          default: general
+          enum: [cs-journey, life-in-london, motivation, tools, general]
+          example: life-in-london
+        categoryLabel:
+          type: string
+          description: Human-readable category name
+          example: Life in London
+        excerpt:
+          type: string
+          description: Short description or preview text
+          example: A snapshot(np pun intended) of what it's really like to move to London...
+        slug:
+          type: string
+          description: >
+            Auto-generated URL-friendly slug (unique, with collision detection).
+            Example: "My Post" → "my-post", then "my-post-2" if collision occurs.
+          example: life-in-london-as-an-international-student
+        isFeatured:
+          type: boolean
+          description: Whether this post is featured on the homepage
+          default: false
+          example: true
+        views:
+          type: integer
+          description: Total view count
+          minimum: 0
+          default: 0
+          example: 128
+        upvotes:
+          type: integer
+          description: Total upvotes (not de-duplicated)
+          minimum: 0
+          default: 0
+          example: 10
+        downvotes:
+          type: integer
+          description: Total downvotes (not de-duplicated)
+          minimum: 0
+          default: 0
+          example: 1
+        authorId:
+          type: string
+          description: Clerk user ID of the post author (owner)
+          example: user_2aBcDeFgHiJkLmNoPqRs
+        createdAt:
+          type: string
+          format: date-time
+          description: ISO 8601 creation timestamp
+          example: 2025-12-28T07:30:00.000Z
+        updatedAt:
+          type: string
+          format: date-time
+          description: ISO 8601 last update timestamp
+          example: 2025-12-28T08:15:00.000Z
+
+    PostCreateInput:
+      type: object
+      required: [title, content]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          description: Post title (slug will be auto-generated from this)
+          example: Life in London as an International Student
+        content:
+          type: string
+          minLength: 1
+          description: Full post content
+          example: "Long form content..."
+        category:
+          type: string
+          description: Category slug (defaults to 'general' if omitted)
+          enum: [cs-journey, life-in-london, motivation, tools, general]
+          default: general
+          example: life-in-london
+        categoryLabel:
+          type: string
+          description: Human-readable category name
+          example: Life in London
+        excerpt:
+          type: string
+          description: Short description (optional)
+          example: What it's like moving to London...
+        isFeatured:
+          type: boolean
+          description: Feature this post on homepage
+          default: false
+          example: false
+
+    PostUpdateInput:
+      type: object
+      description: All fields are optional. Only provided fields will be updated.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          example: Updated Title
+        content:
+          type: string
+          minLength: 1
+          example: Updated content...
+        category:
+          type: string
+          enum: [cs-journey, life-in-london, motivation, tools, general]
+          example: motivation
+        categoryLabel:
+          type: string
+          example: Motivation
+        excerpt:
+          type: string
+          example: Updated excerpt...
+        isFeatured:
+          type: boolean
+          example: true
+
+    ErrorResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          example: Something went wrong
+        error:
+          type: string
+          description: Additional error details (only in development)
+          example: "MongoError: ..."
+
+  responses:
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            missing_fields:
+              value:
+                message: "Title and content are required"
+
+    Unauthenticated:
+      description: Not authenticated
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: "You must be signed in to perform this action."
+
+    Forbidden:
+      description: Not authorized (not the owner)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            not_owner:
+              value:
+                message: "Only Sahil can create posts."
+            misconfigured:
+              value:
+                message: "Server is not configured for write access yet."
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: "Post not found"
+
+    RateLimitExceeded:
+      description: Too many requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: "Too many requests, please try again later."
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+          description: Request limit per window
+          example: 20
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Requests remaining
+          example: 0
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds until limit resets
+          example: 45
+
+    ServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: "Server error"
