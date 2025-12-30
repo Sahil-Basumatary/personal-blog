@@ -36,7 +36,7 @@ A full-stack personal journal where I write about computer science, life in Lond
 
 - **Authentication Architecture** - Integrated Clerk with a custom owner-only guard. In production, Clerk middleware handles JWT validation and in tests, a mock middleware injects test user IDs for deterministic testing.
 
-- **Performance Optimization** - Implemented server side pagination with limit capping (max 50 items) to prevent abuse. Used `Promise.all()` to parallelize post fetching and count queries, cutting response time in half.
+- **Performance Optimization** - Implemented server side pagination with limit capping (max 20 items) to prevent abuse. Used `Promise.all()` to parallelize post fetching and count queries, cutting response time in half.
 
 - **Slug-based Routing** - Generated SEO-friendly slugs from post titles with collision detection. Posts can be accessed by MongoDB ObjectId OR slug, with graceful fallback between the two.
 
@@ -96,6 +96,8 @@ personal-blog/
 │   │   ├── middleware/        # Auth, rate limiting
 │   │   ├── db/                # MongoDB connection
 │   │   └── tests/             # Jest + supertest API tests
+│   │   ├── docs/              # API docs (OpenAPI 3.0 spec)
+│   │   │   └── openapi.yaml   # OpenAPI spec used by Swagger UI
 │   └── package.json
 │
 ├── blog/                      # Static Jekyll content 
@@ -106,31 +108,31 @@ personal-blog/
 
 ### Owner-Only Writing Experience
 - Authenticated via Clerk with dedicated OWNER_USER_ID guard
-- Create, edit, and delete posts from a clean writing UI
+- Create, edit, and delete posts from a user friendly writing UI
 - Local draft autosave 
 - SEO-friendly slug generation with collision handling
 
 ### Search and Discovery
-- Full-text search across title, excerpt, and content
-- Lightweight fuzzy search with typo tolerance (1-char mismatch)
+- Full-text search across title, excerpt, and content using case-insensitive regex
+- Fuzzy search with typo tolerance (1-char mismatch)
 - Category filters 
-- Paginated results with configurable page size (1–50)
+- Paginated results with configurable page size (1–20, default is 5)
 
 ### Blog Reading Experience
 - Featured post highlight on the main blog page
 - Reading progress bar on individual posts
 - View counter (backend source of truth with local fallback)
-- Mobile-responsive design with hamburger navigation
+- Mobile-responsive design with simple top navigation
 
 ### Engagement
 - Per-post upvote/downvote system
-- Vote state persisted in local storage and synced to backend
+- Toggleable backend vote system 
 - Login-gated voting to prevent spam
 
 ### Security & Reliability
 - Rate limiting: 20 writes/min, 60 votes/min per IP
 - Input validation and sanitization on all endpoints
-- Proper HTTP status codes (400, 401, 403, 404, 500)
+- Proper HTTP status codes (400, 401, 403, 404, 429, 500)
 - Error handling throughout the stack
 
 ## API Reference
@@ -145,15 +147,23 @@ personal-blog/
 | `POST` | `/api/posts/:idOrSlug/view` | Public | Increment view count |
 | `POST` | `/api/posts/:idOrSlug/vote` | Logged in | Upvote or downvote (`{ direction: "up" \| "down" }`) |
 | `GET` | `/api/health` | Public | Health check |
+| `GET` | `/api/docs` | Public | Swagger UI |
+
 
 ### Query Parameters for `GET /api/posts`
 
 | Param | Type | Default | Description |
 |-------|------|---------|-------------|
 | `page` | number | 1 | Page number |
-| `limit` | number | 10 | Items per page (max 50) |
-| `search` | string | — | Search term (matches title, case-insensitive) |
+| `limit` | number | 5 | Items per page (max 20) |
+| `search` | string | — | Search term (matches title, excerpt and content; frontend uses fuzzy rank implementation) |
 | `category` | string | — | Filter by category slug |
+
+## API Docs (Swagger UI)
+
+### The API is documented with an OpenAPI 3.0 spec:
+- Spec file: server/src/docs/openapi.yaml
+- Local Swagger UI: http://localhost:5001/api/docs
 
 ---
 
@@ -232,16 +242,15 @@ npm test
 
 ### Test Coverage
 
-- [x]Area Status
-- [x]Health check endpoint	
-- [x]Pagination + sorting	
-- [x]Search + category filtering	
-- [x]Fetch by ID and slug	
-- [x]View count increment	
-- [x]Create post (auth + validation)	
-- [x]Update post (auth + field updates)	
-- [x]Delete post (auth + removal)	
-- [x]Voting (auth + direction validation)
+- [x] Health check endpoint	
+- [x] Pagination + sorting	
+- [x] Search + category filtering	
+- [x] Fetch by ID and slug	
+- [x] View count increment	
+- [x] Create post (auth + validation)	
+- [x] Update post (auth + field updates)	
+- [x] Delete post (auth + removal)	
+- [x] Voting (auth + direction validation & per-user behavior)
 
 ## CI/CD
 
