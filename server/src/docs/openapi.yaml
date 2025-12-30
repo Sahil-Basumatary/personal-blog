@@ -377,13 +377,13 @@ components:
           example: 128
         upvotes:
           type: integer
-          description: Total upvotes (not de-duplicated)
+          description: Total upvotes (one vote per user, toggleable)
           minimum: 0
           default: 0
           example: 10
         downvotes:
           type: integer
-          description: Total downvotes (not de-duplicated)
+          description: Total downvotes (one vote per user, toggleable)
           minimum: 0
           default: 0
           example: 1
