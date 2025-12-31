@@ -137,10 +137,7 @@ export async function getPosts(req, res, next) {
     };
 
     setCachedPostsList(cacheParams, payload);
-    res.set(
-      "Cache-Control",
-      "public, max-age=30, stale-while-revalidate=30"
-    );
+    res.set("Cache-Control", "no-store");
 
     return res.json(payload);
   } catch (err) {

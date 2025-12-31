@@ -524,7 +524,11 @@ function BlogPage() {
 
             const allViews = JSON.parse(localStorage.getItem("post_views") || "{}");
             const localViews = allViews[post.id] || 0;
-            const views = post.views != null ? post.views : localViews;
+
+            const views = Math.max(
+              typeof post.views === "number" ? post.views : 0,
+              localViews
+            );
 
             return (
               <div key={post.id} className="post-card-wrapper">
