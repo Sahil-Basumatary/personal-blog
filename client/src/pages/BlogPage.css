@@ -588,6 +588,12 @@
   transform: translateY(-1px);
 }
 
+.three-dots-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
 .action-menu {
   position: absolute;
   top: 42px;
