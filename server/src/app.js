@@ -30,19 +30,32 @@ app.use(
 
 app.set("trust proxy", 1);
 
-const rawOrigins = process.env.CLIENT_ORIGIN || "";
-const allowedOrigins = rawOrigins
-  .split(",")
-  .map((o) => o.trim())
-  .filter(Boolean);
+const rawOriginMain = process.env.CLIENT_ORIGIN || "";
+const rawOriginPreview = process.env.CLIENT_ORIGIN_PREVIEW || "";
+const allowedOrigins = [
+  rawOriginMain,
+  rawOriginPreview,
+];
+
+if (process.env.NODE_ENV !== "production") {
+  allowedOrigins.push("http://localhost:5173", "http://localhost:5174", "http://localhost:5175");
+}
+
+const uniqueAllowedOrigins = [...new Set(
+  allowedOrigins
+    .map((o) => o.trim())
+    .filter(Boolean)
+)];
 
 app.use(
   cors({
     origin(origin, callback) {
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
+
+      if (uniqueAllowedOrigins.includes(origin)) {
         return callback(null, true);
       }
+      return callback(new Error(`Not allowed by CORS: ${origin}`));
     },
     credentials: true,
   })
