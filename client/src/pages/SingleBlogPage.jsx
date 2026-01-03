@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import { fetchPostById, incrementPostViews, voteOnPost, deletePost } from "../api/posts";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { OWNER_USER_ID } from "../config/authOwner";
+import MarkdownRenderer from "../components/markdown/MarkdownRenderer";
 
 function mapPostFromApi(p) {
   const slugOrId = p.slug || p._id;
@@ -353,9 +354,7 @@ function SingleBlogPage() {
 
       {/* FULL CONTENT */}
       <article className="single-content">
-        {post.content.split("\n").map((para, i) => (
-          <p key={i}>{para}</p>
-        ))}
+        <MarkdownRenderer markdown={post.content} />
       </article>
 
       {/* VOTE BELOW */}

@@ -45,7 +45,17 @@ describe("SingleBlogPage", () => {
     const post = {
       _id: "123",
       title: "Test Single Post",
-      content: "Hello from the single post.",
+      content: [
+        "Hello from the **single post**.",
+        "",
+        "[good link](/blog)",
+        "[bad link](javascript:alert(1))",
+        "",
+        "![local](/images/New-profile-picture.jpeg)",
+        "![blocked](https://evil.com/a.png)",
+        "",
+        "<script>window.__xss = true</script>",
+      ].join("\n"),
       category: "cs-journey",
       categoryLabel: "My CS Journey",
       excerpt: "Short description",
@@ -76,9 +86,23 @@ describe("SingleBlogPage", () => {
       expect(screen.getByText(/8 views/)).toBeInTheDocument();
     });
 
-    expect(
-      screen.getByText("Hello from the single post.")
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Hello from the/i)).toBeInTheDocument();
+    expect(screen.getByText("single post")).toBeInTheDocument();
+    expect(document.querySelector("strong")?.textContent).toBe("single post");
+
+    expect(screen.getByRole("link", { name: "good link" })).toHaveAttribute(
+      "href",
+      "/blog"
+    );
+    expect(screen.queryByRole("link", { name: "bad link" })).toBeNull();
+
+    expect(screen.getByRole("img", { name: "local" })).toHaveAttribute(
+      "src",
+      "/images/New-profile-picture.jpeg"
+    );
+    expect(screen.queryByRole("img", { name: "blocked" })).toBeNull();
+
+    expect(document.querySelector("script")).toBeNull();
 
     expect(
       screen.getByRole("link", { name: /Back to all posts/i })
