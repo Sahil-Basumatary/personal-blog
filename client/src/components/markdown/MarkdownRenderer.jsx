@@ -14,7 +14,7 @@ export default function MarkdownRenderer({ markdown }) {
       remarkPlugins={[remarkGfm]}
       skipHtml
       components={{
-        a({ href, children, ...props }) {
+        a({ node, href, children, ...props }) {
           const safeHref = sanitizeLinkHref(href);
           if (!safeHref) {
             return <span {...props}>{children}</span>;
@@ -33,7 +33,7 @@ export default function MarkdownRenderer({ markdown }) {
             </a>
           );
         },
-        img({ src, alt, ...props }) {
+        img({ node, src, alt, ...props }) {
           if (!isAllowedImageSrc(src)) {
             return null;
           }
