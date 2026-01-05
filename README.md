@@ -23,8 +23,10 @@ A full-stack personal journal where I write about computer science, life in Lond
 ## Demo
 
 <div align="center">
-  <a href="https://blog.sahilbzy.com"><strong>blog.sahilbzy.com</strong></a>
-  <br/>
+  <a href="https://blog.sahilbzy.com">
+    <img src="https://img.shields.io/badge/Live-blog.sahilbzy.com-blue?style=for-the-badge" alt="Live Demo">
+  </a>
+  <br/><br/>
   <img src="docs/demo.gif" alt="Demo preview" width="900" />
 </div>
 
