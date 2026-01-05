@@ -509,7 +509,15 @@ function BlogPage() {
           {query && filteredPosts.length === 0 && (
             <div className="empty-search">
               <p className="empty-text">
-                No posts found matching “{query}”.
+                No posts found matching "{query}".
+              </p>
+            </div>
+          )}
+
+          {!query && categoryFilter && filteredPosts.length === 0 && (
+            <div className="empty-search">
+              <p className="empty-text">
+                Cooking it fast... No posts in this category yet!
               </p>
             </div>
           )}

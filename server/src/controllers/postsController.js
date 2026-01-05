@@ -259,7 +259,7 @@ export const updatePost = async (req, res) => {
     }
 
     const key = req.params.id;
-    const { title, content, category, isFeatured } = req.body;
+    const { title, content, category, categoryLabel, excerpt, isFeatured } = req.body;
 
     let post = null;
 
@@ -281,6 +281,8 @@ export const updatePost = async (req, res) => {
     if (typeof title === "string") post.title = title.trim();
     if (typeof content === "string") post.content = content.trim();
     if (typeof category === "string") post.category = category;
+    if (typeof categoryLabel === "string") post.categoryLabel = categoryLabel;
+    if (typeof excerpt === "string") post.excerpt = excerpt;
     if (typeof isFeatured === "boolean") post.isFeatured = isFeatured;
 
     const updated = await post.save();
