@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/github/actions/workflow/status/Sahil-Basumatary/personal-blog/ci.yml?branch=main&style=for-the-badge&label=Tests" alt="Tests">
   </a>
   <a href="https://github.com/Sahil-Basumatary/personal-blog/blob/main/LICENSE">
-    <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License: MIT">
+    <img src="https://img.shields.io/badge/License-PolyForm_Noncommercial-red.svg?style=for-the-badge" alt="License: PolyForm Noncommercial">
   </a>
   <a href="https://linkedin.com/in/sahil-basumatary">
     <img src="https://img.shields.io/badge/-LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
@@ -262,7 +262,9 @@ npm test
 
 ## License
 
-Distributed under the MIT License. See LICENSE for details.
+This project is licensed under the **PolyForm Noncommercial License 1.0.0**.
+
+See [LICENSE](LICENSE) for full terms.
 
 ## Contact
 
