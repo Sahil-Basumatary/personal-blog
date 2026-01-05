@@ -20,6 +20,14 @@ A full-stack personal journal where I write about computer science, life in Lond
 
 </div>
 
+## Demo
+
+<div align="center">
+  <a href="https://blog.sahilbzy.com"><strong>blog.sahilbzy.com</strong></a>
+  <br/>
+  <img src="docs/demo.gif" alt="Demo preview" width="900" />
+</div>
+
 ### Tech Stack
 
 | Area           | Stack |
@@ -100,7 +108,6 @@ personal-blog/
 │   │   │   └── openapi.yaml   # OpenAPI spec used by Swagger UI
 │   └── package.json
 │
-├── blog/                      # Static Jekyll content 
 └── .github/workflows/         # CI pipeline
 
 ```
@@ -170,7 +177,7 @@ personal-blog/
 ## Setup
 
 ### Prerequisites
-- Node.js 18+ (LTS recommended)
+- Node.js 20+ (LTS recommended)
 - npm or pnpm
 - MongoDB instance (local or [MongoDB Atlas](https://www.mongodb.com/atlas))
 - [Clerk](https://clerk.com) app
@@ -271,6 +278,6 @@ See [LICENSE](LICENSE) for full terms.
 GitHub: [@Sahil-Basumatary](https://github.com/Sahil-Basumatary)
 LinkedIn: [Sahil Basumatary](https://www.linkedin.com/in/sahil-basumatary/)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p> ```
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
