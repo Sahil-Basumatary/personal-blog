@@ -200,15 +200,9 @@ export const createPost = async (req, res) => {
       content,
       category,
       isFeatured,
-      excerpt = "",
-      categoryLabel = "",
-    } = req.body;
-
-    if (!title || !content) {
-      return res
-        .status(400)
-        .json({ message: "Title and content are required" });
-    }
+      excerpt,
+      categoryLabel,
+    } = req.validatedBody;
 
     const baseSlug = makeBaseSlug(title);
     let slug = baseSlug || undefined;
@@ -259,7 +253,7 @@ export const updatePost = async (req, res) => {
     }
 
     const key = req.params.id;
-    const { title, content, category, categoryLabel, excerpt, isFeatured } = req.body;
+    const { title, content, category, categoryLabel, excerpt, isFeatured } = req.validatedBody;
 
     let post = null;
 
@@ -278,12 +272,12 @@ export const updatePost = async (req, res) => {
       post.authorId = gate.authUserId;
     }
 
-    if (typeof title === "string") post.title = title.trim();
-    if (typeof content === "string") post.content = content.trim();
-    if (typeof category === "string") post.category = category;
-    if (typeof categoryLabel === "string") post.categoryLabel = categoryLabel;
-    if (typeof excerpt === "string") post.excerpt = excerpt;
-    if (typeof isFeatured === "boolean") post.isFeatured = isFeatured;
+    if (title !== undefined) post.title = title;
+    if (content !== undefined) post.content = content;
+    if (category !== undefined) post.category = category;
+    if (categoryLabel !== undefined) post.categoryLabel = categoryLabel;
+    if (excerpt !== undefined) post.excerpt = excerpt;
+    if (isFeatured !== undefined) post.isFeatured = isFeatured;
 
     const updated = await post.save();
 
