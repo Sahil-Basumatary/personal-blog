@@ -246,7 +246,7 @@ describe("POST /api/posts auth and validation", () => {
       .send({
         title: "No auth post",
         content: "No auth content",
-        category: "test",
+        category: "general",
       });
 
     expect(res.statusCode).toBe(403);
@@ -260,7 +260,7 @@ describe("POST /api/posts auth and validation", () => {
       .send({
         title: "Not owner",
         content: "Should be rejected",
-        category: "test",
+        category: "general",
       });
 
     expect(res.statusCode).toBe(403);
@@ -274,11 +274,11 @@ describe("POST /api/posts auth and validation", () => {
       .send({
         title: "",
         content: "",
-        category: "test",
+        category: "general",
       });
 
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toBe("Title and content are required");
+    expect(res.body.message).toBe("Title cannot be empty");
   });
 
   it("creates a post when user is owner and data is valid", async () => {
@@ -288,7 +288,7 @@ describe("POST /api/posts auth and validation", () => {
       .send({
         title: "My New Test Post",
         content: "Some content for my post",
-        category: "test",
+        category: "general",
         categoryLabel: "Test",
         excerpt: "Some content for my post",
         isFeatured: true,
