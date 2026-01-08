@@ -27,3 +27,15 @@ export const voteLimiter = isTestEnv
         message: "Too many votes, please relax.",
       },
     });
+
+export const uploadLimiter = isTestEnv
+  ? noopLimiter
+  : rateLimit({
+      windowMs: 60 * 1000,
+      max: 10,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: {
+        message: "Too many uploads, please try again later.",
+      },
+    });
