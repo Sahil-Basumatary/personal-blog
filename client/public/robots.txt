@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Allow: /blog
+Allow: /blog/
+
+Disallow: /new-post
+Disallow: /write
+Disallow: /edit/
+Disallow: /sign-in
+Disallow: /sign-up
+
+Sitemap: https://personal-blog-j0jk.onrender.com/sitemap.xml
