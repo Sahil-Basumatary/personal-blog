@@ -3,6 +3,7 @@ const LIST_TTL_MS = 30 * 1000;
 const ITEM_TTL_MS = 60 * 1000;
 const listCache = new Map();
 const itemCache = new Map();
+const invalidationCallbacks = [];
 
 function now() {
   return Date.now();
@@ -59,4 +60,13 @@ export function setCachedPost(idOrSlug, post) {
 export function invalidatePostsCache() {
   listCache.clear();
   itemCache.clear();
+  for (const callback of invalidationCallbacks) {
+    callback();
+  }
+}
+
+export function onCacheInvalidate(callback) {
+  if (typeof callback === "function") {
+    invalidationCallbacks.push(callback);
+  }
 }
