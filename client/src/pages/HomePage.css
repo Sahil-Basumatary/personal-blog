@@ -96,8 +96,8 @@
 
 .subscribe-wrapper {
   width: 100%;
-  background: #1a1d24; 
-  padding: 14px 0; 
+  background: #1a1d24;
+  padding: 100px 0;
 }
 .subscribe {
   margin: 0 auto; 
@@ -133,5 +133,5 @@
   color: white;
   text-align: center;
   padding: 2rem;
-  margin-top: 2rem;
+  margin-top: 0;
 }
