@@ -10,6 +10,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import postsRouter from "./routes/posts.js";
 import sitemapRouter from "./routes/sitemap.js";
+import uploadsRouter from "./routes/uploads.js";
 import helmet from "helmet";
 
 dotenv.config();
@@ -87,6 +88,7 @@ if (process.env.NODE_ENV === "test") {
 
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/posts", postsRouter);
+app.use("/api/uploads", uploadsRouter);
 app.use("/sitemap.xml", sitemapRouter);
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
