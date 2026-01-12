@@ -24,9 +24,51 @@ const swaggerDocument = YAML.load(
 
 const app = express();
 
+const cspDirectives = {
+  defaultSrc: ["'self'"],
+  scriptSrc: [
+    "'self'",
+    "https://*.clerk.accounts.dev",
+    "https://challenges.cloudflare.com",
+  ],
+  styleSrc: [
+    "'self'",
+    "'unsafe-inline'",
+    "https://fonts.googleapis.com",
+  ],
+  imgSrc: [
+    "'self'",
+    "data:",
+    "https://*.clerk.com",
+    "https://img.clerk.com",
+    process.env.CLOUDFRONT_DOMAIN ? `https://${process.env.CLOUDFRONT_DOMAIN}` : null,
+  ].filter(Boolean),
+  fontSrc: [
+    "'self'",
+    "https://fonts.gstatic.com",
+  ],
+  connectSrc: [
+    "'self'",
+    "https://*.clerk.accounts.dev",
+    "https://api.clerk.com",
+  ],
+  frameSrc: [
+    "'self'",
+    "https://*.clerk.accounts.dev",
+    "https://challenges.cloudflare.com",
+  ],
+  workerSrc: ["'self'", "blob:"],
+  objectSrc: ["'none'"],
+  baseUri: ["'self'"],
+  formAction: ["'self'"],
+  frameAncestors: ["'none'"],
+  upgradeInsecureRequests: [],
+};
 app.use(
   helmet({
-    contentSecurityPolicy: false, //todo: improve this later :)
+    contentSecurityPolicy: {
+      directives: cspDirectives,
+    },
   })
 );
 

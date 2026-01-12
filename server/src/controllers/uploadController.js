@@ -5,6 +5,14 @@ import { requireSignedInOwner } from "../lib/authHelpers.js";
 
 const isTestEnv = process.env.NODE_ENV === "test";
 
+function getCdnUrl(key) {
+  const cdnDomain = process.env.CLOUDFRONT_DOMAIN;
+  if (!cdnDomain) {
+    throw new Error("Missing required environment variable: CLOUDFRONT_DOMAIN");
+  }
+  return `https://${cdnDomain}/${key}`;
+}
+
 export async function uploadImage(req, res) {
   const gate = requireSignedInOwner(req, {
     unauthStatus: 401,
@@ -23,7 +31,7 @@ export async function uploadImage(req, res) {
 
   if (isTestEnv) {
     return res.status(201).json({
-      url: `https://${bucket}.s3.us-east-1.amazonaws.com/${key}`,
+      url: `https://test-cdn.example.com/${key}`,
       key,
       originalName: req.file.originalname,
     });
@@ -50,7 +58,7 @@ export async function uploadImage(req, res) {
     return res.status(500).json({ message: "Image upload failed." });
   }
 
-  const url = `https://${bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+  const url = getCdnUrl(key);
 
   return res.status(201).json({
     url,
