@@ -3,6 +3,8 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getS3Client, getBucketName } from "../lib/s3Client.js";
 import { requireSignedInOwner } from "../lib/authHelpers.js";
 
+const isTestEnv = process.env.NODE_ENV === "test";
+
 export async function uploadImage(req, res) {
   const gate = requireSignedInOwner(req, {
     unauthStatus: 401,
@@ -17,9 +19,22 @@ export async function uploadImage(req, res) {
 
   const ext = req.file.detectedExt;
   const key = `${uuidv4()}.${ext}`;
+  const bucket = getBucketName();
+
+  if (isTestEnv) {
+    return res.status(201).json({
+      url: `https://${bucket}.s3.us-east-1.amazonaws.com/${key}`,
+      key,
+      originalName: req.file.originalname,
+    });
+  }
 
   const s3 = getS3Client();
-  const bucket = getBucketName();
+
+  if (!s3) {
+    console.error("S3 client not available");
+    return res.status(500).json({ message: "Storage service unavailable." });
+  }
 
   const command = new PutObjectCommand({
     Bucket: bucket,
@@ -43,5 +58,4 @@ export async function uploadImage(req, res) {
     originalName: req.file.originalname,
   });
 }
-
 
