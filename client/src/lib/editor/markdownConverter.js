@@ -18,12 +18,41 @@ export function markdownToHtml(md) {
   return String(result);
 }
 
+function createTurndownService() {
+  const turndown = new TurndownService({
+    headingStyle: "atx",
+    hr: "---",
+    bulletListMarker: "-",
+    codeBlockStyle: "fenced",
+    fence: "```",
+    emDelimiter: "*",
+    strongDelimiter: "**",
+    linkStyle: "inlined",
+  });
+  turndown.addRule("strikethrough", {
+    filter: ["del", "s", "strike"],
+    replacement: (content) => `~~${content}~~`,
+  });
+  turndown.addRule("listItem", {
+    filter: "li",
+    replacement: (content, node, options) => {
+      content = content.replace(/^\n+/, "").replace(/\n+$/, "\n").replace(/\n/gm, "\n    ");
+      let prefix = options.bulletListMarker + " ";
+      const parent = node.parentNode;
+      if (parent.nodeName === "OL") {
+        const start = parent.getAttribute("start");
+        const index = Array.prototype.indexOf.call(parent.children, node);
+        prefix = (start ? Number(start) + index : index + 1) + ". ";
+      }
+      return prefix + content.trim() + (node.nextSibling ? "\n" : "");
+    },
+  });
+  return turndown;
+}
+
 export function htmlToMarkdown(html) {
   if (html == null || typeof html !== "string") return "";
   if (html.trim() === "") return "";
-  const turndown = new TurndownService({
-    headingStyle: "atx",
-    codeBlockStyle: "fenced",
-  });
+  const turndown = createTurndownService();
   return turndown.turndown(html);
 }
