@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { markdownToHtml, htmlToMarkdown } from "./markdownConverter";
+import { markdownToHtml, htmlToMarkdown, validateAndStripUrls } from "./markdownConverter";
+
+const baseOrigin = "https://example.com";
 
 describe("markdownConverter", () => {
   describe("markdownToHtml", () => {
@@ -94,7 +96,62 @@ describe("markdownConverter", () => {
     });
 
     it("converts links back", () => {
-      expect(htmlToMarkdown('<a href="https://example.com">Link</a>')).toContain("[Link](https://example.com)");
+      expect(htmlToMarkdown('<a href="https://example.com">Link</a>', { validate: false })).toContain("[Link](https://example.com)");
+    });
+  });
+
+  describe("validateAndStripUrls", () => {
+    it("returns empty for null/undefined", () => {
+      expect(validateAndStripUrls(null)).toEqual({ markdown: "", stripped: [] });
+      expect(validateAndStripUrls(undefined)).toEqual({ markdown: "", stripped: [] });
+    });
+
+    it("allows valid http/https links", () => {
+      const result = validateAndStripUrls("[Example](https://google.com)", { baseOrigin });
+      expect(result.markdown).toContain("[Example](https://google.com)");
+      expect(result.stripped).toHaveLength(0);
+    });
+
+    it("allows relative links", () => {
+      const result = validateAndStripUrls("[Blog](/blog/post)", { baseOrigin });
+      expect(result.markdown).toContain("[Blog](/blog/post)");
+      expect(result.stripped).toHaveLength(0);
+    });
+
+    it("strips javascript: links", () => {
+      const result = validateAndStripUrls("[XSS](javascript:void)", { baseOrigin });
+      expect(result.markdown).not.toContain("javascript:");
+      expect(result.stripped).toContainEqual({ kind: "link", url: "javascript:void" });
+    });
+
+    it("strips data: links", () => {
+      const result = validateAndStripUrls("[X](data:text/html,<h1>x</h1>)", { baseOrigin });
+      expect(result.markdown).not.toContain("data:");
+      expect(result.stripped.length).toBeGreaterThan(0);
+    });
+
+    it("allows same-origin images", () => {
+      const result = validateAndStripUrls("![Alt](/images/photo.png)", { baseOrigin });
+      expect(result.markdown).toContain("![Alt](/images/photo.png)");
+      expect(result.stripped).toHaveLength(0);
+    });
+
+    it("strips external domain images", () => {
+      const result = validateAndStripUrls("![Tracker](https://evil.com/pixel.gif)", { baseOrigin });
+      expect(result.markdown).not.toContain("evil.com");
+      expect(result.stripped).toContainEqual({ kind: "image", url: "https://evil.com/pixel.gif" });
+    });
+
+    it("strips data: URI images", () => {
+      const result = validateAndStripUrls("![Img](data:image/png;base64,abc)", { baseOrigin });
+      expect(result.markdown).not.toContain("data:");
+      expect(result.stripped.length).toBeGreaterThan(0);
+    });
+
+    it("preserves link text when stripped", () => {
+      const result = validateAndStripUrls("Click [here](javascript:void) now", { baseOrigin });
+      expect(result.markdown).toContain("here");
+      expect(result.markdown).not.toContain("javascript:");
     });
   });
 });
