@@ -25,6 +25,7 @@ const subscriberSchema = new mongoose.Schema(
     confirmed: {
       type: Boolean,
       default: false,
+      index: true,
     },
     confirmedAt: {
       type: Date,
@@ -52,4 +53,3 @@ subscriberSchema.statics.generateToken = function () {
 const Subscriber = mongoose.model("Subscriber", subscriberSchema);
 
 export default Subscriber;
-
