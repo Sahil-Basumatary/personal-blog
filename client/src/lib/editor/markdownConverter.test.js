@@ -154,4 +154,93 @@ describe("markdownConverter", () => {
       expect(result.markdown).not.toContain("javascript:");
     });
   });
+
+  describe("GFM features", () => {
+    it("converts tables to html", () => {
+      const md = "| A | B |\n|---|---|\n| 1 | 2 |";
+      const html = markdownToHtml(md);
+      expect(html).toContain("<table>");
+      expect(html).toContain("<th>A</th>");
+      expect(html).toContain("<td>1</td>");
+    });
+
+    it("converts tables back to markdown", () => {
+      const html = "<table><tr><th>X</th><th>Y</th></tr><tr><td>a</td><td>b</td></tr></table>";
+      const md = htmlToMarkdown(html, { validate: false });
+      expect(md).toContain("|");
+      expect(md).toContain("X");
+      expect(md).toContain("a");
+    });
+
+    it("converts task lists to html", () => {
+      const html = markdownToHtml("- [x] Done\n- [ ] Todo");
+      expect(html).toContain('type="checkbox"');
+      expect(html).toContain("checked");
+    });
+  });
+
+  describe("round-trip conversion", () => {
+    it("preserves headings", () => {
+      const original = "# Main Title";
+      const result = htmlToMarkdown(markdownToHtml(original), { validate: false });
+      expect(result).toContain("# Main Title");
+    });
+
+    it("preserves emphasis", () => {
+      const original = "**bold** and *italic*";
+      const result = htmlToMarkdown(markdownToHtml(original), { validate: false });
+      expect(result).toContain("**bold**");
+      expect(result).toContain("*italic*");
+    });
+
+    it("preserves links", () => {
+      const original = "[Link](https://example.com)";
+      const result = htmlToMarkdown(markdownToHtml(original), { validate: false });
+      expect(result).toContain("[Link](https://example.com)");
+    });
+
+    it("preserves code blocks", () => {
+      const original = "```\ncode\n```";
+      const result = htmlToMarkdown(markdownToHtml(original), { validate: false });
+      expect(result).toContain("```");
+      expect(result).toContain("code");
+    });
+
+    it("preserves lists", () => {
+      const original = "- Item A\n- Item B";
+      const result = htmlToMarkdown(markdownToHtml(original), { validate: false });
+      expect(result).toContain("- Item A");
+      expect(result).toContain("- Item B");
+    });
+  });
+
+  describe("edge cases", () => {
+    it("handles unicode and emojis", () => {
+      const html = markdownToHtml("Hello 🚀 世界");
+      expect(html).toContain("🚀");
+      expect(html).toContain("世界");
+    });
+
+    it("handles nested blockquotes", () => {
+      const html = markdownToHtml("> L1\n>> L2\n>>> L3");
+      expect(html.match(/<blockquote>/g).length).toBe(3);
+    });
+
+    it("handles special chars in code", () => {
+      const html = markdownToHtml("`<script>bad</script>`");
+      expect(html).toContain("<code>");
+      expect(html).not.toMatch(/<script>/);
+    });
+
+    it("does not execute raw HTML", () => {
+      const html = markdownToHtml("<script>alert(1)</script>");
+      expect(html).not.toContain("<script>");
+    });
+
+    it("handles very long content", () => {
+      const long = "word ".repeat(500);
+      const html = markdownToHtml(long);
+      expect(html).toContain("word");
+    });
+  });
 });

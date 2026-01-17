@@ -48,6 +48,39 @@ function createTurndownService() {
       return prefix + content.trim() + (node.nextSibling ? "\n" : "");
     },
   });
+  turndown.addRule("taskListItem", {
+    filter: (node) => {
+      return (
+        node.nodeName === "LI" &&
+        node.parentNode?.nodeName === "UL" &&
+        node.querySelector('input[type="checkbox"]')
+      );
+    },
+    replacement: (content, node) => {
+      const checkbox = node.querySelector('input[type="checkbox"]');
+      const checked = checkbox?.checked ? "x" : " ";
+      const text = content.replace(/^\s*\[.\]\s*/, "").trim();
+      return `- [${checked}] ${text}\n`;
+    },
+  });
+  turndown.addRule("table", {
+    filter: "table",
+    replacement: (content, node) => {
+      const rows = Array.from(node.querySelectorAll("tr"));
+      if (rows.length === 0) return "";
+      const result = [];
+      rows.forEach((row, rowIndex) => {
+        const cells = Array.from(row.querySelectorAll("th, td"));
+        const cellContents = cells.map((cell) => cell.textContent.trim());
+        result.push(`| ${cellContents.join(" | ")} |`);
+        if (rowIndex === 0) {
+          const separator = cells.map(() => "---").join(" | ");
+          result.push(`| ${separator} |`);
+        }
+      });
+      return `\n${result.join("\n")}\n`;
+    },
+  });
   return turndown;
 }
 
