@@ -2,6 +2,7 @@ import Subscriber from "../models/subscriberModel.js";
 import {
   sendConfirmationEmail,
   sendUnsubscribeConfirmation,
+  sendDeletionConfirmation,
 } from "../services/emailService.js";
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
@@ -87,6 +88,25 @@ export async function unsubscribe(req, res) {
     return res.status(200).json({ message: "You have been unsubscribed." });
   } catch (err) {
     console.error("unsubscribe error:", err.message);
+    return res.status(500).json({ message: "Server error" });
+  }
+}
+
+export async function deleteData(req, res) {
+  try {
+    const { token } = req.params;
+    if (!token || token.length !== TOKEN_HEX_LENGTH) {
+      return res.status(400).json({ message: "Invalid token." });
+    }
+    const subscriber = await Subscriber.findOne({ unsubscribeToken: token });
+    if (!subscriber) {
+      return res.status(404).json({ message: "Subscriber not found." });
+    }
+    await sendDeletionConfirmation(subscriber.email);
+    await Subscriber.findOneAndDelete({ unsubscribeToken: token });
+    return res.status(200).json({ message: "Your data has been permanently deleted." });
+  } catch (err) {
+    console.error("deleteData error:", err.message);
     return res.status(500).json({ message: "Server error" });
   }
 }
