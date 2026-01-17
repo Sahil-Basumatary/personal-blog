@@ -39,3 +39,15 @@ export const uploadLimiter = isTestEnv
         message: "Too many uploads, please try again later.",
       },
     });
+
+export const subscribeLimiter = isTestEnv
+  ? noopLimiter
+  : rateLimit({
+      windowMs: 60 * 60 * 1000,
+      max: 5,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: {
+        message: "Too many subscription attempts, please try again later.",
+      },
+    });
