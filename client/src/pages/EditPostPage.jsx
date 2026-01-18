@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import "./NewPostPage.css"; 
 import { fetchPostById, updatePost } from "../api/posts";
 import { useUser, useAuth } from "@clerk/clerk-react";
-import { OWNER_USER_ID } from "../config/authOwner";  
+import { isOwnerUser } from "../config/authOwner";  
 
 function EditPostPage() {
   const { id } = useParams();
@@ -11,7 +11,7 @@ function EditPostPage() {
   const { user, isLoaded, isSignedIn } = useUser();
   const { getToken } = useAuth();
   const [slug, setSlug] = useState(null);
-  const isOwner = isLoaded && isSignedIn && user?.id === OWNER_USER_ID;
+  const isOwner = isLoaded && isSignedIn && isOwnerUser(user?.id);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [submitError, setSubmitError] = useState(null);

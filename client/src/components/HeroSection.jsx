@@ -2,14 +2,14 @@ import "./HeroSection.css";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
-import { OWNER_USER_ID } from "../config/authOwner";
+import { isOwnerUser } from "../config/authOwner";
 import UserChip from "./UserChip";
 
 function HeroSection() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { isSignedIn, user } = useUser();
 
-  const isOwner = isSignedIn && user?.id === OWNER_USER_ID;
+  const isOwner = isSignedIn && isOwnerUser(user?.id);
 
   return (
     <header className="hero hero-hybrid">

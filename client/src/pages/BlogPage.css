@@ -144,21 +144,6 @@
   color: #d1d5db;
 }
 
-@media (max-width: 768px) {
-  .blog-header-top {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .blog-header-right {
-    margin-left: 0;
-    justify-content: flex-start;
-  }
-  .blog-header-right .new-post-btn {
-    width: 100%;
-    text-align: center;
-  }
-}
-
 @media (max-width: 640px) {
   .blog-page {
     padding-top: 56px;
@@ -252,8 +237,8 @@
   background: #f3f4f6;
   border: 1px solid #e5e7eb;
   color: #6b7280;
-  min-width: 44px;
-  min-height: 44px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -309,8 +294,8 @@
 }
 
 .vote-btn {
-  min-width: 44px;
-  min-height: 44px;
+  width: 36px;
+  height: 36px;
   font-size: 18px;
   font-weight: 600;
   display: flex;
@@ -363,10 +348,9 @@
 
 .blog-header-top {
   display: flex;
-  align-items: flex-start; 
+  align-items: center; 
   justify-content: space-between;
   margin-bottom: 2rem;
-  gap: 1.5rem;
 }
 
 .blog-header-right {
@@ -378,21 +362,7 @@
 }
 
 .blog-header-right .new-post-btn {
-  margin-top: 0;
-  padding: 0.65rem 1.4rem;
-  border-radius: 999px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  background: #111827;
-  color: #f9fafb;
-  border: none;
-  cursor: pointer;
-  transition: background 0.15s ease, transform 0.1s ease;
-  white-space: nowrap;
-}
-.blog-header-right .new-post-btn:hover {
-  background: #020617;
-  transform: translateY(-1px);
+  margin-top: 38px;
 }
 
 

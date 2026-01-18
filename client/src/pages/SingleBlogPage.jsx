@@ -4,7 +4,7 @@ import "./SingleBlogPage.css";
 import { useEffect, useState, useRef } from "react";
 import { fetchPostById, incrementPostViews, voteOnPost, deletePost } from "../api/posts";
 import { useUser, useAuth } from "@clerk/clerk-react";
-import { OWNER_USER_ID } from "../config/authOwner";
+import { isOwnerUser } from "../config/authOwner";
 import MarkdownRenderer from "../components/markdown/MarkdownRenderer";
 
 function mapPostFromApi(p) {
@@ -44,7 +44,7 @@ function SingleBlogPage() {
 
   const { isLoaded, isSignedIn, user } = useUser();
   const { getToken } = useAuth();
-  const isOwner = isLoaded && isSignedIn && user?.id === OWNER_USER_ID;
+  const isOwner = isLoaded && isSignedIn && isOwnerUser(user?.id);
 
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
