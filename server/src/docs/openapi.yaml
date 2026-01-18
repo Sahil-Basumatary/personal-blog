@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Sahil Blog API
+  title: Sahil Blogs API
   version: 1.0.0
   description: >
     REST API for my personal blog platform supporting posts, views, and voting.

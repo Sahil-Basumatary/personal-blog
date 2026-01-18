@@ -14,7 +14,7 @@ function HeroSection() {
   return (
     <header className="hero hero-hybrid">
       <nav className="navbar hero-nav">
-        <h1 className="logo">Sahil&apos;s Blog</h1>
+        <h1 className="logo">Sahil Blogs</h1>
 
         <div className="nav-links desktop-nav">
           <a href="/blog" className="nav-item">
