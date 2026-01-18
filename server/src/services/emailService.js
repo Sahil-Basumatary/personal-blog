@@ -33,3 +33,10 @@ export async function sendNewPostNotification(email, post, unsubscribeToken) {
   return { success: true, messageId: `stub-${Date.now()}` };
 }
 
+export async function sendDeletionConfirmation(email) {
+  console.log("[EMAIL STUB] Deletion confirmation:");
+  console.log(`  To: ${email}`);
+  console.log(`  Subject: Your data has been deleted`);
+  return { success: true, messageId: `stub-${Date.now()}` };
+}
+
