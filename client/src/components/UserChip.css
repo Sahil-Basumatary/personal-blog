@@ -48,6 +48,7 @@
   padding: 0.25rem 0.6rem;
   background: transparent;
   cursor: pointer;
+  min-height: 44px;
 }
 
 .user-chip-main:focus-visible {
@@ -113,6 +114,9 @@
     background 0.15s ease,
     color 0.15s ease,
     transform 0.08s ease;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 }
 
 .user-chip--dark .user-chip-signout {
@@ -157,6 +161,7 @@
     transform 0.12s ease,
     box-shadow 0.18s ease,
     border-color 0.18s ease;
+  min-height: 44px;
 }
 
 .user-chip-signin:focus,

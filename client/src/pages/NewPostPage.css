@@ -1,35 +1,32 @@
 .new-post-page {
   min-height: calc(100vh - 80px);
-  padding: 4rem 0 5rem;
+  padding: clamp(2rem, 5vw, 4rem) 0;
   display: flex;
   justify-content: center;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
 }
-
 .new-post-card {
   width: 100%;
-  max-width: 1000px;          
+  max-width: 1000px;
   background: #ffffff;
   border-radius: 18px;
-  padding: 2.5rem 2.8rem;
+  padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1.25rem, 3.5vw, 2.8rem);
   box-shadow:
     0 18px 45px rgba(15, 23, 42, 0.08),
     0 1px 3px rgba(15, 23, 42, 0.04);
   border: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
-  align-items: stretch;      
+  align-items: stretch;
 }
-
 .new-post-title {
-  font-size: 2.3rem;
+  font-size: var(--fs-title);
   font-weight: 700;
   margin-bottom: 0.4rem;
   color: #0f172a;
 }
-
 .new-post-subtitle {
-  font-size: 1.2rem;
+  font-size: var(--fs-body);
   color: #6b7280;
   margin-bottom: 2rem;
   margin-top: 1.3rem;
@@ -40,19 +37,17 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-
   border: none;
   background: transparent;
-  padding: 0.3rem 0rem;
+  padding: 0.3rem 0.5rem;
   margin-bottom: 1.8rem;
-
   font-size: 0.9rem;
   font-weight: 500;
   color: #4b5563;
   cursor: pointer;
-
   border-radius: 999px;
   transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  min-height: 44px;
 }
 
 .back-link:hover {
@@ -65,7 +60,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: clamp(1.25rem, 3vw, 1.5rem);
 }
 
 .field {
@@ -127,6 +122,7 @@
   font-weight: 500;
   cursor: pointer;
   border: none;
+  min-height: 44px;
 }
 
 .primary-btn {
@@ -159,23 +155,25 @@
 
 @media (max-width: 640px) {
   .new-post-card {
-    padding: 2rem 1.6rem 2.2rem;
     border-radius: 16px;
   }
-
-  .new-post-title {
-    font-size: 1.9rem;
-  }
-
   .form-actions {
     flex-direction: column-reverse;
     align-items: stretch;
   }
-
   .primary-btn,
   .ghost-btn {
     width: 100%;
     justify-content: center;
     text-align: center;
+  }
+}
+@media (max-width: 480px) {
+  .new-post-card {
+    border-radius: 12px;
+  }
+  .back-link {
+    font-size: 0.85rem;
+    margin-bottom: 1.4rem;
   }
 }

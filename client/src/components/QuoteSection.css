@@ -1,14 +1,13 @@
 .quote-section {
-  padding: 120px 10%;
+  padding: var(--space-section) var(--page-horizontal-gutter);
   background: #f8fafc;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
 .quote {
   max-width: 900px;
-  font-size: 32px;
+  font-size: clamp(1.25rem, 3vw + 0.5rem, 2rem);
   font-weight: 300;
   font-style: italic;
   color: #1e293b;
