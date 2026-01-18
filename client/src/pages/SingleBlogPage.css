@@ -11,7 +11,7 @@
 }
 
 .single-container {
-  padding: 4.5rem 0 4rem;
+  padding: var(--space-section) 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
   line-height: 1.75;
   color: #111;
@@ -33,7 +33,7 @@
 }
 
 .single-title {
-  font-size: 2.8rem;
+  font-size: var(--fs-title);
   font-weight: 700;
   margin-bottom: 1.5rem;
   letter-spacing: -0.6px;
@@ -96,12 +96,12 @@
 
 .single-content {
   background: #ffffff;
-  padding: 3rem;
+  padding: var(--space-content);
   border-radius: 18px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06),
     0 12px 28px rgba(0, 0, 0, 0.04);
   line-height: 1.8;
-  font-size: 1.15rem;
+  font-size: var(--fs-body);
   color: #222;
   margin-top: 2.3rem;
 }
@@ -238,6 +238,8 @@
   font-size: 16px;
   cursor: pointer;
   transition: 0.15s ease;
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .single-footer-votes .vote-btn:hover {
@@ -298,7 +300,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
+  min-width: 44px;
+  min-height: 44px;
   backdrop-filter: blur(6px) saturate(180%);
   transition: 0.2s ease;
 }
@@ -419,4 +422,29 @@
   width: 12px;
   height: 12px;
   display: block;
+}
+
+@media (max-width: 768px) {
+  .single-meta-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .single-footer-votes {
+    margin-left: 0;
+    justify-content: center;
+    width: 100%;
+  }
+  .single-header-top {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .single-content {
+    border-radius: 12px;
+  }
+  .single-header-top {
+    flex-wrap: wrap;
+  }
 }
