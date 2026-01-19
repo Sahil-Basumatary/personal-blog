@@ -142,23 +142,47 @@ header.hero {
 .mobile-menu {
   display: none;
   flex-direction: column;
-  background: rgba(20, 20, 20, 0.85);
-  backdrop-filter: blur(10px);
-  padding: var(--space-element);
-  gap: var(--space-element);
-  text-align: right;
-  animation: fadeSlide 0.3s ease;
+  background: linear-gradient(160deg, rgba(30, 30, 31, 0.9), rgba(16, 16, 17, 0.82));
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow:
+    0 16px 38px rgba(0, 0, 0, 0.42),
+    0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  border-radius: 18px;
+  padding: 16px 18px;
+  gap: 10px;
+  text-align: left;
+  animation: fadeSlide 0.28s ease;
+  max-width: 360px;
+  margin: 12px auto 0;
 }
 .mobile-menu a {
-  color: white;
+  color: #f5f5f7;
   font-size: var(--fs-body);
   min-height: 44px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.18s ease, transform 0.18s ease;
 }
 .mobile-menu.show {
   display: flex;
+}
+.mobile-menu-user {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  justify-content: flex-start;
+}
+.mobile-menu a:hover {
+  background: rgba(255, 255, 255, 0.075);
+  transform: translateY(-1px);
 }
 @keyframes fadeSlide {
   from {

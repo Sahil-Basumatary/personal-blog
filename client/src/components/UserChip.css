@@ -228,13 +228,33 @@
     gap: 0.5rem;
   }
 
+  .user-chip--light:has(.user-chip-main),
+  .user-chip--dark:has(.user-chip-main) {
+    padding: 0.25rem 0.45rem;
+  }
+
+  .user-chip-main,
+  .user-chip-signout,
+  .user-chip-signin {
+    min-height: 36px;
+  }
+
   .user-chip-avatar {
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
+  }
+
+  .user-chip-greeting {
+    display: none;
   }
 
   .user-chip-name {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  .user-chip-signout {
+    padding: 0.2rem 0.55rem;
+    font-size: 0.7rem;
   }
 
   .user-chip-signin {

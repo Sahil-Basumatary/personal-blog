@@ -147,7 +147,40 @@
 @media (max-width: 640px) {
   .blog-page {
     padding-top: 56px;
+    padding-left: 1.3rem;
+    padding-right: 1.3rem;
   }
+
+  .blog-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .blog-header > .user-chip--light {
+    position: static;
+    order: 2;
+    flex-shrink: 0;
+    margin-top: -10px;
+  }
+
+  .posts-section {
+    margin-top: 1.5rem;
+  }
+
+  .posts-section-title {
+    margin-bottom: 2.4rem;
+  }
+
+  .posts-list {
+    gap: 1.15rem;
+    margin-top: 0.85rem;
+  }
+
+  .post-card-wrapper {
+    margin-bottom: 0;
+  }
+
   .featured-post {
     padding: 20px 18px 22px;
   }
@@ -342,8 +375,8 @@
 
 .blog-header > .user-chip--light {
   position: absolute;
-  top: 8px;   
-  right: 0; 
+  top: 8px;
+  right: 0;
 }
 
 .blog-header-top {
@@ -351,6 +384,7 @@
   align-items: center; 
   justify-content: space-between;
   margin-bottom: 2rem;
+  gap: 12px;
 }
 
 .blog-header-right {
@@ -365,6 +399,37 @@
   margin-top: 38px;
 }
 
+@media (max-width: 640px) {
+  .blog-header-top {
+    order: 1;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+  .blog-header-right {
+    width: 100%;
+    margin-left: 0;
+  }
+  .blog-header-right .new-post-btn {
+    margin-top: 0;
+    width: 100%;
+    text-align: center;
+    padding: 12px 20px;
+  }
+  .post-card-views {
+    position: static;
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin: 0 0 8px 0;
+  }
+  .post-card {
+    padding-top: 1rem;
+  }
+}
 
 .blog-title {
   margin: 0;
@@ -401,7 +466,7 @@
 
 .post-card-views {
   position: absolute;
-  top: 22px;
+  top: 18px;
   right: 16px;
   z-index: 100;
   display: flex;
@@ -410,8 +475,10 @@
 }
 
 .post-card-wrapper .view-pill {
-  display: inline-block;
-  padding: 5px 12px;
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
   font-size: 0.8rem;
   color: #444;
   background: rgba(245, 247, 250, 0.85);
@@ -422,6 +489,33 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   transition: transform 0.12s ease;
   margin-top: 0;
+}
+
+@media (max-width: 640px) {
+  .post-card-views {
+    position: absolute;
+    top: 20px;
+    right: 10px;
+    z-index: 10;
+    justify-content: flex-end;
+    gap: 6px;
+    margin: 0;
+  }
+
+  .post-card-views .view-pill {
+    height: 20px;
+    padding: 0 9px;
+    font-size: 0.72rem;
+  }
+
+  .post-card-views .three-dots-btn {
+    width: 20px;
+    height: 20px;
+  }
+
+  .post-card-title {
+    padding-right: 110px;
+  }
 }
 
 .post-card-wrapper .view-pill:hover {
@@ -593,8 +687,8 @@
 .three-dots-btn {
   background: rgba(245, 247, 250, 0.85);
   border: 1px solid rgba(0, 0, 0, 0.05);
-  min-width: 44px;
-  min-height: 44px;
+  width: 32px;
+  height: 32px;
   border-radius: 999px;
   display: flex;
   align-items: center;
@@ -707,6 +801,12 @@
   text-decoration: none;
   transition: all 0.2s ease;
   margin-bottom: 24px;;
+}
+
+@media (max-width: 640px) {
+  .home-pill {
+    margin-bottom: 36px;
+  }
 }
 
 .home-pill:hover {

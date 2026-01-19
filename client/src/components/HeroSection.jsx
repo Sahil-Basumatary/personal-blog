@@ -33,7 +33,7 @@ function HeroSection() {
           </a>
 
           {isOwner && (
-            <Link to="/write" className="write-btn">
+            <Link to="/write" className="nav-item">
               Write
             </Link>
           )}
@@ -52,6 +52,9 @@ function HeroSection() {
       </nav>
 
       <div className={`mobile-menu ${menuOpen ? "show" : ""}`}>
+        <a href="/blog" onClick={() => setMenuOpen(false)}>
+          Blog
+        </a>
         <a href="#" onClick={() => setMenuOpen(false)}>
           About
         </a>
@@ -63,6 +66,14 @@ function HeroSection() {
         >
           LinkedIn
         </a>
+        {isOwner && (
+          <Link to="/write" onClick={() => setMenuOpen(false)}>
+            Write
+          </Link>
+        )}
+        <div className="mobile-menu-user">
+          <UserChip surface="dark" />
+        </div>
       </div>
 
       <div className="hero-content">
