@@ -39,40 +39,72 @@ export async function getPosts(req, res, next) {
     const cacheParams = { page, limit, category, search };
     const cached = getCachedPostsList(cacheParams);
 
+    let items;
+    let total;
+    let fromCache = false;
+
     if (cached) {
-      res.set(
-        "Cache-Control",
-        "public, max-age=30, stale-while-revalidate=30"
-      );
-      return res.json(cached);
+      items = cached.items;
+      total = cached.total;
+      fromCache = true;
+    } else {
+      const query = {};
+      if (category) query.category = category;
+      if (search) {
+        const regex = new RegExp(search, "i");
+        query.$or = [{ title: regex }, { content: regex }, { excerpt: regex }];
+      }
+      [items, total] = await Promise.all([
+        Post.find(query)
+          .sort({ createdAt: -1 })
+          .skip((page - 1) * limit)
+          .limit(limit),
+        Post.countDocuments(query),
+      ]);
+      const rawPayload = {
+        items,
+        total,
+        page,
+        pageSize: limit,
+        totalPages: Math.ceil(total / limit),
+      };
+      setCachedPostsList(cacheParams, rawPayload);
     }
 
-    const query = {};
-    if (category) query.category = category;
-
-    if (search) {
-      const regex = new RegExp(search, "i");
-      query.$or = [{ title: regex }, { content: regex }, { excerpt: regex }];
+    let itemsWithVotes = items;
+    const authUserId = getAuthUserIdFromReq(req);
+    if (authUserId && items.length > 0) {
+      const postIds = items.map(p => p._id);
+      const votes = await PostVote.find({
+        postId: { $in: postIds },
+        userId: authUserId,
+      }).exec();
+      const voteMap = new Map();
+      for (const v of votes) {
+        voteMap.set(v.postId.toString(), v.direction);
+      }
+      itemsWithVotes = items.map(p => {
+        const postObj = p.toObject ? p.toObject() : p;
+        return {
+          ...postObj,
+          userVote: voteMap.get(postObj._id.toString()) || null,
+        };
+      });
     }
-
-    const [items, total] = await Promise.all([
-      Post.find(query)
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit),
-      Post.countDocuments(query),
-    ]);
 
     const payload = {
-      items,
+      items: itemsWithVotes,
       total,
       page,
       pageSize: limit,
       totalPages: Math.ceil(total / limit),
     };
 
-    setCachedPostsList(cacheParams, payload);
-    res.set("Cache-Control", "no-store");
+    if (fromCache) {
+      res.set("Cache-Control", "public, max-age=30, stale-while-revalidate=30");
+    } else {
+      res.set("Cache-Control", "no-store");
+    }
 
     return res.json(payload);
   } catch (err) {
