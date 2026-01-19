@@ -82,36 +82,34 @@ export async function getPosts(req, res, next) {
 
 export async function getPostById(req, res, next) {
   try {
-    const key = req.params.id; 
-    const cached = getCachedPost(key);
-    if (cached) {
-      res.set(
-        "Cache-Control",
-        "public, max-age=60, stale-while-revalidate=60"
-      );
-      return res.json(cached);
-    }
-
-    const { id } = req.params;
-    let post;
-
-    if (isValidObjectId(id)) {
-      post = await Post.findById(id);
-    } else {
-      post = await Post.findOne({ slug: id });
-    }
-
+    const key = req.params.id;
+    let post = getCachedPost(key);
     if (!post) {
-      return res.status(404).json({ message: "Post not found" });
+      const { id } = req.params;
+      if (isValidObjectId(id)) {
+        post = await Post.findById(id);
+      } else {
+        post = await Post.findOne({ slug: id });
+      }
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      setCachedPost(key, post);
     }
-
-    setCachedPost(key, post);
-    res.set(
-      "Cache-Control",
-      "public, max-age=60, stale-while-revalidate=60"
-    );
-
-    return res.json(post);
+    let userVote = null;
+    const authUserId = getAuthUserIdFromReq(req);
+    if (authUserId) {
+      const vote = await PostVote.findOne({
+        postId: post._id,
+        userId: authUserId,
+      }).exec();
+      if (vote) {
+        userVote = vote.direction;
+      }
+    }
+    res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=60");
+    const postObj = post.toObject ? post.toObject() : post;
+    return res.json({ ...postObj, userVote });
   } catch (err) {
     next(err);
   }
