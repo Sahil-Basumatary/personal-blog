@@ -6,35 +6,42 @@ export async function fetchPosts({
   category = "",
   page = 1,
   limit = 10,
+  token = null,
 } = {}) {
   const params = new URLSearchParams();
   if (search) params.append("search", search);
   if (category) params.append("category", category);
   params.append("page", String(page));
   params.append("limit", String(limit));
-
-  const res = await fetch(`${API_BASE_URL}/posts?${params.toString()}`);
+  const headers = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  const res = await fetch(`${API_BASE_URL}/posts?${params.toString()}`, {
+    headers,
+  });
   if (!res.ok) {
     throw new Error("Failed to get posts");
   }
   return res.json();
 }
 
-export async function fetchPostById(id) {
-  const res = await fetch(`${API_BASE_URL}/posts/${id}`);
-
+export async function fetchPostById(id, token = null) {
+  const headers = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  const res = await fetch(`${API_BASE_URL}/posts/${id}`, { headers });
   if (!res.ok) {
     if (res.status === 404) {
       const err = new Error("Post not found");
       err.status = 404;
       throw err;
     }
-
     const err = new Error("Failed to get post");
     err.status = res.status;
     throw err;
   }
-
   return res.json();
 }
 
