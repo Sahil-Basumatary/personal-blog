@@ -9,7 +9,6 @@ import MarkdownRenderer from "../components/markdown/MarkdownRenderer";
 
 function mapPostFromApi(p) {
   const slugOrId = p.slug || p._id;
-
   return {
     id: slugOrId,
     slug: slugOrId,
@@ -22,6 +21,8 @@ function mapPostFromApi(p) {
     excerpt: p.excerpt || "",
     isUserPost: false,
     views: typeof p.views === "number" ? p.views : 0,
+    upvotes: typeof p.upvotes === "number" ? p.upvotes : 0,
+    downvotes: typeof p.downvotes === "number" ? p.downvotes : 0,
   };
 }
 
@@ -46,59 +47,58 @@ function SingleBlogPage() {
   const { getToken } = useAuth();
   const isOwner = isLoaded && isSignedIn && isOwnerUser(user?.id);
 
-    const [post, setPost] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);      
-    const [notFound, setNotFound] = useState(false); 
-    const [votes, setVotes] = useState({ score: 0, userVote: null });
-    const [backendViews, setBackendViews] = useState(null);
-    const isUserPost = isOwner;
+  const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [notFound, setNotFound] = useState(false);
+  const [votes, setVotes] = useState({ upvotes: 0, downvotes: 0, userVote: null });
+  const [backendViews, setBackendViews] = useState(null);
+  const isUserPost = isOwner;
 
-          useEffect(() => {
-            let active = true;
-
-            async function loadPost() {
-              try {
-                const apiPost = await fetchPostById(id);
-                if (!active) return;
-
-                if (typeof apiPost.views === "number") {
-                  setBackendViews(apiPost.views);
-                }
-
-                const mapped = mapPostFromApi(apiPost);
-                setPost(mapped);
-                setError(null);
-                setNotFound(false);
-              } catch (err) {
-                console.error("Failed to fetch post from backend", err);
-                if (!active) return;
-
-                const message =
-                  (err && typeof err.message === "string" && err.message) ||
-                  (typeof err === "string" ? err : "");
-
-                const isNotFound =
-                  (err && err.status === 404) ||
-                  (message && message.toLowerCase().includes("not found"));
-
-                if (isNotFound) {
-                  setNotFound(true);
-                  setError(null);
-                } else {
-                  setError("Failed to load this post");
-                  setNotFound(false);
-                }
-              } finally {
-                if (active) setLoading(false);
-              }
-            }
-
-            loadPost();
-            return () => {
-              active = false;
-            };
-          }, [id]);
+  useEffect(() => {
+    let active = true;
+    async function loadPost() {
+      try {
+        const token = await getToken();
+        const apiPost = await fetchPostById(id, token);
+        if (!active) return;
+        if (typeof apiPost.views === "number") {
+          setBackendViews(apiPost.views);
+        }
+        const mapped = mapPostFromApi(apiPost);
+        setPost(mapped);
+        setVotes({
+          upvotes: mapped.upvotes,
+          downvotes: mapped.downvotes,
+          userVote: apiPost.userVote || null,
+        });
+        setError(null);
+        setNotFound(false);
+      } catch (err) {
+        console.error("Failed to fetch post from backend", err);
+        if (!active) return;
+        const message =
+          (err && typeof err.message === "string" && err.message) ||
+          (typeof err === "string" ? err : "");
+        const isNotFound =
+          (err && err.status === 404) ||
+          (message && message.toLowerCase().includes("not found"));
+        if (isNotFound) {
+          setNotFound(true);
+          setError(null);
+        } else {
+          setError("Failed to load this post");
+          setNotFound(false);
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+    loadPost();
+    return () => {
+      active = false;
+    };
+  }, [id, getToken]);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useClickOutside(() => setMenuOpen(false));
@@ -111,12 +111,6 @@ function SingleBlogPage() {
   }
 
   const hasIncremented = useRef(false);
-
-  useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("post_votes") || "{}");
-    if (stored[id]) setVotes(stored[id]);
-  }, [id]);
-
   useEffect(() => {
     let cancelled = false;
 
@@ -146,78 +140,54 @@ function SingleBlogPage() {
     };
   }, [id]);
 
-  function syncVotes(next) {
-    setVotes(next);
-    const all = JSON.parse(localStorage.getItem("post_votes") || "{}");
-    all[id] = next;
-    localStorage.setItem("post_votes", JSON.stringify(all));
-  }
-
   async function handleUpvote() {
     if (!isSignedIn) {
       navigate("/sign-in");
       return;
     }
-
-    const next = ((prev) => {
-      const current = prev || { score: 0, userVote: null };
-      let { score, userVote } = current;
-
-      if (userVote === "up") {
-        score -= 1;
-        userVote = null;
-      } else if (userVote === "down") {
-        score += 2;
-        userVote = "up";
-      } else {
-        score += 1;
-        userVote = "up";
-      }
-
-      return { score, userVote };
-    })(votes);
-
-    syncVotes(next);
-
+    const prev = votes.userVote;
+    const optimistic = {
+      upvotes: prev === "up" ? votes.upvotes - 1 : votes.upvotes + 1,
+      downvotes: prev === "down" ? votes.downvotes - 1 : votes.downvotes,
+      userVote: prev === "up" ? null : "up",
+    };
+    setVotes(optimistic);
     try {
       const token = await getToken();
-      await voteOnPost(id, "up", token);
+      const updated = await voteOnPost(id, "up", token);
+      setVotes({
+        upvotes: updated.upvotes,
+        downvotes: updated.downvotes,
+        userVote: optimistic.userVote,
+      });
     } catch (err) {
       console.error("Failed to sync upvote to backend", err);
+      setVotes(votes);
     }
   }
-
   async function handleDownvote() {
     if (!isSignedIn) {
       navigate("/sign-in");
       return;
     }
-
-    const next = ((prev) => {
-      const current = prev || { score: 0, userVote: null };
-      let { score, userVote } = current;
-
-      if (userVote === "down") {
-        score += 1;
-        userVote = null;
-      } else if (userVote === "up") {
-        score -= 2;
-        userVote = "down";
-      } else {
-        score -= 1;
-        userVote = "down";
-      }
-
-      return { score, userVote };
-    })(votes);
-
-    syncVotes(next);
-
+    const prev = votes.userVote;
+    const optimistic = {
+      upvotes: prev === "up" ? votes.upvotes - 1 : votes.upvotes,
+      downvotes: prev === "down" ? votes.downvotes - 1 : votes.downvotes + 1,
+      userVote: prev === "down" ? null : "down",
+    };
+    setVotes(optimistic);
     try {
       const token = await getToken();
-      await voteOnPost(id, "down", token);
+      const updated = await voteOnPost(id, "down", token);
+      setVotes({
+        upvotes: updated.upvotes,
+        downvotes: updated.downvotes,
+        userVote: optimistic.userVote,
+      });
     } catch (err) {
       console.error("Failed to sync downvote to backend", err);
+      setVotes(votes);
     }
   }
 
@@ -225,42 +195,34 @@ function SingleBlogPage() {
     JSON.parse(localStorage.getItem("post_views") || "{}")[id] || 0;
   const views = backendViews != null ? backendViews : localViews;
 
-    async function handleDelete() {
-      const ok = window.confirm("Are you sure you want to delete this post?");
-      if (!ok) return;
-
-      try {
-        const token = await getToken();
-        await deletePost(id, token);
-
-        const votes = JSON.parse(localStorage.getItem("post_votes") || "{}");
-        delete votes[id];
-        localStorage.setItem("post_votes", JSON.stringify(votes));
-
-        navigate("/blog");
-      } catch (err) {
-        console.error("Failed to delete post", err);
-        alert("Failed to delete post. Please try again.");
-      }
+  async function handleDelete() {
+    const ok = window.confirm("Are you sure you want to delete this post?");
+    if (!ok) return;
+    try {
+      const token = await getToken();
+      await deletePost(id, token);
+      navigate("/blog");
+    } catch (err) {
+      console.error("Failed to delete post", err);
+      alert("Failed to delete post. Please try again.");
     }
+  }
 
-    if (loading) {
-      return <div className="single-container page-shell">Loading post...</div>;
-    }
-
-    if (notFound) {
-      return <div className="not-found page-shell">Post not found.</div>;
-    }
-
-    if (!post) {
-      return (
-        <div className="single-container page-shell">
-          <div className="error-banner">
-            Something went wrong loading this post - please try again.
-          </div>
+  if (loading) {
+    return <div className="single-container page-shell">Loading post...</div>;
+  }
+  if (notFound) {
+    return <div className="not-found page-shell">Post not found.</div>;
+  }
+  if (!post) {
+    return (
+      <div className="single-container page-shell">
+        <div className="error-banner">
+          Something went wrong loading this post - please try again.
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
   return (
     <div className="single-container page-shell">
@@ -363,27 +325,16 @@ function SingleBlogPage() {
           className={`vote-btn up ${votes.userVote === "up" ? "active" : ""}`}
           onClick={handleUpvote}
         >
-          <img
-            src="/icons/thumb-up.svg"
-            alt="Upvote"
-            className="vote-icon"
-          />
+          <img src="/icons/thumb-up.svg" alt="Upvote" className="vote-icon" />
         </button>
-
-        <span className="vote-count">
-          {votes.score === 0 ? "0" : votes.score}
-        </span>
-
+        <span className="vote-count">{votes.upvotes}</span>
         <button
           className={`vote-btn down ${votes.userVote === "down" ? "active" : ""}`}
           onClick={handleDownvote}
         >
-          <img
-            src="/icons/thumb-down.svg"
-            alt="Downvote"
-            className="vote-icon"
-          />
+          <img src="/icons/thumb-down.svg" alt="Downvote" className="vote-icon" />
         </button>
+        {isOwner && <span className="vote-count">{votes.downvotes}</span>}
       </div>
     </div>
   );

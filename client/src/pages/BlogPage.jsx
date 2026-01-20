@@ -63,7 +63,6 @@ function debounce(fn, delay) {
 
 function mapPostFromApi(p) {
   const slugOrId = p.slug || p._id;
-
   return {
     id: slugOrId,                   
     slug: slugOrId,                  
@@ -76,6 +75,9 @@ function mapPostFromApi(p) {
     excerpt: p.excerpt || "",
     isUserPost: false,
     views: typeof p.views === "number" ? p.views : 0,
+    upvotes: typeof p.upvotes === "number" ? p.upvotes : 0,
+    downvotes: typeof p.downvotes === "number" ? p.downvotes : 0,
+    userVote: p.userVote || null,
   };
 }
 
@@ -117,35 +119,32 @@ function BlogPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-    useEffect(() => {
-      let active = true;
-
-      async function loadPosts() {
-        try {
-          const apiResult = await fetchPosts({ page, limit: PAGE_SIZE });
-          if (!active) return;
-
-          const mapped = (apiResult.items || []).map(mapPostFromApi);
-          setBackendPosts(mapped);
-          setPostsError(null);
-
-          if (typeof apiResult.totalPages === "number") {
-            setTotalPages(apiResult.totalPages || 1);
-          } else {
-            setTotalPages(1);
-          }
-        } catch (err) {
-          console.error("Failed to fetch posts from backend", err);
-          if (active) setPostsError("Failed to load posts from server");
-          setBackendPosts([]); 
+  useEffect(() => {
+    let active = true;
+    async function loadPosts() {
+      try {
+        const token = await getToken();
+        const apiResult = await fetchPosts({ page, limit: PAGE_SIZE, token });
+        if (!active) return;
+        const mapped = (apiResult.items || []).map(mapPostFromApi);
+        setBackendPosts(mapped);
+        setPostsError(null);
+        if (typeof apiResult.totalPages === "number") {
+          setTotalPages(apiResult.totalPages || 1);
+        } else {
+          setTotalPages(1);
         }
+      } catch (err) {
+        console.error("Failed to fetch posts from backend", err);
+        if (active) setPostsError("Failed to load posts from server");
+        setBackendPosts([]); 
       }
-
-      loadPosts();
-      return () => {
-        active = false;
-      };
-    }, [page]);
+    }
+    loadPosts();
+    return () => {
+      active = false;
+    };
+  }, [page, getToken]);
 
   function saveRecent(term) {
     if (!term.trim()) return;
@@ -214,79 +213,78 @@ function BlogPage() {
     return results.map((r) => r.post);
   }, [basePostsForSearch, query]);
 
-  // Voting state 
-  const [votes, setVotes] = useState({});
-
-  useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("post_votes") || "{}");
-    setVotes(stored);
-  }, []);
-
-  async function handleUpvote(id) {
+  async function handleUpvote(postId) {
     if (!isSignedIn) {
       navigate("/sign-in");
       return;
     }
-
-    setVotes((prev) => {
-      const current = prev[id] || { score: 0, userVote: null };
-      let { score, userVote } = current;
-
-      if (userVote === "up") {
-        score -= 1;
-        userVote = null;
-      } else if (userVote === "down") {
-        score += 2;
-        userVote = "up";
-      } else {
-        score += 1;
-        userVote = "up";
-      }
-
-      const next = { ...prev, [id]: { score, userVote } };
-      localStorage.setItem("post_votes", JSON.stringify(next));
-      return next;
-    });
-
+    const post = backendPosts.find((p) => p.id === postId);
+    if (!post) return;
+    const prev = post.userVote;
+    const optimistic = {
+      upvotes: prev === "up" ? post.upvotes - 1 : post.upvotes + 1,
+      downvotes: prev === "down" ? post.downvotes - 1 : post.downvotes,
+      userVote: prev === "up" ? null : "up",
+    };
+    setBackendPosts((posts) =>
+      posts.map((p) => (p.id === postId ? { ...p, ...optimistic } : p))
+    );
     try {
       const token = await getToken();
-      await voteOnPost(id, "up", token);
+      const updated = await voteOnPost(postId, "up", token);
+      setBackendPosts((posts) =>
+        posts.map((p) =>
+          p.id === postId
+            ? { ...p, upvotes: updated.upvotes, downvotes: updated.downvotes }
+            : p
+        )
+      );
     } catch (err) {
       console.error("Failed to sync upvote to backend", err);
+      setBackendPosts((posts) =>
+        posts.map((p) =>
+          p.id === postId
+            ? { ...p, upvotes: post.upvotes, downvotes: post.downvotes, userVote: post.userVote }
+            : p
+        )
+      );
     }
   }
-
-  async function handleDownvote(id) {
+  async function handleDownvote(postId) {
     if (!isSignedIn) {
       navigate("/sign-in");
       return;
     }
-
-    setVotes((prev) => {
-      const current = prev[id] || { score: 0, userVote: null };
-      let { score, userVote } = current;
-
-      if (userVote === "down") {
-        score += 1;
-        userVote = null;
-      } else if (userVote === "up") {
-        score -= 2;
-        userVote = "down";
-      } else {
-        score -= 1;
-        userVote = "down";
-      }
-
-      const next = { ...prev, [id]: { score, userVote } };
-      localStorage.setItem("post_votes", JSON.stringify(next));
-      return next;
-    });
-
+    const post = backendPosts.find((p) => p.id === postId);
+    if (!post) return;
+    const prev = post.userVote;
+    const optimistic = {
+      upvotes: prev === "up" ? post.upvotes - 1 : post.upvotes,
+      downvotes: prev === "down" ? post.downvotes - 1 : post.downvotes + 1,
+      userVote: prev === "down" ? null : "down",
+    };
+    setBackendPosts((posts) =>
+      posts.map((p) => (p.id === postId ? { ...p, ...optimistic } : p))
+    );
     try {
       const token = await getToken();
-      await voteOnPost(id, "down", token);
+      const updated = await voteOnPost(postId, "down", token);
+      setBackendPosts((posts) =>
+        posts.map((p) =>
+          p.id === postId
+            ? { ...p, upvotes: updated.upvotes, downvotes: updated.downvotes }
+            : p
+        )
+      );
     } catch (err) {
       console.error("Failed to sync downvote to backend", err);
+      setBackendPosts((posts) =>
+        posts.map((p) =>
+          p.id === postId
+            ? { ...p, upvotes: post.upvotes, downvotes: post.downvotes, userVote: post.userVote }
+            : p
+        )
+      );
     }
   }
 
@@ -335,18 +333,12 @@ function BlogPage() {
   async function handleDeleteFromList(deleteId) {
     const ok = window.confirm("Are you sure you want to delete this post?");
     if (!ok) return;
-
     try {
       const token = await getToken();
       await deletePost(deleteId, token);
-
       setBackendPosts((prev) =>
         prev.filter((p) => String(p.id) !== String(deleteId))
       );
-
-      const votes = JSON.parse(localStorage.getItem("post_votes") || "{}");
-      delete votes[deleteId];
-      localStorage.setItem("post_votes", JSON.stringify(votes));
     } catch (err) {
       console.error("Failed to delete post on backend", err);
       alert("Failed to delete post. Please try again.");
@@ -523,8 +515,6 @@ function BlogPage() {
           )}
 
           {filteredPosts.map((post) => {
-            const voteInfo = votes[post.id] || { score: 0, userVote: null };
-
             const finalExcerpt =
               post.excerpt && post.excerpt.trim().length > 0
                 ? post.excerpt
@@ -605,10 +595,9 @@ function BlogPage() {
                   </div>
                 </Link>
 
-                {/*Votes*/}
                 <div className="vote-bar-below">
                   <button
-                    className={`vote-btn up ${voteInfo.userVote === "up" ? "active" : ""}`}
+                    className={`vote-btn up ${post.userVote === "up" ? "active" : ""}`}
                     onClick={() => handleUpvote(post.id)}
                   >
                     <img
@@ -617,13 +606,9 @@ function BlogPage() {
                       className="vote-icon"
                     />
                   </button>
-
-                  <span className="vote-count">
-                    {voteInfo.score === 0 ? "0" : voteInfo.score}
-                  </span>
-
+                  <span className="vote-count">{post.upvotes}</span>
                   <button
-                    className={`vote-btn down ${voteInfo.userVote === "down" ? "active" : ""}`}
+                    className={`vote-btn down ${post.userVote === "down" ? "active" : ""}`}
                     onClick={() => handleDownvote(post.id)}
                   >
                     <img
@@ -632,6 +617,7 @@ function BlogPage() {
                       className="vote-icon"
                     />
                   </button>
+                  {isOwner && <span className="vote-count">{post.downvotes}</span>}
                 </div>
               </div>
             );
