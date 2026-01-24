@@ -24,7 +24,6 @@ const swaggerDocument = YAML.load(
 );
 
 const app = express();
-
 const cspDirectives = {
   defaultSrc: ["'self'"],
   scriptSrc: [

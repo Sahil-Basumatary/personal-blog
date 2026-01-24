@@ -31,6 +31,14 @@ function HeroSection() {
           >
             LinkedIn
           </a>
+          <a
+            href="https://github.com/Sahil-Basumatary"
+            target="_blank"
+            rel="noreferrer"
+            className="nav-item"
+          >
+            GitHub
+          </a>
 
           {isOwner && (
             <Link to="/write" className="nav-item">
@@ -65,6 +73,14 @@ function HeroSection() {
           onClick={() => setMenuOpen(false)}
         >
           LinkedIn
+        </a>
+        <a
+          href="https://github.com/Sahil-Basumatary"
+          target="_blank"
+          rel="noreferrer"
+          onClick={() => setMenuOpen(false)}
+        >
+          GitHub
         </a>
         {isOwner && (
           <Link to="/write" onClick={() => setMenuOpen(false)}>
