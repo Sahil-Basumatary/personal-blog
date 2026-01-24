@@ -12,6 +12,7 @@ import {
   getAuthUserIdFromReq,
   requireSignedInOwner,
 } from "../lib/authHelpers.js";
+import { sendBatchNewsletter } from "../services/emailService.js";
 
 function makeBaseSlug(title) {
   return title
@@ -197,7 +198,9 @@ export const createPost = async (req, res) => {
 
     invalidatePostsCache();
     res.set("Cache-Control", "no-store");
-
+    sendBatchNewsletter(post).catch((err) => {
+      console.error("Newsletter send failed:", err.message);
+    });
     return res.status(201).json(post);
   } catch (err) {
     console.error("createPost error:", err.message);
