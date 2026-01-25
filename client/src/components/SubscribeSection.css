@@ -26,8 +26,54 @@
   margin: 0 auto;
   max-width: 750px;
 }
+.subscribe-form {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 500px;
+  margin: 0 auto;
+}
+.subscribe-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 14px 18px;
+  font-size: var(--fs-body);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: white;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.subscribe-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+.subscribe-input:focus {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.1);
+}
+.subscribe-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.subscribe-message {
+  font-size: var(--fs-small);
+  margin: 0;
+  padding: 8px 16px;
+  border-radius: 6px;
+}
+.subscribe-message--success {
+  color: #4ade80;
+}
+.subscribe-message--info {
+  color: #facc15;
+}
+.subscribe-message--error {
+  color: #f87171;
+}
 .subscribe-btns {
-  margin-top: 28px;
+  margin-top: 8px;
   display: flex;
   gap: var(--space-element);
   justify-content: center;
@@ -47,9 +93,16 @@
   background: white;
   color: #1f2937;
 }
-.sub-btn:hover {
+.sub-btn:hover:not(:disabled) {
   background: #e5e7eb;
   transform: translateY(-3px);
+}
+.sub-btn--loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.sub-btn:disabled {
+  cursor: not-allowed;
 }
 .linkedin-btn {
   background: rgba(255, 255, 255, 0.08);
@@ -62,6 +115,13 @@
   background: rgba(255, 255, 255, 0.18);
 }
 @media (max-width: 480px) {
+  .subscribe-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .subscribe-input {
+    min-width: unset;
+  }
   .subscribe-btns {
     flex-direction: column;
     align-items: center;
