@@ -9,6 +9,8 @@ const BlogPage = lazy(() => import("./pages/BlogPage"));
 const SingleBlogPage = lazy(() => import("./pages/SingleBlogPage"));
 const NewPostPage = lazy(() => import("./pages/NewPostPage"));
 const EditPostPage = lazy(() => import("./pages/EditPostPage"));
+const SubscriptionConfirmPage = lazy(() => import("./pages/SubscriptionConfirmPage"));
+const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
 
 function RequireAuth({ children }) {
   return (
@@ -62,6 +64,8 @@ function App() {
 
         <Route path="/sign-in" element={<AuthSignInPage />} />
         <Route path="/sign-up" element={<AuthSignUpPage />} />
+        <Route path="/confirm/:token" element={<SubscriptionConfirmPage />} />
+        <Route path="/unsubscribe/:token" element={<UnsubscribePage />} />
       </Routes>
     </Suspense>
   );
