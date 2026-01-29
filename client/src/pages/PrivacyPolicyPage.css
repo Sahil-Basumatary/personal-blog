@@ -1,0 +1,111 @@
+.privacy-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: radial-gradient(circle at top left, #2b2f38, #1f2430);
+  padding: 48px 24px;
+}
+.privacy-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 48px 40px;
+  max-width: 720px;
+  width: 100%;
+  color: white;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+.privacy-header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.privacy-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 8px;
+  letter-spacing: -0.5px;
+}
+.privacy-updated {
+  font-size: 0.875rem;
+  opacity: 0.6;
+  margin: 0;
+}
+.privacy-section {
+  margin-bottom: 32px;
+}
+.privacy-section:last-of-type {
+  margin-bottom: 0;
+}
+.privacy-section h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 12px;
+  letter-spacing: -0.3px;
+}
+.privacy-section p {
+  font-size: 1rem;
+  line-height: 1.7;
+  opacity: 0.85;
+  margin: 0 0 12px;
+}
+.privacy-section p:last-child {
+  margin-bottom: 0;
+}
+.privacy-section a {
+  color: #60a5fa;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.privacy-section a:hover {
+  color: #93c5fd;
+  text-decoration: underline;
+}
+.privacy-list {
+  margin: 12px 0 0;
+  padding-left: 24px;
+  list-style: disc;
+}
+.privacy-list li {
+  font-size: 1rem;
+  line-height: 1.7;
+  opacity: 0.85;
+  margin-bottom: 8px;
+}
+.privacy-list li:last-child {
+  margin-bottom: 0;
+}
+.privacy-footer {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+.privacy-back-link {
+  color: white;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+.privacy-back-link:hover {
+  opacity: 1;
+}
+@media (max-width: 600px) {
+  .privacy-page {
+    padding: 24px 16px;
+  }
+  .privacy-card {
+    padding: 32px 24px;
+  }
+  .privacy-header h1 {
+    font-size: 1.5rem;
+  }
+  .privacy-section h2 {
+    font-size: 1.125rem;
+  }
+}
+

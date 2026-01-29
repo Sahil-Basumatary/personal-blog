@@ -11,6 +11,7 @@ const NewPostPage = lazy(() => import("./pages/NewPostPage"));
 const EditPostPage = lazy(() => import("./pages/EditPostPage"));
 const SubscriptionConfirmPage = lazy(() => import("./pages/SubscriptionConfirmPage"));
 const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
+const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
 
 function RequireAuth({ children }) {
   return (
@@ -66,6 +67,7 @@ function App() {
         <Route path="/sign-up" element={<AuthSignUpPage />} />
         <Route path="/confirm/:token" element={<SubscriptionConfirmPage />} />
         <Route path="/unsubscribe/:token" element={<UnsubscribePage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
       </Routes>
     </Suspense>
   );
