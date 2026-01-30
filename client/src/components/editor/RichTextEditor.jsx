@@ -11,6 +11,7 @@ import "./RichTextEditor.css";
 export default function RichTextEditor({
   initialMarkdown = "",
   onChange,
+  onImageUpload,
   placeholder = "Start writing...",
   disabled = false,
 }) {
