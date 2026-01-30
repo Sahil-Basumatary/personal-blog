@@ -72,6 +72,20 @@
 .subscribe-message--error {
   color: #f87171;
 }
+.subscribe-privacy {
+  font-size: var(--fs-small);
+  opacity: 0.6;
+  margin: 0;
+}
+.subscribe-privacy a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: opacity 0.2s;
+}
+.subscribe-privacy a:hover {
+  opacity: 1;
+}
 .subscribe-btns {
   margin-top: 8px;
   display: flex;

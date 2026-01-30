@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { subscribeToNewsletter } from "../api/subscribers";
 import "./SubscribeSection.css";
 
@@ -62,6 +63,9 @@ function SubscribeSection() {
           {message}
         </p>
       )}
+      <p className="subscribe-privacy">
+        By subscribing, you agree to our <Link to="/privacy">Privacy Policy</Link>
+      </p>
       <div className="subscribe-btns">
         <button
           className="linkedin-btn"

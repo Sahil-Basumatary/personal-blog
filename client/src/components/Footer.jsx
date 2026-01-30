@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import "./Footer.css";
 
 function Footer() {
@@ -13,6 +14,9 @@ function Footer() {
       </p>
       <p className="footer-license">
         Source code viewable for learning purposes only. Not licensed for copying or commercial use.
+      </p>
+      <p className="footer-links">
+        <Link to="/privacy">Privacy Policy</Link>
       </p>
     </footer>
   );
