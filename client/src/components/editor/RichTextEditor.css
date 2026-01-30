@@ -52,3 +52,45 @@
   height: 0;
   font-style: italic;
 }
+.editor-content .tiptap p {
+  margin-bottom: 1.4rem;
+}
+.editor-content .tiptap p:last-child {
+  margin-bottom: 0;
+}
+.editor-content .tiptap :where(h1, h2, h3) {
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: #0f0f0f;
+  margin: 1.8rem 0 0.8rem;
+  font-weight: 600;
+}
+.editor-content .tiptap h1 {
+  font-size: 1.85rem;
+}
+.editor-content .tiptap h2 {
+  font-size: 1.5rem;
+}
+.editor-content .tiptap h3 {
+  font-size: 1.25rem;
+}
+.editor-content .tiptap :where(h1, h2, h3):first-child {
+  margin-top: 0;
+}
+.editor-content .tiptap strong {
+  font-weight: 600;
+  color: #0f0f0f;
+}
+.editor-content .tiptap em {
+  font-style: italic;
+}
+.editor-content .tiptap s {
+  text-decoration: line-through;
+  color: #6b7280;
+}
+.editor-content .tiptap > *:first-child {
+  margin-top: 0;
+}
+.editor-content .tiptap > *:last-child {
+  margin-bottom: 0;
+}
