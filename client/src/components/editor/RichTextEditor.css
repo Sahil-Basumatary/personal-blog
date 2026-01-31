@@ -168,3 +168,49 @@
   font-size: 0.9rem;
   line-height: 1.6;
 }
+.editor-content .tiptap img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.2rem auto;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+.editor-content .tiptap img.ProseMirror-selectednode {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+}
+.editor-content .tiptap table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.6rem 0;
+  font-size: 0.95rem;
+}
+.editor-content .tiptap th,
+.editor-content .tiptap td {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+}
+.editor-content .tiptap thead th {
+  background: rgba(0, 0, 0, 0.03);
+  font-weight: 600;
+}
+@media (max-width: 640px) {
+  .rich-text-editor {
+    border-radius: 12px;
+  }
+  .editor-content {
+    min-height: 180px;
+    max-height: 400px;
+  }
+  .editor-content .tiptap h1 {
+    font-size: 1.6rem;
+  }
+  .editor-content .tiptap h2 {
+    font-size: 1.35rem;
+  }
+  .editor-content .tiptap h3 {
+    font-size: 1.15rem;
+  }
+}
