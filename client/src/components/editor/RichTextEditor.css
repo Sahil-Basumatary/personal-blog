@@ -94,3 +94,77 @@
 .editor-content .tiptap > *:last-child {
   margin-bottom: 0;
 }
+.editor-content .tiptap :where(ul, ol) {
+  margin: 0 0 1.4rem;
+  padding-left: 1.4rem;
+}
+.editor-content .tiptap li {
+  margin: 0.3rem 0;
+}
+.editor-content .tiptap li p {
+  margin-bottom: 0.3rem;
+}
+.editor-content .tiptap ul {
+  list-style-type: disc;
+}
+.editor-content .tiptap ol {
+  list-style-type: decimal;
+}
+.editor-content .tiptap ul ul,
+.editor-content .tiptap ol ol,
+.editor-content .tiptap ul ol,
+.editor-content .tiptap ol ul {
+  margin-top: 0.3rem;
+  margin-bottom: 0.3rem;
+}
+.editor-content .tiptap a {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s ease;
+}
+.editor-content .tiptap a:hover {
+  color: #1d4ed8;
+}
+.editor-content .tiptap blockquote {
+  margin: 1.6rem 0;
+  padding: 0.8rem 1rem;
+  border-left: 4px solid rgba(37, 99, 235, 0.4);
+  background: rgba(37, 99, 235, 0.05);
+  border-radius: 0 12px 12px 0;
+  color: #1e293b;
+}
+.editor-content .tiptap blockquote p:last-child {
+  margin-bottom: 0;
+}
+.editor-content .tiptap hr {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  margin: 2rem 0;
+}
+.editor-content .tiptap :where(pre, code) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+.editor-content .tiptap code {
+  font-size: 0.92em;
+  background: rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  padding: 0.12rem 0.35rem;
+  border-radius: 6px;
+  color: #0f172a;
+}
+.editor-content .tiptap pre {
+  margin: 1.6rem 0;
+  padding: 1rem 1.2rem;
+  background: rgba(15, 23, 42, 0.05);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 12px;
+  overflow-x: auto;
+}
+.editor-content .tiptap pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
