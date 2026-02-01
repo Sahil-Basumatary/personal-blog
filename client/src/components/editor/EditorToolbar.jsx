@@ -34,6 +34,53 @@ const ICONS = {
       <path d="M7 6L3 10l4 4M13 6l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   ),
+  h1: (
+    <svg viewBox="0 0 20 20" fill="currentColor">
+      <path d="M3 4v12M3 10h6M9 4v12M13 16v-8l-2 1.5M15 16h-4" />
+    </svg>
+  ),
+  h2: (
+    <svg viewBox="0 0 20 20" fill="currentColor">
+      <path d="M2 4v12M2 10h5M7 4v12M12 8a2 2 0 1 1 4 2c0 1.5-4 3-4 5h5M12 16h5" />
+    </svg>
+  ),
+  h3: (
+    <svg viewBox="0 0 20 20" fill="currentColor">
+      <path d="M2 4v12M2 10h5M7 4v12M13 7a2 2 0 1 1 3 1.5M13 13a2 2 0 1 0 3-1.5M16 10h-3" />
+    </svg>
+  ),
+  bulletList: (
+    <svg viewBox="0 0 20 20" fill="currentColor">
+      <circle cx="4" cy="5" r="1.5" />
+      <circle cx="4" cy="10" r="1.5" />
+      <circle cx="4" cy="15" r="1.5" />
+      <path d="M8 5h9M8 10h9M8 15h9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  ),
+  orderedList: (
+    <svg viewBox="0 0 20 20" fill="currentColor">
+      <text x="2" y="7" fontSize="5" fontWeight="600">1</text>
+      <text x="2" y="12" fontSize="5" fontWeight="600">2</text>
+      <text x="2" y="17" fontSize="5" fontWeight="600">3</text>
+      <path d="M8 5h9M8 10h9M8 15h9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  ),
+  blockquote: (
+    <svg viewBox="0 0 20 20" fill="currentColor">
+      <path d="M4 5c3 0 4 2 4 5s-1 5-4 5M4 5v5M12 5c3 0 4 2 4 5s-1 5-4 5M12 5v5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+    </svg>
+  ),
+  codeBlock: (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="3" y="3" width="14" height="14" rx="2" />
+      <path d="M7 8l-2 2 2 2M13 8l2 2-2 2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  hr: (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M3 10h14" strokeLinecap="round" />
+    </svg>
+  ),
 };
 
 function ToolbarButton({ icon, label, shortcut, active, disabled, onClick }) {
@@ -108,6 +155,67 @@ export default function EditorToolbar({ editor, disabled = false }) {
           active={editor?.isActive("code")}
           disabled={isDisabled}
           onClick={() => editor?.chain().focus().toggleCode().run()}
+        />
+      </div>
+      <div className="toolbar-divider" />
+      <div className="toolbar-group">
+        <ToolbarButton
+          icon={ICONS.h1}
+          label="Heading 1"
+          active={editor?.isActive("heading", { level: 1 })}
+          disabled={isDisabled}
+          onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
+        />
+        <ToolbarButton
+          icon={ICONS.h2}
+          label="Heading 2"
+          active={editor?.isActive("heading", { level: 2 })}
+          disabled={isDisabled}
+          onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
+        />
+        <ToolbarButton
+          icon={ICONS.h3}
+          label="Heading 3"
+          active={editor?.isActive("heading", { level: 3 })}
+          disabled={isDisabled}
+          onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
+        />
+      </div>
+      <div className="toolbar-divider" />
+      <div className="toolbar-group">
+        <ToolbarButton
+          icon={ICONS.bulletList}
+          label="Bullet List"
+          active={editor?.isActive("bulletList")}
+          disabled={isDisabled}
+          onClick={() => editor?.chain().focus().toggleBulletList().run()}
+        />
+        <ToolbarButton
+          icon={ICONS.orderedList}
+          label="Numbered List"
+          active={editor?.isActive("orderedList")}
+          disabled={isDisabled}
+          onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+        />
+        <ToolbarButton
+          icon={ICONS.blockquote}
+          label="Blockquote"
+          active={editor?.isActive("blockquote")}
+          disabled={isDisabled}
+          onClick={() => editor?.chain().focus().toggleBlockquote().run()}
+        />
+        <ToolbarButton
+          icon={ICONS.codeBlock}
+          label="Code Block"
+          active={editor?.isActive("codeBlock")}
+          disabled={isDisabled}
+          onClick={() => editor?.chain().focus().toggleCodeBlock().run()}
+        />
+        <ToolbarButton
+          icon={ICONS.hr}
+          label="Horizontal Rule"
+          disabled={isDisabled}
+          onClick={() => editor?.chain().focus().setHorizontalRule().run()}
         />
       </div>
     </div>
