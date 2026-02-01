@@ -4,7 +4,7 @@ function QuoteSection() {
   return (
     <section className="quote-section">
       <p className="quote">
-        If it is meant to be, it will be. Maybe not today, but if god has planned it, it will happen in one way or another. Maybe not in the way you wanted it to, but it will happen. Trust the process. 
+      If it's meant to be, it will be. Maybe not today, and maybe not how you expected it to, but if God has planned it, it will happen in the right way and time. Trust the process, believe in yourself.”
       </p>
     </section>
   );
