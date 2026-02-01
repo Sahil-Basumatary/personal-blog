@@ -1,0 +1,76 @@
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: #fafafa;
+  border-bottom: 1px solid #e5e7eb;
+}
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.toolbar-divider {
+  width: 1px;
+  height: 20px;
+  background: #d1d5db;
+  margin: 0 6px;
+}
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.toolbar-btn svg {
+  width: 18px;
+  height: 18px;
+}
+.toolbar-btn:hover:not(:disabled) {
+  background: #e5e7eb;
+  color: #111827;
+}
+.toolbar-btn:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 1px;
+}
+.toolbar-btn.active {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.toolbar-btn.active:hover:not(:disabled) {
+  background: #bfdbfe;
+}
+.toolbar-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+@media (max-width: 640px) {
+  .editor-toolbar {
+    padding: 6px 8px;
+    gap: 2px;
+  }
+  .toolbar-divider {
+    height: 16px;
+    margin: 0 4px;
+  }
+  .toolbar-btn {
+    width: 28px;
+    height: 28px;
+  }
+  .toolbar-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
