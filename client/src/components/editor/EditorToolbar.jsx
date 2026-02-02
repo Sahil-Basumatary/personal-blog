@@ -1,3 +1,5 @@
+import { useState, useRef, useEffect, useCallback } from "react";
+import { sanitizeLinkHref } from "../../lib/markdown/urlPolicy";
 import "./EditorToolbar.css";
 
 const ICONS = {
@@ -81,6 +83,11 @@ const ICONS = {
       <path d="M3 10h14" strokeLinecap="round" />
     </svg>
   ),
+  link: (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M8 12l4-4M6 9L4.5 10.5a3.5 3.5 0 0 0 5 5L11 14M14 11l1.5-1.5a3.5 3.5 0 0 0-5-5L9 6" strokeLinecap="round" />
+    </svg>
+  ),
 };
 
 function ToolbarButton({ icon, label, shortcut, active, disabled, onClick }) {
@@ -100,11 +107,115 @@ function ToolbarButton({ icon, label, shortcut, active, disabled, onClick }) {
   );
 }
 
+function LinkDialog({ isOpen, initialUrl, onClose, onApply, onRemove }) {
+  const [url, setUrl] = useState(initialUrl);
+  const [error, setError] = useState("");
+  const inputRef = useRef(null);
+  const dialogRef = useRef(null);
+  useEffect(() => {
+    if (isOpen) {
+      setUrl(initialUrl);
+      setError("");
+      setTimeout(() => inputRef.current?.focus(), 0);
+    }
+  }, [isOpen, initialUrl]);
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleKeyDown(e) {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+  function handleClickOutside(e) {
+    if (dialogRef.current && !dialogRef.current.contains(e.target)) {
+      onClose();
+    }
+  }
+  function handleApply() {
+    const trimmed = url.trim();
+    if (!trimmed) {
+      setError("URL is required");
+      return;
+    }
+    const sanitized = sanitizeLinkHref(trimmed);
+    if (!sanitized) {
+      setError("Invalid or unsafe URL");
+      return;
+    }
+    onApply(sanitized);
+  }
+  if (!isOpen) return null;
+  return (
+    <div className="link-dialog-overlay" onClick={handleClickOutside}>
+      <div className="link-dialog" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="link-dialog-title">
+        <h3 id="link-dialog-title" className="link-dialog-title">Insert Link</h3>
+        <input
+          ref={inputRef}
+          type="url"
+          className="link-dialog-input"
+          placeholder="https://example.com"
+          value={url}
+          onChange={(e) => {
+            setUrl(e.target.value);
+            setError("");
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleApply();
+            }
+          }}
+        />
+        {error && <p className="link-dialog-error">{error}</p>}
+        <div className="link-dialog-actions">
+          {initialUrl && (
+            <button type="button" className="link-dialog-btn remove" onClick={onRemove}>
+              Remove
+            </button>
+          )}
+          <button type="button" className="link-dialog-btn cancel" onClick={onClose}>
+            Cancel
+          </button>
+          <button type="button" className="link-dialog-btn apply" onClick={handleApply}>
+            Apply
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function EditorToolbar({ editor, disabled = false }) {
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+  const [linkDialogUrl, setLinkDialogUrl] = useState("");
   const isDisabled = disabled || !editor;
   const canUndo = editor?.can().undo() ?? false;
   const canRedo = editor?.can().redo() ?? false;
+  const openLinkDialog = useCallback(() => {
+    if (!editor) return;
+    const existingHref = editor.getAttributes("link").href || "";
+    setLinkDialogUrl(existingHref);
+    setLinkDialogOpen(true);
+  }, [editor]);
+  const closeLinkDialog = useCallback(() => {
+    setLinkDialogOpen(false);
+    setLinkDialogUrl("");
+  }, []);
+  const applyLink = useCallback((href) => {
+    if (!editor) return;
+    editor.chain().focus().extendMarkRange("link").setLink({ href }).run();
+    closeLinkDialog();
+  }, [editor, closeLinkDialog]);
+  const removeLink = useCallback(() => {
+    if (!editor) return;
+    editor.chain().focus().extendMarkRange("link").unsetLink().run();
+    closeLinkDialog();
+  }, [editor, closeLinkDialog]);
   return (
+    <>
     <div className="editor-toolbar" role="toolbar" aria-label="Text formatting">
       <div className="toolbar-group">
         <ToolbarButton
@@ -218,7 +329,25 @@ export default function EditorToolbar({ editor, disabled = false }) {
           onClick={() => editor?.chain().focus().setHorizontalRule().run()}
         />
       </div>
+      <div className="toolbar-divider" />
+      <div className="toolbar-group">
+        <ToolbarButton
+          icon={ICONS.link}
+          label="Insert Link"
+          active={editor?.isActive("link")}
+          disabled={isDisabled}
+          onClick={openLinkDialog}
+        />
+      </div>
     </div>
+    <LinkDialog
+      isOpen={linkDialogOpen}
+      initialUrl={linkDialogUrl}
+      onClose={closeLinkDialog}
+      onApply={applyLink}
+      onRemove={removeLink}
+    />
+    </>
   );
 }
 
