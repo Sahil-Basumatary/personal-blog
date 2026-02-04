@@ -55,6 +55,16 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+.toolbar-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
 .link-dialog-overlay {
   position: fixed;
   inset: 0;

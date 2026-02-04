@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { sanitizeLinkHref } from "../../lib/markdown/urlPolicy";
+import { uploadImage } from "../../api/uploads";
 import "./EditorToolbar.css";
 
 const ICONS = {
@@ -86,6 +87,13 @@ const ICONS = {
   link: (
     <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
       <path d="M8 12l4-4M6 9L4.5 10.5a3.5 3.5 0 0 0 5 5L11 14M14 11l1.5-1.5a3.5 3.5 0 0 0-5-5L9 6" strokeLinecap="round" />
+    </svg>
+  ),
+  image: (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="3" y="3" width="14" height="14" rx="2" />
+      <circle cx="7" cy="7" r="1.5" fill="currentColor" />
+      <path d="M3 14l4-4 3 3 3-3 4 4" strokeLinejoin="round" />
     </svg>
   ),
 };
@@ -188,9 +196,11 @@ function LinkDialog({ isOpen, initialUrl, onClose, onApply, onRemove }) {
   );
 }
 
-export default function EditorToolbar({ editor, disabled = false }) {
+export default function EditorToolbar({ editor, disabled = false, getToken, onUploadError }) {
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [linkDialogUrl, setLinkDialogUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
   const isDisabled = disabled || !editor;
   const canUndo = editor?.can().undo() ?? false;
   const canRedo = editor?.can().redo() ?? false;
@@ -214,6 +224,28 @@ export default function EditorToolbar({ editor, disabled = false }) {
     editor.chain().focus().extendMarkRange("link").unsetLink().run();
     closeLinkDialog();
   }, [editor, closeLinkDialog]);
+  const handleImageClick = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+  const handleFileChange = useCallback(async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !editor) return;
+    e.target.value = "";
+    if (!getToken) {
+      onUploadError?.(new Error("Authentication not available"));
+      return;
+    }
+    setUploading(true);
+    try {
+      const token = await getToken();
+      const result = await uploadImage(file, token);
+      editor.chain().focus().setImage({ src: result.url }).run();
+    } catch (err) {
+      onUploadError?.(err);
+    } finally {
+      setUploading(false);
+    }
+  }, [editor, getToken, onUploadError]);
   return (
     <>
     <div className="editor-toolbar" role="toolbar" aria-label="Text formatting">
@@ -337,6 +369,19 @@ export default function EditorToolbar({ editor, disabled = false }) {
           active={editor?.isActive("link")}
           disabled={isDisabled}
           onClick={openLinkDialog}
+        />
+        <ToolbarButton
+          icon={ICONS.image}
+          label={uploading ? "Uploading..." : "Insert Image"}
+          disabled={isDisabled || uploading}
+          onClick={handleImageClick}
+        />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/gif,image/webp"
+          className="toolbar-file-input"
+          onChange={handleFileChange}
         />
       </div>
     </div>
