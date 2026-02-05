@@ -6,12 +6,14 @@ import Placeholder from "@tiptap/extension-placeholder";
 import Typography from "@tiptap/extension-typography";
 import { useEffect, useRef } from "react";
 import { markdownToHtml, htmlToMarkdown } from "../../lib/editor/markdownConverter";
+import EditorToolbar from "./EditorToolbar";
 import "./RichTextEditor.css";
 
 export default function RichTextEditor({
   initialMarkdown = "",
   onChange,
-  onImageUpload,
+  getToken,
+  onUploadError,
   placeholder = "Start writing...",
   disabled = false,
 }) {
@@ -61,6 +63,12 @@ export default function RichTextEditor({
   }, [initialMarkdown, editor]);
   return (
     <div className={`rich-text-editor ${disabled ? "disabled" : ""}`}>
+      <EditorToolbar
+        editor={editor}
+        disabled={disabled}
+        getToken={getToken}
+        onUploadError={onUploadError}
+      />
       <EditorContent editor={editor} className="editor-content" />
     </div>
   );
