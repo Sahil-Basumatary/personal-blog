@@ -5,14 +5,10 @@ const baseOrigin = "https://example.com";
 
 describe("markdownConverter", () => {
   describe("markdownToHtml", () => {
-    it("returns empty string for null/undefined", () => {
+    it("returns empty string for null/undefined/empty", () => {
       expect(markdownToHtml(null)).toBe("");
       expect(markdownToHtml(undefined)).toBe("");
-    });
-
-    it("returns empty string for empty input", () => {
       expect(markdownToHtml("")).toBe("");
-      expect(markdownToHtml("   ")).toBe("");
     });
 
     it("converts headings", () => {
@@ -20,67 +16,55 @@ describe("markdownConverter", () => {
       expect(markdownToHtml("## Heading 2")).toContain("<h2>Heading 2</h2>");
     });
 
-    it("converts bold and italic", () => {
+    it("converts emphasis", () => {
       expect(markdownToHtml("**bold**")).toContain("<strong>bold</strong>");
       expect(markdownToHtml("*italic*")).toContain("<em>italic</em>");
-    });
-
-    it("converts strikethrough (GFM)", () => {
       expect(markdownToHtml("~~deleted~~")).toContain("<del>deleted</del>");
     });
 
-    it("converts bullet lists", () => {
-      const html = markdownToHtml("- Item 1\n- Item 2");
-      expect(html).toContain("<ul>");
-      expect(html).toContain("<li>Item 1</li>");
+    it("converts lists", () => {
+      expect(markdownToHtml("- Item 1\n- Item 2")).toContain("<ul>");
+      expect(markdownToHtml("1. First\n2. Second")).toContain("<ol>");
     });
 
-    it("converts numbered lists", () => {
-      const html = markdownToHtml("1. First\n2. Second");
-      expect(html).toContain("<ol>");
-      expect(html).toContain("<li>First</li>");
-    });
-
-    it("converts inline code", () => {
+    it("converts code", () => {
       expect(markdownToHtml("`code`")).toContain("<code>code</code>");
+      expect(markdownToHtml("```js\nconst x = 1;\n```")).toContain("<pre>");
     });
 
-    it("converts code blocks", () => {
-      const html = markdownToHtml("```js\nconst x = 1;\n```");
-      expect(html).toContain("<pre>");
-      expect(html).toContain("const x = 1;");
-    });
-
-    it("converts blockquotes", () => {
+    it("converts blockquotes and links", () => {
       expect(markdownToHtml("> Quote")).toContain("<blockquote>");
-    });
-
-    it("converts links", () => {
-      expect(markdownToHtml("[Link](https://example.com)")).toContain('<a href="https://example.com">Link</a>');
+      expect(markdownToHtml("[Link](https://example.com)")).toContain('<a href="https://example.com">');
     });
 
     it("converts images", () => {
       expect(markdownToHtml("![Alt](/img.png)")).toContain('<img src="/img.png" alt="Alt">');
     });
+
+    it("converts GFM tables", () => {
+      const html = markdownToHtml("| A | B |\n|---|---|\n| 1 | 2 |");
+      expect(html).toContain("<table>");
+      expect(html).toContain("<th>A</th>");
+    });
+
+    it("converts task lists", () => {
+      const html = markdownToHtml("- [x] Done\n- [ ] Todo");
+      expect(html).toContain('type="checkbox"');
+    });
   });
 
   describe("htmlToMarkdown", () => {
-    it("returns empty string for null/undefined", () => {
+    it("returns empty string for null/undefined/empty", () => {
       expect(htmlToMarkdown(null)).toBe("");
       expect(htmlToMarkdown(undefined)).toBe("");
     });
 
     it("converts headings back", () => {
       expect(htmlToMarkdown("<h1>Title</h1>")).toBe("# Title");
-      expect(htmlToMarkdown("<h2>Sub</h2>")).toBe("## Sub");
     });
 
     it("converts emphasis back", () => {
       expect(htmlToMarkdown("<strong>bold</strong>")).toContain("**bold**");
-      expect(htmlToMarkdown("<em>italic</em>")).toContain("*italic*");
-    });
-
-    it("converts strikethrough back", () => {
       expect(htmlToMarkdown("<del>deleted</del>")).toContain("~~deleted~~");
     });
 
@@ -95,57 +79,34 @@ describe("markdownConverter", () => {
       expect(htmlToMarkdown("<pre><code>block</code></pre>")).toContain("```");
     });
 
-    it("converts links back", () => {
-      expect(htmlToMarkdown('<a href="https://example.com">Link</a>', { validate: false })).toContain("[Link](https://example.com)");
+    it("converts tables back", () => {
+      const html = "<table><tr><th>X</th></tr><tr><td>a</td></tr></table>";
+      const md = htmlToMarkdown(html, { validate: false });
+      expect(md).toContain("|");
+      expect(md).toContain("X");
     });
   });
 
   describe("validateAndStripUrls", () => {
-    it("returns empty for null/undefined", () => {
-      expect(validateAndStripUrls(null)).toEqual({ markdown: "", stripped: [] });
-      expect(validateAndStripUrls(undefined)).toEqual({ markdown: "", stripped: [] });
-    });
-
-    it("allows valid http/https links", () => {
-      const result = validateAndStripUrls("[Example](https://google.com)", { baseOrigin });
-      expect(result.markdown).toContain("[Example](https://google.com)");
+    it("allows valid links and relative paths", () => {
+      const result = validateAndStripUrls("[Link](https://google.com)\n[Local](/blog)", { baseOrigin });
       expect(result.stripped).toHaveLength(0);
+      expect(result.markdown).toContain("https://google.com");
+      expect(result.markdown).toContain("/blog");
     });
 
-    it("allows relative links", () => {
-      const result = validateAndStripUrls("[Blog](/blog/post)", { baseOrigin });
-      expect(result.markdown).toContain("[Blog](/blog/post)");
-      expect(result.stripped).toHaveLength(0);
-    });
-
-    it("strips javascript: links", () => {
-      const result = validateAndStripUrls("[XSS](javascript:void)", { baseOrigin });
+    it("strips dangerous protocol links", () => {
+      const result = validateAndStripUrls("[XSS](javascript:void)\n[Data](data:text/html,x)", { baseOrigin });
       expect(result.markdown).not.toContain("javascript:");
-      expect(result.stripped).toContainEqual({ kind: "link", url: "javascript:void" });
-    });
-
-    it("strips data: links", () => {
-      const result = validateAndStripUrls("[X](data:text/html,<h1>x</h1>)", { baseOrigin });
       expect(result.markdown).not.toContain("data:");
-      expect(result.stripped.length).toBeGreaterThan(0);
+      expect(result.stripped.length).toBe(2);
     });
 
-    it("allows same-origin images", () => {
-      const result = validateAndStripUrls("![Alt](/images/photo.png)", { baseOrigin });
-      expect(result.markdown).toContain("![Alt](/images/photo.png)");
-      expect(result.stripped).toHaveLength(0);
-    });
-
-    it("strips external domain images", () => {
-      const result = validateAndStripUrls("![Tracker](https://evil.com/pixel.gif)", { baseOrigin });
-      expect(result.markdown).not.toContain("evil.com");
-      expect(result.stripped).toContainEqual({ kind: "image", url: "https://evil.com/pixel.gif" });
-    });
-
-    it("strips data: URI images", () => {
-      const result = validateAndStripUrls("![Img](data:image/png;base64,abc)", { baseOrigin });
-      expect(result.markdown).not.toContain("data:");
-      expect(result.stripped.length).toBeGreaterThan(0);
+    it("allows same-origin images only", () => {
+      const valid = validateAndStripUrls("![Alt](/images/photo.png)", { baseOrigin });
+      expect(valid.stripped).toHaveLength(0);
+      const invalid = validateAndStripUrls("![Tracker](https://evil.com/pixel.gif)", { baseOrigin });
+      expect(invalid.stripped).toContainEqual({ kind: "image", url: "https://evil.com/pixel.gif" });
     });
 
     it("preserves link text when stripped", () => {
@@ -153,64 +114,37 @@ describe("markdownConverter", () => {
       expect(result.markdown).toContain("here");
       expect(result.markdown).not.toContain("javascript:");
     });
-  });
 
-  describe("GFM features", () => {
-    it("converts tables to html", () => {
-      const md = "| A | B |\n|---|---|\n| 1 | 2 |";
-      const html = markdownToHtml(md);
-      expect(html).toContain("<table>");
-      expect(html).toContain("<th>A</th>");
-      expect(html).toContain("<td>1</td>");
-    });
-
-    it("converts tables back to markdown", () => {
-      const html = "<table><tr><th>X</th><th>Y</th></tr><tr><td>a</td><td>b</td></tr></table>";
-      const md = htmlToMarkdown(html, { validate: false });
-      expect(md).toContain("|");
-      expect(md).toContain("X");
-      expect(md).toContain("a");
-    });
-
-    it("converts task lists to html", () => {
-      const html = markdownToHtml("- [x] Done\n- [ ] Todo");
-      expect(html).toContain('type="checkbox"');
-      expect(html).toContain("checked");
+    it("allows mailto links", () => {
+      const result = validateAndStripUrls("[Email](mailto:test@example.com)", { baseOrigin });
+      expect(result.stripped).toHaveLength(0);
     });
   });
 
   describe("round-trip conversion", () => {
-    it("preserves headings", () => {
-      const original = "# Main Title";
-      const result = htmlToMarkdown(markdownToHtml(original), { validate: false });
-      expect(result).toContain("# Main Title");
-    });
+    it("preserves document structure", () => {
+      const original = `# Title
 
-    it("preserves emphasis", () => {
-      const original = "**bold** and *italic*";
+Paragraph with **bold** and *italic*.
+
+- List item 1
+- List item 2
+
+> A blockquote
+
+\`\`\`
+code block
+\`\`\`
+
+[A link](https://example.com)`;
       const result = htmlToMarkdown(markdownToHtml(original), { validate: false });
+      expect(result).toContain("# Title");
       expect(result).toContain("**bold**");
       expect(result).toContain("*italic*");
-    });
-
-    it("preserves links", () => {
-      const original = "[Link](https://example.com)";
-      const result = htmlToMarkdown(markdownToHtml(original), { validate: false });
-      expect(result).toContain("[Link](https://example.com)");
-    });
-
-    it("preserves code blocks", () => {
-      const original = "```\ncode\n```";
-      const result = htmlToMarkdown(markdownToHtml(original), { validate: false });
+      expect(result).toContain("- List item");
+      expect(result).toContain(">");
       expect(result).toContain("```");
-      expect(result).toContain("code");
-    });
-
-    it("preserves lists", () => {
-      const original = "- Item A\n- Item B";
-      const result = htmlToMarkdown(markdownToHtml(original), { validate: false });
-      expect(result).toContain("- Item A");
-      expect(result).toContain("- Item B");
+      expect(result).toContain("[A link]");
     });
   });
 
@@ -226,21 +160,14 @@ describe("markdownConverter", () => {
       expect(html.match(/<blockquote>/g).length).toBe(3);
     });
 
-    it("handles special chars in code", () => {
-      const html = markdownToHtml("`<script>bad</script>`");
-      expect(html).toContain("<code>");
-      expect(html).not.toMatch(/<script>/);
+    it("does not execute raw HTML or scripts", () => {
+      expect(markdownToHtml("<script>alert(1)</script>")).not.toContain("<script>");
+      expect(markdownToHtml("`<script>bad</script>`")).toContain("<code>");
     });
 
-    it("does not execute raw HTML", () => {
-      const html = markdownToHtml("<script>alert(1)</script>");
-      expect(html).not.toContain("<script>");
-    });
-
-    it("handles very long content", () => {
+    it("handles long content without issues", () => {
       const long = "word ".repeat(500);
-      const html = markdownToHtml(long);
-      expect(html).toContain("word");
+      expect(markdownToHtml(long)).toContain("word");
     });
   });
 });

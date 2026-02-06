@@ -9,6 +9,7 @@ import morgan from "morgan";
 import postsRouter from "../routes/posts.js";
 import connectDB from "../db/index.js";
 import Post from "../models/postsModel.js";
+import PostVote from "../models/postVoteModel.js";
 
 const TEST_OWNER_ID = "test-owner-id";
 
@@ -54,8 +55,8 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  // tidy posts up for clean run easy for my eyes
   await Post.deleteMany({});
+  await PostVote.deleteMany({});
 });
 
 afterAll(async () => {
@@ -526,5 +527,47 @@ describe("POST /api/posts/:id/vote (votePost)", () => {
     const inDb = await Post.findById(created._id);
     expect(inDb.upvotes).toBe(3);
     expect(inDb.downvotes).toBe(2);
+  });
+
+});
+
+describe("userVote sync across devices/users", () => {
+  it("returns correct userVote per user - cross-device sync", async () => {
+    const created = await Post.create({
+      authorId: TEST_OWNER_ID,
+      title: "Cross-device test",
+      content: "Body",
+      category: "test",
+      categoryLabel: "Test",
+      excerpt: "Excerpt",
+      upvotes: 0,
+      downvotes: 0,
+    });
+
+    await request(app)
+      .post(`/api/posts/${created._id.toString()}/vote`)
+      .set("x-test-user-id", "user-a")
+      .send({ direction: "up" });
+
+    await request(app)
+      .post(`/api/posts/${created._id.toString()}/vote`)
+      .set("x-test-user-id", "user-b")
+      .send({ direction: "down" });
+
+    const resA = await request(app)
+      .get(`/api/posts/${created._id.toString()}`)
+      .set("x-test-user-id", "user-a");
+
+    const resB = await request(app)
+      .get(`/api/posts/${created._id.toString()}`)
+      .set("x-test-user-id", "user-b");
+
+    expect(resA.body.upvotes).toBe(1);
+    expect(resA.body.downvotes).toBe(1);
+    expect(resA.body.userVote).toBe("up");
+
+    expect(resB.body.upvotes).toBe(1);
+    expect(resB.body.downvotes).toBe(1);
+    expect(resB.body.userVote).toBe("down");
   });
 });

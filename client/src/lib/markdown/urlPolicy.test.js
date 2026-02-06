@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   isAllowedImageSrc,
   isExternalHref,
@@ -48,6 +48,24 @@ describe("markdown urlPolicy", () => {
       expect(isAllowedImageSrc("https://evil.com/a.png", { baseOrigin })).toBe(false);
       expect(isAllowedImageSrc("data:image/png;base64,aaaa", { baseOrigin })).toBe(false);
       expect(isAllowedImageSrc("blob:https://example.com/123", { baseOrigin })).toBe(false);
+    });
+    describe("CDN domain support", () => {
+      beforeEach(() => {
+        vi.resetModules();
+      });
+      afterEach(() => {
+        vi.unstubAllEnvs();
+      });
+      it("allows CDN images when VITE_CDN_DOMAIN is set", async () => {
+        vi.stubEnv("VITE_CDN_DOMAIN", "cdn.myblog.com");
+        const { isAllowedImageSrc: freshCheck } = await import("./urlPolicy");
+        expect(freshCheck("https://cdn.myblog.com/uuid.png", { baseOrigin })).toBe(true);
+        expect(freshCheck("https://cdn.myblog.com/images/post-header.jpg", { baseOrigin })).toBe(true);
+      });
+      it("blocks CDN images when VITE_CDN_DOMAIN not set", async () => {
+        const { isAllowedImageSrc: freshCheck } = await import("./urlPolicy");
+        expect(freshCheck("https://cdn.myblog.com/uuid.png", { baseOrigin })).toBe(false);
+      });
     });
   });
 

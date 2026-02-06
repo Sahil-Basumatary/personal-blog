@@ -1,5 +1,16 @@
 const DEV_ALLOWED_HOSTNAMES = new Set(["localhost", "127.0.0.1"]);
 
+function getCdnHostname() {
+  const cdnDomain = import.meta.env?.VITE_CDN_DOMAIN;
+  if (!cdnDomain) return null;
+  try {
+    const url = new URL(`https://${cdnDomain}`);
+    return url.hostname;
+  } catch {
+    return null;
+  }
+}
+
 function safeGetBaseOrigin(explicitBaseOrigin) {
   if (explicitBaseOrigin) return explicitBaseOrigin;
 
@@ -40,8 +51,10 @@ export function isAllowedImageSrc(src, { baseOrigin } = {}) {
   }
 
   const baseUrl = tryResolveUrl(base, base);
+  const cdnHostname = getCdnHostname();
   const allowedHostnames = new Set([
     ...(baseUrl?.hostname ? [baseUrl.hostname] : []),
+    ...(cdnHostname ? [cdnHostname] : []),
     ...DEV_ALLOWED_HOSTNAMES,
   ]);
 

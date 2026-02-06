@@ -1,32 +1,45 @@
 import { Resend } from "resend";
 import Subscriber from "../models/subscriberModel.js";
 
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const EMAIL_FROM = process.env.EMAIL_FROM || "blog@yourdomain.com";
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
-const BLOG_NAME = process.env.BLOG_NAME || "My Blog";
+let resendClient = null;
+function getResendClient() {
+  if (resendClient) return resendClient;
+  const apiKey = process.env.RESEND_API_KEY;
+  if (apiKey) {
+    resendClient = new Resend(apiKey);
+  }
+  return resendClient;
+}
+function getEmailFrom() {
+  return process.env.EMAIL_FROM || "blog@yourdomain.com";
+}
+function getClientOrigin() {
+  return process.env.CLIENT_ORIGIN || "http://localhost:5173";
+}
+function getBlogName() {
+  return process.env.BLOG_NAME || "My Blog";
+}
 const RESEND_BATCH_SIZE = 100;
 
-const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
-
 function buildConfirmUrl(token) {
-  return `${CLIENT_ORIGIN}/subscribe/confirm/${token}`;
+  return `${getClientOrigin()}/subscribe/confirm/${token}`;
 }
 function buildUnsubscribeUrl(token) {
-  return `${CLIENT_ORIGIN}/unsubscribe/${token}`;
+  return `${getClientOrigin()}/unsubscribe/${token}`;
 }
 function buildPostUrl(slug) {
-  return `${CLIENT_ORIGIN}/posts/${slug}`;
+  return `${getClientOrigin()}/posts/${slug}`;
 }
 
 function baseTemplate(content, footerHtml = "") {
+  const blogName = getBlogName();
   return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${BLOG_NAME}</title>
+  <title>${blogName}</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f4f4f5;">
@@ -35,7 +48,7 @@ function baseTemplate(content, footerHtml = "") {
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
           <tr>
             <td style="padding:32px 40px 24px;border-bottom:1px solid #e4e4e7;">
-              <h1 style="margin:0;font-size:20px;font-weight:600;color:#18181b;">${BLOG_NAME}</h1>
+              <h1 style="margin:0;font-size:20px;font-weight:600;color:#18181b;">${blogName}</h1>
             </td>
           </tr>
           <tr>
@@ -63,8 +76,10 @@ function buttonStyle() {
 }
 
 export async function sendConfirmationEmail(email, confirmationToken) {
+  const blogName = getBlogName();
+  const resend = getResendClient();
   const confirmUrl = buildConfirmUrl(confirmationToken);
-  const subject = `Confirm your subscription to ${BLOG_NAME}`;
+  const subject = `Confirm your subscription to ${blogName}`;
   const content = `
     <p style="margin:0 0 16px;font-size:15px;color:#3f3f46;line-height:1.6;">
       Thanks for subscribing! Please confirm your email address by clicking the button below.
@@ -79,7 +94,7 @@ export async function sendConfirmationEmail(email, confirmationToken) {
       If the button doesn't work, copy and paste this link:<br>
       <a href="${confirmUrl}" style="color:#3b82f6;word-break:break-all;">${confirmUrl}</a>
     </p>`;
-  const footer = `If you didn't subscribe to ${BLOG_NAME}, you can safely ignore this email.`;
+  const footer = `If you didn't subscribe to ${blogName}, you can safely ignore this email.`;
   if (!resend) {
     console.log("[EMAIL DEV] Confirmation email:");
     console.log(`  To: ${email}`);
@@ -89,7 +104,7 @@ export async function sendConfirmationEmail(email, confirmationToken) {
   }
   try {
     const { data, error } = await resend.emails.send({
-      from: EMAIL_FROM,
+      from: getEmailFrom(),
       to: email,
       subject,
       html: baseTemplate(content, footer),
@@ -106,16 +121,19 @@ export async function sendConfirmationEmail(email, confirmationToken) {
 }
 
 export async function sendUnsubscribeConfirmation(email) {
-  const subject = `You've been unsubscribed from ${BLOG_NAME}`;
+  const blogName = getBlogName();
+  const clientOrigin = getClientOrigin();
+  const resend = getResendClient();
+  const subject = `You've been unsubscribed from ${blogName}`;
   const content = `
     <p style="margin:0 0 16px;font-size:15px;color:#3f3f46;line-height:1.6;">
-      You've been successfully unsubscribed from ${BLOG_NAME}. You won't receive any more emails from us.
+      You've been successfully unsubscribed from ${blogName}. You won't receive any more emails from us.
     </p>
     <p style="margin:0;font-size:15px;color:#3f3f46;line-height:1.6;">
       Changed your mind? You can re-subscribe anytime by visiting our blog.
     </p>
     <p style="margin:24px 0 0;">
-      <a href="${CLIENT_ORIGIN}" style="${buttonStyle()}">Visit ${BLOG_NAME}</a>
+      <a href="${clientOrigin}" style="${buttonStyle()}">Visit ${blogName}</a>
     </p>`;
   const footer = `Your data will be permanently deleted in 30 days. If you need immediate deletion, visit the unsubscribe page again.`;
   if (!resend) {
@@ -126,7 +144,7 @@ export async function sendUnsubscribeConfirmation(email) {
   }
   try {
     const { data, error } = await resend.emails.send({
-      from: EMAIL_FROM,
+      from: getEmailFrom(),
       to: email,
       subject,
       html: baseTemplate(content, footer),
@@ -143,6 +161,8 @@ export async function sendUnsubscribeConfirmation(email) {
 }
 
 export async function sendNewPostNotification(email, post, unsubscribeToken) {
+  const blogName = getBlogName();
+  const resend = getResendClient();
   const postUrl = buildPostUrl(post.slug);
   const unsubscribeUrl = buildUnsubscribeUrl(unsubscribeToken);
   const subject = `New post: ${post.title}`;
@@ -158,7 +178,7 @@ export async function sendNewPostNotification(email, post, unsubscribeToken) {
     <p style="margin:0;">
       <a href="${postUrl}" style="${buttonStyle()}">Read Post</a>
     </p>`;
-  const footer = `You received this because you subscribed to ${BLOG_NAME}.<br><a href="${unsubscribeUrl}" style="color:#71717a;">Unsubscribe</a>`;
+  const footer = `You received this because you subscribed to ${blogName}.<br><a href="${unsubscribeUrl}" style="color:#71717a;">Unsubscribe</a>`;
   if (!resend) {
     console.log("[EMAIL DEV] New post notification:");
     console.log(`  To: ${email}`);
@@ -168,7 +188,7 @@ export async function sendNewPostNotification(email, post, unsubscribeToken) {
   }
   try {
     const { data, error } = await resend.emails.send({
-      from: EMAIL_FROM,
+      from: getEmailFrom(),
       to: email,
       subject,
       html: baseTemplate(content, footer),
@@ -188,10 +208,12 @@ export async function sendNewPostNotification(email, post, unsubscribeToken) {
 }
 
 export async function sendDeletionConfirmation(email) {
-  const subject = `Your data has been deleted from ${BLOG_NAME}`;
+  const blogName = getBlogName();
+  const resend = getResendClient();
+  const subject = `Your data has been deleted from ${blogName}`;
   const content = `
     <p style="margin:0 0 16px;font-size:15px;color:#3f3f46;line-height:1.6;">
-      As requested, your data has been permanently deleted from ${BLOG_NAME}.
+      As requested, your data has been permanently deleted from ${blogName}.
     </p>
     <p style="margin:0;font-size:15px;color:#3f3f46;line-height:1.6;">
       This is our final email to you. Take care!
@@ -205,7 +227,7 @@ export async function sendDeletionConfirmation(email) {
   }
   try {
     const { data, error } = await resend.emails.send({
-      from: EMAIL_FROM,
+      from: getEmailFrom(),
       to: email,
       subject,
       html: baseTemplate(content, footer),
@@ -222,6 +244,9 @@ export async function sendDeletionConfirmation(email) {
 }
 
 export async function sendBatchNewsletter(post) {
+  const blogName = getBlogName();
+  const emailFrom = getEmailFrom();
+  const resend = getResendClient();
   const subscribers = await Subscriber.find({
     confirmed: true,
     unsubscribedAt: null,
@@ -256,9 +281,9 @@ export async function sendBatchNewsletter(post) {
         <p style="margin:0;">
           <a href="${postUrl}" style="${buttonStyle()}">Read Post</a>
         </p>`;
-      const footer = `You received this because you subscribed to ${BLOG_NAME}.<br><a href="${unsubscribeUrl}" style="color:#71717a;">Unsubscribe</a>`;
+      const footer = `You received this because you subscribed to ${blogName}.<br><a href="${unsubscribeUrl}" style="color:#71717a;">Unsubscribe</a>`;
       return {
-        from: EMAIL_FROM,
+        from: emailFrom,
         to: sub.email,
         subject: `New post: ${post.title}`,
         html: baseTemplate(content, footer),
