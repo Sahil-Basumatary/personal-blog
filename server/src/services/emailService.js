@@ -22,7 +22,7 @@ function getBlogName() {
 const RESEND_BATCH_SIZE = 100;
 
 function buildConfirmUrl(token) {
-  return `${getClientOrigin()}/subscribe/confirm/${token}`;
+  return `${getClientOrigin()}/confirm/${token}`;
 }
 function buildUnsubscribeUrl(token) {
   return `${getClientOrigin()}/unsubscribe/${token}`;
