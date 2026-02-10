@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import "./NewPostPage.css"; 
+import "./NewPostPage.css";
 import { fetchPostById, updatePost } from "../api/posts";
 import { useUser, useAuth } from "@clerk/clerk-react";
-import { isOwnerUser } from "../config/authOwner";  
+import { isOwnerUser } from "../config/authOwner";
+import RichTextEditor from "../components/editor/RichTextEditor";
 
 function EditPostPage() {
   const { id } = useParams();
@@ -15,6 +16,7 @@ function EditPostPage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [uploadError, setUploadError] = useState(null);
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("cs-journey");
   const [excerpt, setExcerpt] = useState("");
@@ -59,6 +61,7 @@ function EditPostPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     setSubmitError(null);
+    setUploadError(null);
 
     const categoryLabel =
       category === "cs-journey"
@@ -182,15 +185,21 @@ function EditPostPage() {
             />
           </label>
 
-          <label className="field">
+          <div className="field">
             <span>Content</span>
-            <textarea
-              rows={10}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              required
+            <RichTextEditor
+              initialMarkdown={content}
+              onChange={setContent}
+              getToken={getToken}
+              onUploadError={(err) => setUploadError(err?.message || "Image upload failed")}
+              placeholder="Start writing your post..."
             />
-          </label>
+            {uploadError && (
+              <p style={{ color: "#dc2626", fontSize: "0.85rem" }}>
+                {uploadError}
+              </p>
+            )}
+          </div>
 
           <div className="form-actions">
             <button

@@ -4,6 +4,7 @@ import "./NewPostPage.css";
 import { createPost } from "../api/posts";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { isOwnerUser } from "../config/authOwner";
+import RichTextEditor from "../components/editor/RichTextEditor";
 
 function NewPostPage() {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ function NewPostPage() {
   const [content, setContent] = useState(savedDraft.content || "");
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState(null);
+  const [uploadError, setUploadError] = useState(null);
 
   useEffect(() => {
     const draft = { title, category, excerpt, content };
@@ -56,6 +58,7 @@ function NewPostPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     setSubmitError(null);
+    setUploadError(null);
     if (!validate()) return;
 
     const finalExcerpt =
@@ -177,19 +180,26 @@ function NewPostPage() {
           </label>
 
           {/* Content */}
-          <label className="field">
+          <div className="field">
             <span>Content</span>
-            <textarea
-              rows={10}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
+            <RichTextEditor
+              initialMarkdown={content}
+              onChange={setContent}
+              getToken={getToken}
+              onUploadError={(err) => setUploadError(err?.message || "Image upload failed")}
+              placeholder="Start writing your post..."
             />
+            {uploadError && (
+              <p style={{ color: "#dc2626", fontSize: "0.85rem" }}>
+                {uploadError}
+              </p>
+            )}
             {errors.content && (
               <p style={{ color: "#dc2626", fontSize: "0.85rem" }}>
                 {errors.content}
               </p>
             )}
-          </label>
+          </div>
 
           <div className="form-actions">
             <button
