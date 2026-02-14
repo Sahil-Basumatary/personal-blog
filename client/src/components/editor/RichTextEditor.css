@@ -26,6 +26,7 @@
   font-size: 1rem;
   line-height: 1.8;
   color: #222;
+  cursor: text;
 }
 .editor-content::-webkit-scrollbar {
   width: 8px;
@@ -53,26 +54,26 @@
   font-style: italic;
 }
 .editor-content .tiptap p {
-  margin-bottom: 1.4rem;
+  margin-bottom: 1.6rem;
 }
 .editor-content .tiptap p:last-child {
   margin-bottom: 0;
 }
 .editor-content .tiptap :where(h1, h2, h3) {
-  line-height: 1.25;
+  line-height: 1.2;
   letter-spacing: -0.02em;
   color: #0f0f0f;
-  margin: 1.8rem 0 0.8rem;
+  margin: 2.2rem 0 1rem;
   font-weight: 600;
 }
 .editor-content .tiptap h1 {
-  font-size: 1.85rem;
+  font-size: 2.1rem;
 }
 .editor-content .tiptap h2 {
-  font-size: 1.5rem;
+  font-size: 1.65rem;
 }
 .editor-content .tiptap h3 {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
 }
 .editor-content .tiptap :where(h1, h2, h3):first-child {
   margin-top: 0;
@@ -95,14 +96,14 @@
   margin-bottom: 0;
 }
 .editor-content .tiptap :where(ul, ol) {
-  margin: 0 0 1.4rem;
-  padding-left: 1.4rem;
+  margin: 0 0 1.6rem;
+  padding-left: 1.2rem;
 }
 .editor-content .tiptap li {
-  margin: 0.3rem 0;
+  margin: 0.35rem 0;
 }
 .editor-content .tiptap li p {
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.35rem;
 }
 .editor-content .tiptap ul {
   list-style-type: disc;
@@ -127,38 +128,38 @@
   color: #1d4ed8;
 }
 .editor-content .tiptap blockquote {
-  margin: 1.6rem 0;
-  padding: 0.8rem 1rem;
-  border-left: 4px solid rgba(37, 99, 235, 0.4);
-  background: rgba(37, 99, 235, 0.05);
-  border-radius: 0 12px 12px 0;
-  color: #1e293b;
+  margin: 1.8rem 0;
+  padding: 0.9rem 1.1rem;
+  border-left: 4px solid rgba(37, 99, 235, 0.35);
+  background: rgba(37, 99, 235, 0.06);
+  border-radius: 12px;
+  color: #111;
 }
 .editor-content .tiptap blockquote p:last-child {
   margin-bottom: 0;
 }
 .editor-content .tiptap hr {
   border: none;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  margin: 2rem 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  margin: 2.2rem 0;
 }
 .editor-content .tiptap :where(pre, code) {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 .editor-content .tiptap code {
-  font-size: 0.92em;
+  font-size: 0.95em;
   background: rgba(15, 23, 42, 0.06);
   border: 1px solid rgba(15, 23, 42, 0.08);
-  padding: 0.12rem 0.35rem;
-  border-radius: 6px;
+  padding: 0.15rem 0.35rem;
+  border-radius: 8px;
   color: #0f172a;
 }
 .editor-content .tiptap pre {
-  margin: 1.6rem 0;
-  padding: 1rem 1.2rem;
-  background: rgba(15, 23, 42, 0.05);
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 12px;
+  margin: 1.8rem 0;
+  padding: 1.1rem 1.2rem;
+  background: rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  border-radius: 14px;
   overflow-x: auto;
 }
 .editor-content .tiptap pre code {
@@ -172,9 +173,9 @@
   display: block;
   max-width: 100%;
   height: auto;
-  margin: 1.2rem auto;
-  border-radius: 12px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  margin: 1.4rem auto;
+  border-radius: 14px;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.10);
 }
 .editor-content .tiptap img.ProseMirror-selectednode {
   outline: 3px solid #3b82f6;
@@ -183,18 +184,42 @@
 .editor-content .tiptap table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1.6rem 0;
-  font-size: 0.95rem;
+  margin: 1.8rem 0;
+  font-size: 0.98rem;
 }
 .editor-content .tiptap th,
 .editor-content .tiptap td {
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 0.6rem 0.8rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 0.7rem 0.8rem;
   text-align: left;
 }
 .editor-content .tiptap thead th {
-  background: rgba(0, 0, 0, 0.03);
+  background: rgba(0, 0, 0, 0.04);
   font-weight: 600;
+}
+.rich-text-editor.loading .editor-content {
+  animation: editorPulse 1.5s ease-in-out infinite;
+}
+@keyframes editorPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.editor-content .tiptap ::selection {
+  background: rgba(59, 130, 246, 0.18);
+}
+@media (max-width: 768px) {
+  .editor-content {
+    max-height: clamp(300px, 50vh, 500px);
+  }
+  .editor-content .tiptap h1 {
+    font-size: 1.85rem;
+  }
+  .editor-content .tiptap h2 {
+    font-size: 1.5rem;
+  }
+  .editor-content .tiptap h3 {
+    font-size: 1.2rem;
+  }
 }
 @media (max-width: 640px) {
   .rich-text-editor {
