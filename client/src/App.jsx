@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
 import AuthSignInPage from "./pages/AuthSignInPage.jsx";
 import AuthSignUpPage from "./pages/AuthSignUpPage.jsx";
+import ToastContainer from "./components/toast/Toast";
 
 const HomePage = lazy(() => import("./pages/HomePage"));
 const BlogPage = lazy(() => import("./pages/BlogPage"));
@@ -26,6 +27,8 @@ function RequireAuth({ children }) {
 
 function App() {
   return (
+    <>
+    <ToastContainer />
     <Suspense
       fallback={
         <div className="page-shell" style={{ padding: "2rem" }}>
@@ -70,6 +73,7 @@ function App() {
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
       </Routes>
     </Suspense>
+    </>
   );
 }
 
