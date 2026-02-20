@@ -6,6 +6,7 @@ import { useUser, useAuth } from "@clerk/clerk-react";
 import { isOwnerUser } from "../config/authOwner";
 import UserChip from "../components/UserChip";
 import { useMemo } from "react";
+import { SEO } from "../config/seo";
 
 // search feat helpers
 function tokenize(text) {
@@ -345,8 +346,34 @@ function BlogPage() {
     }
   }
 
+  const categoryName = categoryFilter
+    ? categoryFilter.replace("-", " ")
+    : null;
+  const pageTitle = categoryName
+    ? `Posts in "${categoryName}" | ${SEO.siteName}`
+    : `All Posts | ${SEO.siteName}`;
+  const pageDescription = categoryName
+    ? `Browse posts in the "${categoryName}" category on ${SEO.siteName}.`
+    : "A collection of thoughts, stories and reflections — browse all posts on Sahil Blogs.";
+  const pageUrl = categoryFilter
+    ? `${SEO.baseUrl}/blog?category=${categoryFilter}`
+    : `${SEO.baseUrl}/blog`;
   return (
     <div className="blog-page page-shell">
+      <title>{pageTitle}</title>
+      <meta name="description" content={pageDescription} />
+      <link rel="canonical" href={pageUrl} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={pageTitle} />
+      <meta property="og:description" content={pageDescription} />
+      <meta property="og:url" content={pageUrl} />
+      <meta property="og:image" content={SEO.defaultImage} />
+      <meta property="og:site_name" content={SEO.siteName} />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:site" content={SEO.twitterHandle} />
+      <meta name="twitter:title" content={pageTitle} />
+      <meta name="twitter:description" content={pageDescription} />
+      <meta name="twitter:image" content={SEO.defaultImage} />
       {/* HEADER */}
       <section className="blog-header">
         <UserChip surface="light" />
