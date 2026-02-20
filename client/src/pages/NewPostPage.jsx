@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./NewPostPage.css";
 import { createPost } from "../api/posts";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { isOwnerUser } from "../config/authOwner";
 import RichTextEditor from "../components/editor/RichTextEditor";
+import { showToast } from "../components/toast/Toast";
+import useUnsavedChanges from "../hooks/useUnsavedChanges";
 
 function NewPostPage() {
   const navigate = useNavigate();
@@ -25,7 +27,9 @@ function NewPostPage() {
   const [content, setContent] = useState(savedDraft.content || "");
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState(null);
-  const [uploadError, setUploadError] = useState(null);
+  const hasEdited = useRef(false);
+  if (title || content) hasEdited.current = true;
+  useUnsavedChanges(hasEdited.current);
 
   useEffect(() => {
     const draft = { title, category, excerpt, content };
@@ -58,7 +62,6 @@ function NewPostPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     setSubmitError(null);
-    setUploadError(null);
     if (!validate()) return;
 
     const finalExcerpt =
@@ -88,15 +91,15 @@ function NewPostPage() {
       const token = await getToken();
       const created = await createPost(payload, token);
       localStorage.removeItem("new_post_draft");
-
-      // If backend returns slug or _id, go straight to that post
+      hasEdited.current = false;
+      showToast("Post published successfully", "success");
       if (created && (created.slug || created._id)) {
         const slugOrId = created.slug || created._id;
         navigate(`/blog/${slugOrId}`);
       } else {
         navigate("/blog");
       }
-        } catch (err) {
+    } catch (err) {
       console.error("Failed to create post on backend", err);
       setSubmitError(
         "Failed to publish post. Your draft is saved locally — please try again later."
@@ -105,6 +108,7 @@ function NewPostPage() {
   }
 
   function handleCancel() {
+    hasEdited.current = false;
     localStorage.removeItem("new_post_draft");
     navigate("/blog");
   }
@@ -186,14 +190,9 @@ function NewPostPage() {
               initialMarkdown={content}
               onChange={setContent}
               getToken={getToken}
-              onUploadError={(err) => setUploadError(err?.message || "Image upload failed")}
+              onUploadError={(err) => showToast(err?.message || "Image upload failed", "error")}
               placeholder="Start writing your post..."
             />
-            {uploadError && (
-              <p style={{ color: "#dc2626", fontSize: "0.85rem" }}>
-                {uploadError}
-              </p>
-            )}
             {errors.content && (
               <p style={{ color: "#dc2626", fontSize: "0.85rem" }}>
                 {errors.content}

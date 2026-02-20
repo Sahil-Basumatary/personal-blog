@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./NewPostPage.css";
 import { fetchPostById, updatePost } from "../api/posts";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { isOwnerUser } from "../config/authOwner";
 import RichTextEditor from "../components/editor/RichTextEditor";
+import { showToast } from "../components/toast/Toast";
+import useUnsavedChanges from "../hooks/useUnsavedChanges";
+import useAutoSave from "../hooks/useAutoSave";
 
 function EditPostPage() {
   const { id } = useParams();
@@ -16,53 +19,69 @@ function EditPostPage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [submitError, setSubmitError] = useState(null);
-  const [uploadError, setUploadError] = useState(null);
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("cs-journey");
   const [excerpt, setExcerpt] = useState("");
   const [content, setContent] = useState("");
-
-    useEffect(() => {
-      if (!isLoaded) return;
-
-      if (!isOwner) {
-        navigate("/", { replace: true });
-        return;
-      }
-
-      let active = true;
-
-      async function loadPost() {
-        try {
-          const apiPost = await fetchPostById(id);
-          if (!active) return;
-
-          setTitle(apiPost.title || "");
-          setCategory(apiPost.category || "cs-journey");
-          setExcerpt(apiPost.excerpt || "");
-          setContent(apiPost.content || "");
-          setSlug(apiPost.slug || apiPost._id);
-          setLoading(false);
-        } catch (err) {
-          console.error("Failed to load post from backend", err);
-          if (!active) return;
-
-          setNotFound(true);
-          setLoading(false);
+  const serverSnapshot = useRef(null);
+  const dirty = title !== (serverSnapshot.current?.title ?? "") ||
+    content !== (serverSnapshot.current?.content ?? "") ||
+    category !== (serverSnapshot.current?.category ?? "cs-journey") ||
+    excerpt !== (serverSnapshot.current?.excerpt ?? "");
+  useUnsavedChanges(dirty && !loading);
+  const draftKey = id ? `edit_post_draft_${id}` : null;
+  const { draftData, clearDraft } = useAutoSave(
+    draftKey,
+    { title, category, excerpt, content },
+    { enabled: !loading && dirty },
+  );
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (!isOwner) {
+      navigate("/", { replace: true });
+      return;
+    }
+    let active = true;
+    async function loadPost() {
+      try {
+        const apiPost = await fetchPostById(id);
+        if (!active) return;
+        const saved = {
+          title: apiPost.title || "",
+          category: apiPost.category || "cs-journey",
+          excerpt: apiPost.excerpt || "",
+          content: apiPost.content || "",
+        };
+        serverSnapshot.current = saved;
+        setSlug(apiPost.slug || apiPost._id);
+        const draft = draftData;
+        if (draft && draft._savedAt) {
+          setTitle(draft.title ?? saved.title);
+          setCategory(draft.category ?? saved.category);
+          setExcerpt(draft.excerpt ?? saved.excerpt);
+          setContent(draft.content ?? saved.content);
+          showToast("Restored unsaved draft from last session", "info");
+        } else {
+          setTitle(saved.title);
+          setCategory(saved.category);
+          setExcerpt(saved.excerpt);
+          setContent(saved.content);
         }
+        setLoading(false);
+      } catch (err) {
+        console.error("Failed to load post from backend", err);
+        if (!active) return;
+        setNotFound(true);
+        setLoading(false);
       }
-
-      loadPost();
-      return () => {
-        active = false;
-      };
-    }, [id, isLoaded, isOwner, navigate]);
+    }
+    loadPost();
+    return () => { active = false; };
+  }, [id, isLoaded, isOwner, navigate]);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setSubmitError(null);
-    setUploadError(null);
-
     const categoryLabel =
       category === "cs-journey"
         ? "My CS Journey"
@@ -71,12 +90,10 @@ function EditPostPage() {
         : category === "motivation"
         ? "Motivation"
         : "Tools & Resources";
-
     const finalExcerpt =
       excerpt.trim() !== ""
         ? excerpt.trim()
         : content.split("\n")[0].slice(0, 140) + "...";
-
     const payload = {
       title: title.trim(),
       content: content.trim(),
@@ -84,16 +101,17 @@ function EditPostPage() {
       categoryLabel,
       excerpt: finalExcerpt,
     };
-
-        try {
-        const token = await getToken();
-        await updatePost(id, payload, token);
-        setSubmitError(null);
-        navigate(`/blog/${slug || id}`);
-      } catch (err) {
-        console.error("Failed to update post on backend:", err);
-        setSubmitError("Failed to update post. Please try again.");
-      }
+    try {
+      const token = await getToken();
+      await updatePost(id, payload, token);
+      clearDraft();
+      serverSnapshot.current = { title, category, excerpt, content };
+      showToast("Changes saved", "success");
+      navigate(`/blog/${slug || id}`);
+    } catch (err) {
+      console.error("Failed to update post on backend:", err);
+      setSubmitError("Failed to update post. Please try again.");
+    }
   }
 
     if (!isLoaded) {
@@ -191,21 +209,16 @@ function EditPostPage() {
               initialMarkdown={content}
               onChange={setContent}
               getToken={getToken}
-              onUploadError={(err) => setUploadError(err?.message || "Image upload failed")}
+              onUploadError={(err) => showToast(err?.message || "Image upload failed", "error")}
               placeholder="Start writing your post..."
             />
-            {uploadError && (
-              <p style={{ color: "#dc2626", fontSize: "0.85rem" }}>
-                {uploadError}
-              </p>
-            )}
           </div>
 
           <div className="form-actions">
             <button
               type="button"
               className="ghost-btn"
-              onClick={() => navigate(`/blog/${slug || id}`)}
+              onClick={() => { clearDraft(); navigate(`/blog/${slug || id}`); }}
             >
               Cancel
             </button>
