@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import { fetchPostById, incrementPostViews, voteOnPost, deletePost } from "../api/posts";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { isOwnerUser } from "../config/authOwner";
+import { SEO } from "../config/seo";
 import MarkdownRenderer from "../components/markdown/MarkdownRenderer";
 
 function mapPostFromApi(p) {
@@ -209,14 +210,25 @@ function SingleBlogPage() {
   }
 
   if (loading) {
-    return <div className="single-container page-shell">Loading post...</div>;
+    return (
+      <div className="single-container page-shell">
+        <title>{SEO.siteName}</title>
+        Loading post...
+      </div>
+    );
   }
   if (notFound) {
-    return <div className="not-found page-shell">Post not found.</div>;
+    return (
+      <div className="not-found page-shell">
+        <title>{`Post Not Found | ${SEO.siteName}`}</title>
+        Post not found.
+      </div>
+    );
   }
   if (!post) {
     return (
       <div className="single-container page-shell">
+        <title>{SEO.siteName}</title>
         <div className="error-banner">
           Something went wrong loading this post - please try again.
         </div>
@@ -224,8 +236,23 @@ function SingleBlogPage() {
     );
   }
 
+  const postUrl = `${SEO.baseUrl}/blog/${post.slug}`;
+
   return (
     <div className="single-container page-shell">
+      <title>{`${post.title} | ${SEO.siteName}`}</title>
+      <meta name="description" content={post.excerpt} />
+      <meta name="author" content={SEO.author} />
+      <meta property="og:title" content={post.title} />
+      <meta property="og:description" content={post.excerpt} />
+      <meta property="og:url" content={postUrl} />
+      <meta property="og:type" content="article" />
+      <meta property="og:image" content={SEO.defaultImage} />
+      <meta property="og:site_name" content={SEO.siteName} />
+      <meta name="twitter:card" content="summary" />
+      <meta name="twitter:title" content={post.title} />
+      <meta name="twitter:description" content={post.excerpt} />
+      <meta name="twitter:site" content={SEO.twitterHandle} />
       <ReadingProgressBar />
 
       {error && (
