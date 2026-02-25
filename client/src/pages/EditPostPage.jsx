@@ -8,7 +8,7 @@ import RichTextEditor from "../components/editor/RichTextEditor";
 import { showToast } from "../components/toast/Toast";
 import useUnsavedChanges from "../hooks/useUnsavedChanges";
 import useAutoSave from "../hooks/useAutoSave";
-import { SEO } from "../config/seo";
+import { SEOHead } from "../components/SEOHead";
 
 function EditPostPage() {
   const { id } = useParams();
@@ -152,8 +152,7 @@ function EditPostPage() {
 
   return (
     <div className="new-post-page page-shell">
-      <title>{`Edit Post | ${SEO.siteName}`}</title>
-      <meta name="robots" content="noindex, nofollow" />
+      <SEOHead title="Edit Post" description="" url={`/edit/${id}`} noIndex />
       <div className="new-post-card">
         <button
           className="back-link"

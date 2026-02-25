@@ -1,9 +1,15 @@
 import { Link } from "react-router-dom";
+import { SEOHead } from "../components/SEOHead";
 import "./PrivacyPolicyPage.css";
 
 function PrivacyPolicyPage() {
   return (
     <div className="privacy-page">
+      <SEOHead
+        title="Privacy Policy"
+        description="How Sahil Blogs handles your data — what we collect, why, and your rights."
+        url="/privacy"
+      />
       <div className="privacy-card">
         <header className="privacy-header">
           <h1>Privacy Policy</h1>

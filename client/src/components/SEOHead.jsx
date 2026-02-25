@@ -5,10 +5,11 @@ export function SEOHead({
   description,
   image,
   url,
-  type = "article",
+  type = "website",
   publishedTime,
   modifiedTime,
   author,
+  noIndex = false,
 }) {
   const pageTitle = title ? `${title} | ${SEO.siteName}` : SEO.siteName;
   const pageDescription = description || "";
@@ -21,6 +22,7 @@ export function SEOHead({
       <meta name="description" content={pageDescription} />
       <meta name="author" content={pageAuthor} />
       <link rel="canonical" href={pageUrl} />
+      {noIndex && <meta name="robots" content="noindex, nofollow" />}
       <meta property="og:type" content={type} />
       <meta property="og:url" content={pageUrl} />
       <meta property="og:site_name" content={SEO.siteName} />
@@ -42,4 +44,3 @@ export function SEOHead({
     </>
   );
 }
-

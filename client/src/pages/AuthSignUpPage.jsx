@@ -1,11 +1,10 @@
 import { SignUp } from "@clerk/clerk-react";
-import { SEO } from "../config/seo";
+import { SEOHead } from "../components/SEOHead";
 
 function AuthSignUpPage() {
   return (
     <div style={{ padding: "4rem 0", display: "flex", justifyContent: "center" }}>
-      <title>{`Sign Up | ${SEO.siteName}`}</title>
-      <meta name="robots" content="noindex, nofollow" />
+      <SEOHead title="Sign Up" description="" url="/sign-up" noIndex />
       <SignUp routing="path" path="/sign-up" />
     </div>
   );

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { confirmSubscription } from "../api/subscribers";
+import { SEOHead } from "../components/SEOHead";
 import "./SubscriptionConfirmPage.css";
 
 function SubscriptionConfirmPage() {
@@ -37,6 +38,7 @@ function SubscriptionConfirmPage() {
 
   return (
     <div className="confirm-page">
+      <SEOHead title="Confirm Subscription" description="" noIndex />
       <div className="confirm-card">
         {status === "loading" && (
           <>

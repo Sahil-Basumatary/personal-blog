@@ -7,7 +7,7 @@ import { isOwnerUser } from "../config/authOwner";
 import RichTextEditor from "../components/editor/RichTextEditor";
 import { showToast } from "../components/toast/Toast";
 import useUnsavedChanges from "../hooks/useUnsavedChanges";
-import { SEO } from "../config/seo";
+import { SEOHead } from "../components/SEOHead";
 
 function NewPostPage() {
   const navigate = useNavigate();
@@ -118,8 +118,7 @@ function NewPostPage() {
 
   return (
     <div className="new-post-page page-shell">
-      <title>{`Write a New Post | ${SEO.siteName}`}</title>
-      <meta name="robots" content="noindex, nofollow" />
+      <SEOHead title="Write a New Post" description="" url="/write" noIndex />
       <div className="new-post-card">
         <button
           className="back-link"

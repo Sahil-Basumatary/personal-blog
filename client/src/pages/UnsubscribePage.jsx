@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { unsubscribeEmail, deleteSubscriberData } from "../api/subscribers";
+import { SEOHead } from "../components/SEOHead";
 import "./UnsubscribePage.css";
 
 function UnsubscribePage() {
@@ -51,6 +52,7 @@ function UnsubscribePage() {
 
   return (
     <div className="unsub-page">
+      <SEOHead title="Unsubscribe" description="" noIndex />
       <div className="unsub-card">
         {status === "loading" && (
           <>
