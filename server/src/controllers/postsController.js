@@ -255,9 +255,7 @@ export const updatePost = async (req, res) => {
     return res.json(updated);
   } catch (err) {
     console.error("updatePost error:", err.message);
-    return res
-      .status(500)
-      .json({ message: "Server error", error: err.message });
+    return res.status(500).json({ message: "Server error" });
   }
 };
 

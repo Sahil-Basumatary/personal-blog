@@ -13,15 +13,17 @@ import sitemapRouter from "./routes/sitemap.js";
 import uploadsRouter from "./routes/uploads.js";
 import subscribersRouter from "./routes/subscribers.js";
 import helmet from "helmet";
+import globalErrorHandler from "./middleware/errorHandler.js";
 
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const swaggerDocument = YAML.load(
-  path.join(__dirname, "docs", "openapi.yaml")
-);
+let swaggerDocument;
+if (process.env.NODE_ENV !== "production") {
+  swaggerDocument = YAML.load(path.join(__dirname, "docs", "openapi.yaml"));
+}
 
 const app = express();
 const cspDirectives = {
@@ -128,7 +130,9 @@ if (process.env.NODE_ENV === "test") {
   );
 }
 
-app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+if (process.env.NODE_ENV !== "production") {
+  app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+}
 app.use("/api/posts", postsRouter);
 app.use("/api/uploads", uploadsRouter);
 app.use("/api/subscribers", subscribersRouter);
@@ -139,5 +143,7 @@ app.get("/api/health", (req, res) => {
 app.get("/", (req, res) => {
   res.send("Hello from personal-blog server");
 });
+
+app.use(globalErrorHandler);
 
 export default app;
