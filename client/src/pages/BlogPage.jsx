@@ -8,6 +8,8 @@ import UserChip from "../components/UserChip";
 import { useMemo } from "react";
 import { SEO } from "../config/seo";
 import { SEOHead } from "../components/SEOHead";
+import { JsonLd } from "../components/JsonLd";
+import { breadcrumbSchema } from "../config/structuredData";
 
 // search feat helpers
 function tokenize(text) {
@@ -360,6 +362,18 @@ function BlogPage() {
         description={pageDescription}
         url={categoryFilter ? `/blog?category=${categoryFilter}` : "/blog"}
       />
+      <JsonLd data={breadcrumbSchema(
+        categoryName
+          ? [
+              { name: "Home", url: "/" },
+              { name: "Blog", url: "/blog" },
+              { name: `Posts in "${categoryName}"` },
+            ]
+          : [
+              { name: "Home", url: "/" },
+              { name: "Blog" },
+            ]
+      )} />
       {/* HEADER */}
       <section className="blog-header">
         <UserChip surface="light" />
