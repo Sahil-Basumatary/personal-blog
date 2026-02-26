@@ -6,6 +6,8 @@ import { fetchPostById, incrementPostViews, voteOnPost, deletePost } from "../ap
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { isOwnerUser } from "../config/authOwner";
 import { SEOHead } from "../components/SEOHead";
+import { JsonLd } from "../components/JsonLd";
+import { blogPostingSchema, breadcrumbSchema } from "../config/structuredData";
 import MarkdownRenderer from "../components/markdown/MarkdownRenderer";
 
 function mapPostFromApi(p) {
@@ -18,6 +20,7 @@ function mapPostFromApi(p) {
     category: p.category || "general",
     categoryLabel: p.categoryLabel || (p.category ? p.category : "General"),
     date: p.date || p.createdAt || new Date().toISOString(),
+    updatedAt: p.updatedAt || p.createdAt || null,
     featured: p.isFeatured,
     excerpt: p.excerpt || "",
     isUserPost: false,
@@ -244,7 +247,14 @@ function SingleBlogPage() {
         url={`/blog/${post.slug}`}
         type="article"
         publishedTime={post.date}
+        modifiedTime={post.updatedAt}
       />
+      <JsonLd data={blogPostingSchema(post)} />
+      <JsonLd data={breadcrumbSchema([
+        { name: "Home", url: "/" },
+        { name: "Blog", url: "/blog" },
+        { name: post.title },
+      ])} />
       <ReadingProgressBar />
 
       {error && (
