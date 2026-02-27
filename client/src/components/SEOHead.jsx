@@ -29,6 +29,9 @@ export function SEOHead({
       <meta property="og:title" content={pageTitle} />
       <meta property="og:description" content={pageDescription} />
       <meta property="og:image" content={pageImage} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content={pageTitle} />
       {publishedTime && (
         <meta property="article:published_time" content={publishedTime} />
       )}

@@ -8,6 +8,7 @@ import { isOwnerUser } from "../config/authOwner";
 import { SEOHead } from "../components/SEOHead";
 import { JsonLd } from "../components/JsonLd";
 import { blogPostingSchema, breadcrumbSchema } from "../config/structuredData";
+import { getOgImageUrl } from "../config/seo";
 import MarkdownRenderer from "../components/markdown/MarkdownRenderer";
 
 function mapPostFromApi(p) {
@@ -244,6 +245,7 @@ function SingleBlogPage() {
       <SEOHead
         title={post.title}
         description={post.excerpt}
+        image={getOgImageUrl(post.title, post.categoryLabel)}
         url={`/blog/${post.slug}`}
         type="article"
         publishedTime={post.date}
