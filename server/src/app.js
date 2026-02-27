@@ -12,6 +12,7 @@ import postsRouter from "./routes/posts.js";
 import sitemapRouter from "./routes/sitemap.js";
 import uploadsRouter from "./routes/uploads.js";
 import subscribersRouter from "./routes/subscribers.js";
+import ogRouter from "./routes/og.js";
 import helmet from "helmet";
 import globalErrorHandler from "./middleware/errorHandler.js";
 
@@ -137,6 +138,7 @@ app.use("/api/posts", postsRouter);
 app.use("/api/uploads", uploadsRouter);
 app.use("/api/subscribers", subscribersRouter);
 app.use("/sitemap.xml", sitemapRouter);
+app.use("/api/og", ogRouter);
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
