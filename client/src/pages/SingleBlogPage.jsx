@@ -250,6 +250,7 @@ function SingleBlogPage() {
         type="article"
         publishedTime={post.date}
         modifiedTime={post.updatedAt}
+        section={post.categoryLabel}
       />
       <JsonLd data={blogPostingSchema(post)} />
       <JsonLd data={breadcrumbSchema([
