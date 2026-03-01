@@ -224,7 +224,7 @@ function SingleBlogPage() {
   if (notFound) {
     return (
       <div className="not-found page-shell">
-        <SEOHead title="Post Not Found" description="" url={`/blog/${id}`} noIndex />
+        <SEOHead title="Post Not Found" description="" url={`/blog/${id}`} noIndex prerenderStatusCode={404} />
         Post not found.
       </div>
     );

@@ -12,6 +12,7 @@ export function SEOHead({
   noIndex = false,
   section,
   tags,
+  prerenderStatusCode,
 }) {
   const pageTitle = title ? `${title} | ${SEO.siteName}` : SEO.siteName;
   const pageDescription = description || "";
@@ -27,6 +28,9 @@ export function SEOHead({
       <meta name="author" content={pageAuthor} />
       <link rel="canonical" href={pageUrl} />
       {noIndex && <meta name="robots" content="noindex, nofollow" />}
+      {prerenderStatusCode && (
+        <meta name="prerender-status-code" content={String(prerenderStatusCode)} />
+      )}
       <meta property="og:locale" content="en_GB" />
       <meta property="og:type" content={type} />
       <meta property="og:url" content={pageUrl} />

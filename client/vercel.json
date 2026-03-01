@@ -1,6 +1,23 @@
 {
   "rewrites": [
     {
+      "source": "/((?!api/).*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*([Bb]ot|[Cc]rawl|[Ss]pider|[Ss]lurp|facebookexternalhit|[Ww]hatsapp|[Tt]elegram|[Dd]iscord|[Pp]interest).*"
+        }
+      ],
+      "missing": [
+        {
+          "type": "header",
+          "key": "x-prerender"
+        }
+      ],
+      "destination": "/api/prerender?path=/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
