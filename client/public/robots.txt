@@ -9,4 +9,4 @@ Disallow: /edit/
 Disallow: /sign-in
 Disallow: /sign-up
 
-Sitemap: https://personal-blog-j0jk.onrender.com/sitemap.xml
+Sitemap: https://blog.sahilbzy.com/sitemap.xml
