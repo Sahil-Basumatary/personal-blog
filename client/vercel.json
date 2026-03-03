@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/sitemap.xml",
+      "destination": "https://personal-blog-j0jk.onrender.com/sitemap.xml"
+    },
+    {
       "source": "/((?!api/).*)",
       "has": [
         {
