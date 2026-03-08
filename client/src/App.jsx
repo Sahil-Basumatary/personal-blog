@@ -1,9 +1,11 @@
 import { Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
+import { Analytics } from "@vercel/analytics/react";
 import AuthSignInPage from "./pages/AuthSignInPage.jsx";
 import AuthSignUpPage from "./pages/AuthSignUpPage.jsx";
 import ToastContainer from "./components/toast/Toast";
+import { usePageTracking } from "./hooks/usePageTracking";
 
 const HomePage = lazy(() => import("./pages/HomePage"));
 const BlogPage = lazy(() => import("./pages/BlogPage"));
@@ -26,8 +28,10 @@ function RequireAuth({ children }) {
 }
 
 function App() {
+  usePageTracking();
   return (
     <>
+    <Analytics />
     <ToastContainer />
     <Suspense
       fallback={
