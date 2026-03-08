@@ -13,14 +13,20 @@ function PrivacyPolicyPage() {
       <div className="privacy-card">
         <header className="privacy-header">
           <h1>Privacy Policy</h1>
-          <p className="privacy-updated">Last updated: January 2026</p>
+          <p className="privacy-updated">Last updated: March 2026</p>
         </header>
         <section className="privacy-section">
           <h2>What Data We Collect</h2>
           <p>
             We collect only your <strong>email address</strong> when you subscribe to the newsletter.
             We do not collect names, phone numbers, or any other personal information.
-            This site does not use tracking cookies or analytics that identify individual users.
+          </p>
+          <p>
+            We use <strong>Google Analytics 4</strong> and <strong>Vercel Analytics</strong> to
+            understand aggregate traffic patterns (page views, referral sources, device types).
+            Vercel Analytics is privacy-friendly and does not use cookies.
+            Google Analytics may use cookies — no data is used to identify individual users,
+            and IP addresses are anonymised.
           </p>
         </section>
         <section className="privacy-section">
@@ -38,6 +44,18 @@ function PrivacyPolicyPage() {
             You can review Resend's privacy practices at{" "}
             <a href="https://resend.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">
               resend.com/legal/privacy-policy
+            </a>.
+          </p>
+          <p>
+            We use <strong>Google Analytics 4</strong> for aggregate traffic analytics.
+            Google's privacy policy is available at{" "}
+            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">
+              policies.google.com/privacy
+            </a>.
+            We also use <strong>Vercel Analytics</strong>, which collects anonymous performance
+            and usage data without cookies. Learn more at{" "}
+            <a href="https://vercel.com/docs/analytics/privacy-policy" target="_blank" rel="noopener noreferrer">
+              vercel.com/docs/analytics/privacy-policy
             </a>.
           </p>
         </section>
