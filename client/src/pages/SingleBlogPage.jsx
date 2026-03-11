@@ -10,6 +10,7 @@ import { JsonLd } from "../components/JsonLd";
 import { blogPostingSchema, breadcrumbSchema } from "../config/structuredData";
 import { getOgImageUrl } from "../config/seo";
 import MarkdownRenderer from "../components/markdown/MarkdownRenderer";
+import { estimateReadingTime } from "../lib/readingTime";
 
 function mapPostFromApi(p) {
   const slugOrId = p.slug || p._id;
@@ -288,6 +289,8 @@ function SingleBlogPage() {
             <span className="chip">{post.categoryLabel}</span>
             <span>•</span>
             <span>{new Date(post.date).toLocaleDateString("en-GB")}</span>
+            <span>•</span>
+            <span className="reading-time">{estimateReadingTime(post.content)}</span>
             <span className="view-pill">{views} views</span>
           </div>
 

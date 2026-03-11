@@ -242,6 +242,13 @@
   color: #666;
 }
 
+.reading-time {
+  font-size: 0.72rem;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
 .chip {
   background: #eef1f5;
   padding: 5px 12px;

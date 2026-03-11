@@ -10,6 +10,7 @@ import { SEO } from "../config/seo";
 import { SEOHead } from "../components/SEOHead";
 import { JsonLd } from "../components/JsonLd";
 import { breadcrumbSchema } from "../config/structuredData";
+import { estimateReadingTime } from "../lib/readingTime";
 
 // search feat helpers
 function tokenize(text) {
@@ -495,6 +496,8 @@ function BlogPage() {
             <span>
               {new Date(featuredPost.date).toLocaleDateString("en-GB")}
             </span>
+            <span>•</span>
+            <span className="reading-time">{estimateReadingTime(featuredPost.content)}</span>
           </div>
 
           <p className="featured-excerpt">{featuredPost.excerpt}</p>
@@ -619,6 +622,8 @@ function BlogPage() {
                     <span className="chip">{post.categoryLabel}</span>
                     <span>•</span>
                     <span>{new Date(post.date).toLocaleDateString("en-GB")}</span>
+                    <span>•</span>
+                    <span className="reading-time">{estimateReadingTime(post.content)}</span>
                   </div>
                 </Link>
 
