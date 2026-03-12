@@ -50,11 +50,12 @@
 }
 .code-block pre {
   margin: 0 !important;
-  padding: 0 !important;
+  padding: 1rem 1.2rem !important;
   border: none !important;
   background: transparent !important;
   border-radius: 0 !important;
   box-shadow: none !important;
+  overflow-x: auto;
 }
 .code-block code {
   background: transparent !important;

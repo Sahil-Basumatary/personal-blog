@@ -147,7 +147,6 @@ export default function CodeBlock({ language, children }) {
         style={oneLight}
         customStyle={{
           margin: 0,
-          padding: "1rem 1.2rem",
           background: "transparent",
           fontSize: "0.875rem",
           lineHeight: 1.7,
