@@ -1,0 +1,64 @@
+.code-block {
+  position: relative;
+  margin: 1.8rem 0;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: #fafbfc;
+  overflow: hidden;
+}
+.code-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+  height: 38px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.07);
+  background: rgba(15, 23, 42, 0.03);
+}
+.code-block-lang {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  user-select: none;
+}
+.code-block-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  font-family: inherit;
+}
+.code-block-copy:hover {
+  background: rgba(15, 23, 42, 0.06);
+  color: #374151;
+}
+.code-block-copy.copied {
+  color: #16a34a;
+}
+.code-block-copy.copied:hover {
+  background: rgba(22, 163, 74, 0.08);
+}
+.code-block pre {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.code-block code {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  font-size: 0.875rem !important;
+}
