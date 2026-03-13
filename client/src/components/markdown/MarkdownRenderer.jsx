@@ -5,6 +5,7 @@ import {
   isExternalHref,
   sanitizeLinkHref,
 } from "../../lib/markdown/urlPolicy";
+import CodeBlock from "./CodeBlock";
 
 export default function MarkdownRenderer({ markdown }) {
   const source = typeof markdown === "string" ? markdown : "";
@@ -14,14 +15,27 @@ export default function MarkdownRenderer({ markdown }) {
       remarkPlugins={[remarkGfm]}
       skipHtml
       components={{
+        code({ node, className, children, ...props }) {
+          const match = /language-(\w+)/.exec(className || "");
+          if (match) {
+            return <CodeBlock language={match[1]}>{children}</CodeBlock>;
+          }
+          return <code className={className} {...props}>{children}</code>;
+        },
+        pre({ node, children }) {
+          const child = Array.isArray(children) ? children[0] : children;
+          if (child?.type === CodeBlock) return child;
+          const codeNode = node?.children?.find((c) => c.tagName === "code");
+          const text = codeNode?.children?.map((c) => c.value ?? "").join("") ?? "";
+          if (text) return <CodeBlock>{text}</CodeBlock>;
+          return <pre>{children}</pre>;
+        },
         a({ node, href, children, ...props }) {
           const safeHref = sanitizeLinkHref(href);
           if (!safeHref) {
             return <span {...props}>{children}</span>;
           }
-
           const external = isExternalHref(safeHref);
-
           return (
             <a
               href={safeHref}
@@ -37,7 +51,6 @@ export default function MarkdownRenderer({ markdown }) {
           if (!isAllowedImageSrc(src)) {
             return null;
           }
-
           return (
             <img
               src={src}
@@ -54,5 +67,3 @@ export default function MarkdownRenderer({ markdown }) {
     </ReactMarkdown>
   );
 }
-
-
