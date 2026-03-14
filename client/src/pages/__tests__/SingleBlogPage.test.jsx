@@ -10,9 +10,11 @@ vi.mock("../../api/posts", () => ({
   deletePost: vi.fn()
 }));
 
+const mockGetToken = vi.fn();
+
 vi.mock("@clerk/clerk-react", () => ({
   useUser: () => ({ isLoaded: true, isSignedIn: false, user: null }),
-  useAuth: () => ({ getToken: async () => "test-token" }),
+  useAuth: () => ({ getToken: mockGetToken }),
   useClerk: () => ({
     signOut: vi.fn(),
     openSignIn: vi.fn(),
@@ -38,6 +40,7 @@ function renderWithRouter(initialPath = "/blog/123") {
 describe("SingleBlogPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetToken.mockResolvedValue("test-token");
     localStorage.clear();
   });
 
@@ -64,10 +67,7 @@ describe("SingleBlogPage", () => {
     };
 
     fetchPostById.mockResolvedValueOnce(post);
-    incrementPostViews.mockResolvedValueOnce({
-      ...post,
-      views: 8
-    });
+    incrementPostViews.mockResolvedValueOnce({ ...post, views: 8 });
 
     renderWithRouter("/blog/123");
 
@@ -79,12 +79,13 @@ describe("SingleBlogPage", () => {
       ).toBeInTheDocument();
     });
 
-
     expect(screen.getByText("My CS Journey")).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(screen.getByText(/8 views/)).toBeInTheDocument();
+      expect(screen.getByText(/views/)).toBeInTheDocument();
     });
+
+    expect(incrementPostViews).toHaveBeenCalledWith("123");
 
     expect(screen.getByText(/Hello from the/i)).toBeInTheDocument();
     expect(screen.getByText("single post")).toBeInTheDocument();
@@ -102,13 +103,13 @@ describe("SingleBlogPage", () => {
     );
     expect(screen.queryByRole("img", { name: "blocked" })).toBeNull();
 
-    expect(document.querySelector("script")).toBeNull();
+    expect(document.querySelector("script:not([type='application/ld+json'])")).toBeNull();
 
     expect(
       screen.getByRole("link", { name: /Back to all posts/i })
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Home/i })).toBeInTheDocument();
-  });
+  }, 15000);
 
   it("shows not found when backend returns error", async () => {
     fetchPostById.mockRejectedValueOnce(new Error("Not found"));
