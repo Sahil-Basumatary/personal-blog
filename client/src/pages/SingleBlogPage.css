@@ -166,25 +166,17 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
 }
-.single-content code {
-  font-size: 0.95em;
+.single-content > code,
+.single-content p code,
+.single-content li code,
+.single-content td code,
+.single-content th code,
+.single-content blockquote code {
+  font-size: 0.88em;
   background: rgba(15, 23, 42, 0.06);
   border: 1px solid rgba(15, 23, 42, 0.08);
   padding: 0.15rem 0.35rem;
-  border-radius: 8px;
-}
-.single-content pre {
-  margin: 1.8rem 0;
-  padding: 1.1rem 1.2rem;
-  background: rgba(15, 23, 42, 0.06);
-  border: 1px solid rgba(15, 23, 42, 0.10);
-  border-radius: 14px;
-  overflow: auto;
-}
-.single-content pre code {
-  background: transparent;
-  border: none;
-  padding: 0;
+  border-radius: 6px;
 }
 
 .single-content img {
