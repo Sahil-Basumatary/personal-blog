@@ -42,3 +42,7 @@
   color: #1f2937;
   text-decoration: underline;
 }
+.footer-link-separator {
+  margin: 0 8px;
+  opacity: 0.4;
+}

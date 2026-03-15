@@ -5,6 +5,10 @@
       "destination": "https://personal-blog-j0jk.onrender.com/sitemap.xml"
     },
     {
+      "source": "/rss.xml",
+      "destination": "https://personal-blog-j0jk.onrender.com/rss.xml"
+    },
+    {
       "source": "/((?!api/).*)",
       "has": [
         {

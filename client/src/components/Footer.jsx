@@ -17,6 +17,8 @@ function Footer() {
       </p>
       <p className="footer-links">
         <Link to="/privacy">Privacy Policy</Link>
+        <span className="footer-link-separator">·</span>
+        <a href="/rss.xml" target="_blank" rel="noopener noreferrer">RSS Feed</a>
       </p>
     </footer>
   );

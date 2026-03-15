@@ -10,6 +10,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import postsRouter from "./routes/posts.js";
 import sitemapRouter from "./routes/sitemap.js";
+import rssRouter from "./routes/rss.js";
 import uploadsRouter from "./routes/uploads.js";
 import subscribersRouter from "./routes/subscribers.js";
 import ogRouter from "./routes/og.js";
@@ -138,6 +139,7 @@ app.use("/api/posts", postsRouter);
 app.use("/api/uploads", uploadsRouter);
 app.use("/api/subscribers", subscribersRouter);
 app.use("/sitemap.xml", sitemapRouter);
+app.use("/rss.xml", rssRouter);
 app.use("/api/og", ogRouter);
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
