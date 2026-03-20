@@ -5,16 +5,42 @@ import {
   isExternalHref,
   sanitizeLinkHref,
 } from "../../lib/markdown/urlPolicy";
+import { slugify } from "../../lib/tableOfContents";
 import CodeBlock from "./CodeBlock";
+
+function extractText(node) {
+  if (!node) return "";
+  if (typeof node === "string") return node;
+  if (typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(extractText).join("");
+  if (node.props && node.props.children) return extractText(node.props.children);
+  return "";
+}
 
 export default function MarkdownRenderer({ markdown }) {
   const source = typeof markdown === "string" ? markdown : "";
+  const slugCounter = new Map();
+
+  function headingId(children) {
+    const text = extractText(children);
+    const base = slugify(text);
+    if (!base) return undefined;
+    const count = slugCounter.get(base) || 0;
+    slugCounter.set(base, count + 1);
+    return count === 0 ? base : `${base}-${count}`;
+  }
 
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       skipHtml
       components={{
+        h2({ children }) {
+          return <h2 id={headingId(children)}>{children}</h2>;
+        },
+        h3({ children }) {
+          return <h3 id={headingId(children)}>{children}</h3>;
+        },
         code({ node, className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || "");
           if (match) {
