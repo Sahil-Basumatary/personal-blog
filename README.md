@@ -1,285 +1,112 @@
-<a id="readme-top"></a>
+# Personal Blog
 
-<div align="center">
+[blog.sahilbzy.com](https://blog.sahilbzy.com) is my personal blog for writing about computer science, life in London, useful tools, and learning in public.
 
-# My Personal Blog
+## What it includes
 
-<p>
-  <a href="https://github.com/Sahil-Basumatary/personal-blog/actions/workflows/ci.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/Sahil-Basumatary/personal-blog/ci.yml?branch=main&style=for-the-badge&label=Tests" alt="Tests">
-  </a>
-  <a href="https://github.com/Sahil-Basumatary/personal-blog/blob/main/LICENSE">
-    <img src="https://img.shields.io/badge/License-PolyForm_Noncommercial-red.svg?style=for-the-badge" alt="License: PolyForm Noncommercial">
-  </a>
-  <a href="https://linkedin.com/in/sahil-basumatary">
-    <img src="https://img.shields.io/badge/-LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
-  </a>
-</p>
+- Paginated posts with featured stories, markdown rendering, syntax highlighting, reading time, and reading progress
+- Owner-only writing with Clerk, a TipTap editor, slug URLs, and local draft autosave
+- Search and category browsing on the blog page
+- Signed-in upvotes and downvotes with one vote per user
+- Double opt-in email subscriptions, unsubscribe, data deletion, and new-post notifications
+- RSS, sitemap, metadata, structured data, Open Graph images, and bot prerendering
+- Owner-only image uploads through S3 and CloudFront
 
-A full-stack personal journal where I write about computer science, life in London, technical tools and my journey of learning in public.
+Only the configured owner can create, edit, or delete posts.
 
-</div>
+## How it works
 
-## Demo
+The web app uses React 19, Vite 7, React Router 7, and Clerk. The API uses Node.js 20, Express 4, Mongoose 9, and MongoDB.
 
-<div align="center">
-  <a href="https://blog.sahilbzy.com">
-    <img src="https://img.shields.io/badge/Live-blog.sahilbzy.com-blue?style=for-the-badge" alt="Live Demo">
-  </a>
-  <br/><br/>
-  <img src="docs/demo.gif" alt="Demo preview" width="900" />
-</div>
+Resend sends newsletter emails. S3 stores uploaded images, and CloudFront serves them. Jest, Supertest, and an in-memory MongoDB instance test the API. Vitest and Testing Library cover the client.
 
-### Tech Stack
-
-| Area           | Stack |
-| -------------- | ----- |
-| **Backend**    | [![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/) [![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge&logo=express)](https://expressjs.com/) [![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/) [![Jest](https://img.shields.io/badge/-jest-%23C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/) |
-| **Frontend**   | [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/) [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/) [![React Router](https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white)](https://reactrouter.com/) |
-| **Infrastructure** | [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/features/actions) [![npm](https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/) [![Clerk](https://img.shields.io/badge/Clerk-6C47FF?style=for-the-badge&logo=clerk&logoColor=white)](https://clerk.com/) |
-
-## Technical Highlights
-
-**What I have learned throughout building this:**
-
-- **Testing Strategy** - Implemented integration tests with mongodb-memory-server. Each test runs against an isolated in-memory database, ensuring tests don't interfere with each other. Used Supertest to test HTTP endpoints without starting the actual server.
-
-- **Authentication Architecture** - Integrated Clerk with a custom owner-only guard. In production, Clerk middleware handles JWT validation and in tests, a mock middleware injects test user IDs for deterministic testing.
-
-- **Performance Optimization** - Implemented server side pagination with limit capping (max 20 items) to prevent abuse. Used `Promise.all()` to parallelize post fetching and count queries, cutting response time in half.
-
-- **Slug-based Routing** - Generated SEO-friendly slugs from post titles with collision detection. Posts can be accessed by MongoDB ObjectId OR slug, with graceful fallback between the two.
-
-- **CI/CD Pipeline** - GitHub Actions workflow runs tests on every push. Prevents merging broken code to main. Automated client build verification catches build errors early.
-
-## Architecture
+The API validates and sanitises post content, checks uploaded file signatures, restricts CORS, and rate-limits writes, votes, subscriptions, and uploads.
 
 ```text
-┌──────────────────────────────────────────────────────────────────────────┐
-│                              CLIENT (React SPA)                          │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐  │
-│  │  HomePage   │  │  BlogPage   │  │ SinglePost  │  │ NewPost/EditPost│  │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └────────┬────────┘  │
-│         └────────────────┴────────────────┴──────────────────┘           │
-│                                   │                                      │
-│                          src/api/posts.js                                │
-└──────────────────────────────────┬───────────────────────────────────────┘
-                                   │ HTTP (REST)
-                                   ▼
-┌──────────────────────────────────────────────────────────────────────────┐
-│                            SERVER (Express API)                          │
-│                                                                          │
-│  ┌────────────────┐    ┌────────────────┐    ┌────────────────────────┐  │
-│  │  Rate Limiter  │───▶│  Clerk Auth    │───▶│  postsController.js    │  │
-│  │  (20 writes/m) │    │  (JWT verify)  │    │  CRUD + views + votes  │  │
-│  └────────────────┘    └────────────────┘    └───────────┬────────────┘  │
-│                                                          │               │
-│                                                   Mongoose ODM           │
-└──────────────────────────────────────────────────────────┬───────────────┘
-                                                           │
-                                                           ▼
-                                                ┌────────────────────┐
-                                                │   MongoDB Atlas    │
-                                                │   (posts, votes,   │
-                                                │    view counts)    │
-                                                └────────────────────┘
-
+React SPA -> Express API -> MongoDB
+                      |-> Resend
+                      |-> S3 and CloudFront
+                      |-> RSS, sitemap, and Open Graph routes
 ```
 
-## Project Structure
+## Run locally
 
-```
-personal-blog/
-├── client/                    # React SPA
-│   ├── src/
-│   │   ├── api/               # API client (fetchPosts, createPost, etc.)
-│   │   ├── components/        # Reusable UI (HeroSection, Footer, UserChip)
-│   │   ├── pages/             # Route-level components
-│   │   └── config/            # Auth and environment config
-│   └── public/
-│
-├── server/                    # Express API
-│   ├── src/
-│   │   ├── controllers/       # Business logic (postsController.js)
-│   │   ├── models/            # Mongoose schemas (Post)
-│   │   ├── routes/            # Route definitions (/api/posts)
-│   │   ├── middleware/        # Auth, rate limiting
-│   │   ├── db/                # MongoDB connection
-│   │   └── tests/             # Jest + supertest API tests
-│   │   ├── docs/              # API docs (OpenAPI 3.0 spec)
-│   │   │   └── openapi.yaml   # OpenAPI spec used by Swagger UI
-│   └── package.json
-│
-└── .github/workflows/         # CI pipeline
+Requirements
 
-```
-## Features
-
-### Owner-Only Writing Experience
-- Authenticated via Clerk with dedicated OWNER_USER_ID guard
-- Create, edit, and delete posts from a user friendly writing UI
-- Local draft autosave 
-- SEO-friendly slug generation with collision handling
-
-### Search and Discovery
-- Full-text search across title, excerpt, and content using case-insensitive regex
-- Fuzzy search with typo tolerance (1-char mismatch)
-- Category filters 
-- Paginated results with configurable page size (1–20, default is 5)
-
-### Blog Reading Experience
-- Featured post highlight on the main blog page
-- Reading progress bar on individual posts
-- View counter (backend source of truth with local fallback)
-- Mobile-responsive design with simple top navigation
-
-### Engagement
-- Per-post upvote/downvote system
-- Toggleable backend vote system 
-- Login-gated voting to prevent spam
-
-### Security & Reliability
-- Rate limiting: 20 writes/min, 60 votes/min per IP
-- Input validation and sanitization on all endpoints
-- Proper HTTP status codes (400, 401, 403, 404, 429, 500)
-- Error handling throughout the stack
-
-## API Reference
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| `GET` | `/api/posts` | Public | List posts (paginated, searchable, filterable) |
-| `GET` | `/api/posts/:idOrSlug` | Public | Get single post by ID or slug |
-| `POST` | `/api/posts` | Owner | Create new post |
-| `PUT` | `/api/posts/:idOrSlug` | Owner | Update existing post |
-| `DELETE` | `/api/posts/:idOrSlug` | Owner | Delete post |
-| `POST` | `/api/posts/:idOrSlug/view` | Public | Increment view count |
-| `POST` | `/api/posts/:idOrSlug/vote` | Logged in | Upvote or downvote (`{ direction: "up" \| "down" }`) |
-| `GET` | `/api/health` | Public | Health check |
-| `GET` | `/api/docs` | Public | Swagger UI |
-
-
-### Query Parameters for `GET /api/posts`
-
-| Param | Type | Default | Description |
-|-------|------|---------|-------------|
-| `page` | number | 1 | Page number |
-| `limit` | number | 5 | Items per page (max 20) |
-| `search` | string | — | Search term (matches title, excerpt and content; frontend uses fuzzy rank implementation) |
-| `category` | string | — | Filter by category slug |
-
-## API Docs (Swagger UI)
-
-### The API is documented with an OpenAPI 3.0 spec:
-- Spec file: server/src/docs/openapi.yaml
-- Local Swagger UI: http://localhost:5001/api/docs
-
----
-
-## Setup
-
-### Prerequisites
-- Node.js 20+ (LTS recommended)
-- npm or pnpm
-- MongoDB instance (local or [MongoDB Atlas](https://www.mongodb.com/atlas))
-- [Clerk](https://clerk.com) app
-
-### Clone the Repository
+- Node.js 20
+- npm
+- MongoDB
+- A Clerk application
 
 ```bash
 git clone https://github.com/Sahil-Basumatary/personal-blog.git
 cd personal-blog
+
+npm --prefix server ci
+npm --prefix client ci
 ```
 
-### Backend Setup
+Create `server/.env`.
 
-```
-cd server
-npm install
-
-```
-
-### Create server/.env:
-
-```
-MONGODB_URI=mongodb+srv://...
-OWNER_USER_ID=user_xxxxxxxxxxxxx
+```env
+MONGODB_URI=mongodb://localhost:27017/personal-blog
+OWNER_USER_ID=user_...
 CLERK_PUBLISHABLE_KEY=pk_test_...
 CLERK_SECRET_KEY=sk_test_...
+CLIENT_ORIGIN=http://localhost:5173
 PORT=5001
-
 ```
 
-### Start the development server:
+Create `client/.env`.
 
-```
-npm run dev
-```
-
-This starts the API on http://localhost:5001.
-
-### Frontend Setup
-
-```
-cd client
-npm install
-```
-
-### Create client/.env:
-
-```
+```env
 VITE_API_BASE_URL=http://localhost:5001/api
 VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
+VITE_OWNER_USER_ID=user_...
+VITE_SITE_URL=http://localhost:5173
 ```
 
-### Start the dev server:
+Start the API and client in separate terminals.
 
-```
-npm run dev
-```
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-### Testing
-
-Backend tests use Jest + supertest against an in-memory MongoDB instance:
-
-```
-cd server
-npm test
+```bash
+npm --prefix server run dev
 ```
 
-### Test Coverage
+```bash
+npm --prefix client run dev
+```
 
-- [x] Health check endpoint	
-- [x] Pagination + sorting	
-- [x] Search + category filtering	
-- [x] Fetch by ID and slug	
-- [x] View count increment	
-- [x] Create post (auth + validation)	
-- [x] Update post (auth + field updates)	
-- [x] Delete post (auth + removal)	
-- [x] Voting (auth + direction validation & per-user behavior)
+Open [http://localhost:5173](http://localhost:5173). No seed step is required because MongoDB collections are created on first use. Swagger UI is available at [http://localhost:5001/api/docs](http://localhost:5001/api/docs) outside production.
 
-## CI/CD
+Set `RESEND_API_KEY` to send real emails and `EMAIL_FROM` to choose the sender. Without the API key, development emails are written to the console. Image uploads require `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_S3_BUCKET`, and `CLOUDFRONT_DOMAIN`.
 
-- GitHub Actions runs on every push to main:
+Optional deployment settings include `CLIENT_ORIGIN_PREVIEW`, `BLOG_NAME`, `VITE_GA4_MEASUREMENT_ID`, `VITE_GOOGLE_SITE_VERIFICATION`, and `PRERENDER_TOKEN`.
 
-- Server tests — `npm test` in `server/`
-- Client build — `npm run build` in `client/`
-- GitHub Actions workflow runs on every push to `main`
+## Checks
 
-## License
+```bash
+npm --prefix server test
+npm --prefix server run lint
+npm --prefix client test -- --run
+npm --prefix client run lint
+npm --prefix client run build
+```
 
-This project is licensed under the **PolyForm Noncommercial License 1.0.0**.
+GitHub Actions runs the server tests and client build on pushes and pull requests to `main`.
 
-See [LICENSE](LICENSE) for full terms.
+## Known issues
+
+- Search and category filters only cover posts loaded for the current page
+- View counts are not deduplicated by visitor or session
+- Newsletter links use `/posts/{slug}`, while the client reads posts from `/blog/{id}`
+- Post, RSS, and Open Graph caches are local to each API process
+- Client tests are not currently part of CI
 
 ## Contact
 
-GitHub: [@Sahil-Basumatary](https://github.com/Sahil-Basumatary)
-LinkedIn: [Sahil Basumatary](https://www.linkedin.com/in/sahil-basumatary/)
+- [GitHub](https://github.com/Sahil-Basumatary)
+- [LinkedIn](https://www.linkedin.com/in/sahil-basumatary/)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## License
 
-
+This project is source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE). Commercial use requires separate permission.
