@@ -1,6 +1,6 @@
 # Personal Blog
 
-[blog.sahilbzy.com](https://blog.sahilbzy.com) is my personal blog for writing about computer science, life in London, useful tools, and learning in public.
+[blog.sahilbzy.com](https://blog.sahilbzy.com) is my personal blog for writing about computer science, life in London, useful tools, and learning in public :)
 
 ## What it includes
 
@@ -12,13 +12,9 @@
 - RSS, sitemap, metadata, structured data, Open Graph images, and bot prerendering
 - Owner-only image uploads through S3 and CloudFront
 
-Only the configured owner can create, edit, or delete posts.
-
 ## How it works
 
 The web app uses React 19, Vite 7, React Router 7, and Clerk. The API uses Node.js 20, Express 4, Mongoose 9, and MongoDB.
-
-Resend sends newsletter emails. S3 stores uploaded images, and CloudFront serves them. Jest, Supertest, and an in-memory MongoDB instance test the API. Vitest and Testing Library cover the client.
 
 The API validates and sanitises post content, checks uploaded file signatures, restricts CORS, and rate-limits writes, votes, subscriptions, and uploads.
 
@@ -91,8 +87,6 @@ npm --prefix client test -- --run
 npm --prefix client run lint
 npm --prefix client run build
 ```
-
-GitHub Actions runs the server tests and client build on pushes and pull requests to `main`.
 
 ## Known issues
 
